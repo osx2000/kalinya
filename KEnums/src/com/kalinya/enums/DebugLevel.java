@@ -2,7 +2,8 @@ package com.kalinya.enums;
 
 public enum DebugLevel {
 	LOW(0),
-	HIGH(1);
+	MEDIUM(1),
+	HIGH(2);
 
 	private int index;
 
