@@ -18,5 +18,4 @@ public enum FileExportFormat {
 	public String getFileExtension() {
 		return fileExtension;
 	}
-
 }
