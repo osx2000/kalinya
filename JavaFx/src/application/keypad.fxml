@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="keypad" alignment="CENTER" prefHeight="183.0" prefWidth="222.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.KeyPadForm">
+   <children>
+      <GridPane fx:id="gridPane" alignment="CENTER" hgap="5.0" layoutX="127.0" layoutY="98.0" vgap="5.0" AnchorPane.bottomAnchor="182.0">
+         <columnConstraints>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Button layoutX="169.0" layoutY="98.0" mnemonicParsing="false" text="1" />
+            <Button layoutX="169.0" layoutY="188.0" mnemonicParsing="false" text="2" GridPane.columnIndex="1" />
+            <Button layoutX="212.0" layoutY="98.0" mnemonicParsing="false" text="3" GridPane.columnIndex="2" />
+            <Button layoutX="169.0" layoutY="140.0" mnemonicParsing="false" text="4" GridPane.rowIndex="1" />
+            <Button layoutX="127.0" layoutY="188.0" mnemonicParsing="false" text="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button layoutX="212.0" layoutY="188.0" mnemonicParsing="false" text="6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Button layoutX="127.0" layoutY="140.0" mnemonicParsing="false" text="7" GridPane.rowIndex="2" />
+            <Button layoutX="212.0" layoutY="140.0" mnemonicParsing="false" text="8" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Button layoutX="127.0" layoutY="98.0" mnemonicParsing="false" text="9" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <Button fx:id="delete" mnemonicParsing="false" onAction="#delete" text="Del" GridPane.rowIndex="3" />
+            <Button mnemonicParsing="false" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Button fx:id="printHello" mnemonicParsing="false" onAction="#keyTyped" text="OK" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+         </children>
+      </GridPane>
+      <PasswordField fx:id="passwordDisplay" layoutX="103.0" layoutY="252.0" />
+      <TextField fx:id="textField" />
+   </children>
+</VBox>

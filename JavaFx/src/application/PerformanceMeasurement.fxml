@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.input.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="476.0" prefWidth="946.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.PerformanceMeasurementForm">
+   <children>
+      <VBox prefHeight="476.0" prefWidth="944.0">
+         <children>
+            <MenuBar>
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                        <MenuItem mnemonicParsing="false" text="New">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <Menu mnemonicParsing="false" text="Extract">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="Extract to User Table" />
+                              <MenuItem mnemonicParsing="false" text="Extract to CSV" />
+                          </items>
+                        </Menu>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                    <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" onAction="#close" text="Close" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Delete" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About" />
+                  </items>
+                </Menu>
+              </menus>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </MenuBar>
+            <ToolBar prefHeight="40.0" prefWidth="200.0">
+              <items>
+                <Button mnemonicParsing="false" text="Button" />
+              </items>
+            </ToolBar>
+            <TabPane prefHeight="426.0" prefWidth="944.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+              <tabs>
+                <Tab fx:id="parametersTab" closable="false" text="Parameters">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="316.0" prefWidth="600.0">
+                           <children>
+                              <Accordion layoutX="14.0" layoutY="14.0" prefHeight="351.0" prefWidth="627.0">
+                                <panes>
+                                    <TitledPane animated="false" layoutX="10.0" layoutY="10.0" prefHeight="166.0" prefWidth="627.0" text="Runtime Properties">
+                                       <content>
+                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="226.0" prefWidth="625.0">
+                                             <children>
+                                                <GridPane prefHeight="90.0" prefWidth="349.0">
+                                                  <columnConstraints>
+                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="169.0" minWidth="10.0" prefWidth="126.0" />
+                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="287.0" minWidth="10.0" prefWidth="223.0" />
+                                                  </columnConstraints>
+                                                  <rowConstraints>
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                  </rowConstraints>
+                                                   <children>
+                                                      <DatePicker fx:id="startDatePicker" prefHeight="25.0" prefWidth="236.0" GridPane.columnIndex="1" />
+                                                      <Label prefHeight="17.0" prefWidth="179.0" text="Start Date" />
+                                                      <Label prefHeight="17.0" prefWidth="181.0" text="End Date" GridPane.rowIndex="1" />
+                                                      <Label layoutX="10.0" layoutY="17.0" prefHeight="17.0" prefWidth="189.0" text="Portfolios" GridPane.rowIndex="2" />
+                                                      <DatePicker fx:id="endDatePicker" layoutX="136.0" layoutY="13.0" prefHeight="25.0" prefWidth="236.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                   </children>
+                                                </GridPane>
+                                             </children>
+                                          </AnchorPane>
+                                       </content>
+                                    </TitledPane>
+                                  <TitledPane animated="false" prefHeight="166.0" prefWidth="627.0" text="Data Source">
+                                    <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                             <children>
+                                                <VBox prefHeight="274.0" prefWidth="480.0" spacing="10.0">
+                                                   <children>
+                                                      <Label text="Performance Dimensions" />
+                                                      <ComboBox fx:id="performanceDimensionComboBox" layoutX="20.0" layoutY="37.0" prefHeight="25.0" prefWidth="512.0" />
+                                                      <Label text="DataSource" />
+                                                      <ComboBox fx:id="dataSourceComboBox" prefHeight="25.0" prefWidth="485.0" />
+                                                   </children>
+                                                   <padding>
+                                                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                                   </padding>
+                                                </VBox>
+                                             </children>
+                                          </AnchorPane>
+                                    </content>
+                                  </TitledPane>
+                                  <TitledPane animated="false" text="Data Source Properties">
+                                    <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                             <children>
+                                                <VBox prefHeight="306.0" prefWidth="631.0">
+                                                   <children>
+                                                      <Label text="Positions File Path" />
+                                                      <TextField fx:id="positionsFilePathField" />
+                                                      <Label text="Security Master File Path" />
+                                                      <TextField fx:id="securityMasterFilePathField" />
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </AnchorPane>
+                                    </content>
+                                  </TitledPane>
+                                </panes>
+                              </Accordion>
+                              <BorderPane layoutX="640.0" prefHeight="125.0" prefWidth="302.0">
+                                 <center>
+                                    <Button fx:id="calculateButton" mnemonicParsing="false" onAction="#calculateResults" prefHeight="51.0" prefWidth="103.0" text="Calculate" BorderPane.alignment="CENTER" />
+                                 </center>
+                              </BorderPane>
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab fx:id="resultsTab" closable="false" disable="true" text="Results">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="365.0" prefWidth="975.0">
+                           <children>
+                              <TableView fx:id="resultsTableView" prefHeight="318.0" prefWidth="946.0">
+                                <columns>
+                                  <TableColumn fx:id="propertyColumn1" editable="false" maxWidth="200.0" text="Date" />
+                                  <TableColumn fx:id="propertyColumn2" editable="false" maxWidth="200.0" text="Portfolio" />
+                                    <TableColumn fx:id="resultsColumnStartLocalMarketValue" editable="false" maxWidth="200.0" text="Start Local Market Value" />
+                                    <TableColumn fx:id="resultsColumnStartBaseMarketValue" editable="false" maxWidth="200.0" text="Start Base Market Value" />
+                                    <TableColumn fx:id="resultsColumnEndLocalMarketValue" editable="false" maxWidth="200.0" text="End Local Market Value" />
+                                    <TableColumn fx:id="resultsColumnEndBaseMarketValue" editable="false" maxWidth="200.0" text="End Base Market Value" />
+                                    <TableColumn fx:id="resultsColumnLocalCashflowsAmount" editable="false" maxWidth="200.0" text="Local Cashflows Amount" />
+                                    <TableColumn fx:id="resultsColumnBaseCashflowsAmount" editable="false" maxWidth="200.0" text="Local Gain/Loss" />
+                                    <TableColumn fx:id="resultsColumnBaseGainLoss" editable="false" maxWidth="200.0" text="Base Gain/Loss" />
+                                    <TableColumn fx:id="resultsColumnLocalRateOfReturn" editable="false" maxWidth="200.0" text="Local Rate of Return" />
+                                    <TableColumn fx:id="resultsColumnBaseRateOfReturn" editable="false" maxWidth="200.0" text="Base Rate of Return" />
+                                </columns>
+                              </TableView>
+                              <HBox alignment="CENTER" layoutX="574.0" layoutY="318.0" prefHeight="45.0" prefWidth="372.0" spacing="20.0">
+                                 <children>
+                                    <Button fx:id="viewResultsButton" alignment="BOTTOM_RIGHT" mnemonicParsing="false" onAction="#viewResults" text="View Results" />
+                                    <Button fx:id="extractToTableButton" alignment="BOTTOM_RIGHT" mnemonicParsing="false" text="Extract to Table" />
+                                    <Button fx:id="extractToCsvButton" alignment="BOTTOM_RIGHT" mnemonicParsing="false" onAction="#extractToCsv" text="Extract to CSV" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                  </content>
+                     <tooltip>
+                        <Tooltip text="Calculate results first" />
+                     </tooltip>
+                </Tab>
+                  <Tab fx:id="securityMasterTab" closable="false" disable="true" text="Security Master">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                    </content>
+                     <tooltip>
+                        <Tooltip text="Retrieve security master first" />
+                     </tooltip>
+                  </Tab>
+                  <Tab text="Console">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <VBox prefHeight="352.0" prefWidth="944.0">
+                                 <children>
+                                    <HBox prefHeight="31.0" prefWidth="944.0">
+                                       <children>
+                                          <TextField fx:id="logFileTextField" editable="false" prefHeight="25.0" prefWidth="840.0" text="C:\Users\Stephen\workspace\Data\PerformanceMeasurementLogFile.txt">
+                                             <padding>
+                                                <Insets left="10.0" right="10.0" />
+                                             </padding>
+                                          </TextField>
+                                          <CheckBox mnemonicParsing="false" prefHeight="17.0" prefWidth="175.0" text="Wrap Text" />
+                                       </children>
+                                    </HBox>
+                                    <TextArea fx:id="logFileTextArea" editable="false" prefHeight="326.0" text="Disabled" wrapText="true" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </Tab>
+              </tabs>
+            </TabPane>
+            <BorderPane prefHeight="30.0" prefWidth="946.0">
+               <left>
+                  <Label fx:id="statusBar" prefHeight="17.0" prefWidth="924.0" text="Ready" BorderPane.alignment="CENTER" />
+               </left>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </BorderPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
