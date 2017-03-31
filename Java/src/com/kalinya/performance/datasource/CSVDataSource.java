@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.NotImplementedException;
 
 import com.kalinya.enums.DebugLevel;
 import com.kalinya.performance.BenchmarkAssociation;
@@ -22,8 +22,6 @@ import com.kalinya.performance.Cashflow;
 import com.kalinya.performance.Cashflows;
 import com.kalinya.performance.Instrument;
 import com.kalinya.performance.InstrumentLeg;
-import com.kalinya.performance.InstrumentLegs;
-import com.kalinya.performance.Instruments;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.Portfolios;
 import com.kalinya.performance.Position;
@@ -39,25 +37,23 @@ import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.DateUtil;
-import com.kalinya.util.Debuggable;
 import com.kalinya.util.NumberUtil;
 import com.kalinya.util.PluginUtil;
-import com.kalinya.util.StringUtil;
-import com.kalinya.util.Timer;
 import com.kalinya.util.ToStringBuilder;
 
-final public class CSVDataSource<T extends CSVDataSource> extends DataSource<T> {
-	private String positionsFilePath;
-	private String securityMasterFilePath;
-	private String portfoliosFilePath;
-	private String benchmarkAssociationsFilePath;
-	
-	/*public CSVDataSource() {
-		super();
-	}*/
-	
-	public <T extends CSVDataSource> CSVDataSource() {
-		super();
+final public class CSVDataSource extends DataSource {
+	private final static DataSourceType DATA_SOURCE_TYPE = DataSourceType.CSV;
+	private final String positionsFilePath;
+	private final String securityMasterFilePath;
+	private final String portfoliosFilePath;
+	private final String benchmarkAssociationsFilePath;
+
+	public CSVDataSource(Builder builder) {
+		super(builder);
+		positionsFilePath = builder.positionsFilePath;
+		securityMasterFilePath = builder.securityMasterFilePath;
+		portfoliosFilePath = builder.portfoliosFilePath;
+		benchmarkAssociationsFilePath = builder.benchmarkAssociationsFilePath;
 	}
 	
 	@Override
@@ -67,151 +63,183 @@ final public class CSVDataSource<T extends CSVDataSource> extends DataSource<T> 
 				.append("RequiresFindurSession", requiresFindurSession())
 				.append("StartDate", getStartDate())
 				.append("EndDate", getEndDate())
-				.append("PositionsFilePath", positionsFilePath)
-				/*.append("SecurityMasterFilePath", securityMasterFilePath)
-				.append("PortfoliosFilePath", portfoliosFilePath)
-				.append("BenchmarkAssociationsFilePath", benchmarkAssociationsFilePath)
-				.append("ResultsExtractFilePath", resultsExtractFilePath)*/
+				.append("PositionsFilePath", getPositionsFilePath())
+				.append("SecurityMasterFilePath", getSecurityMasterFilePath())
+				.append("PortfoliosFilePath", getPortfoliosFilePath())
+				.append("BenchmarkAssociationsFilePath", getBenchmarkAssociationsFilePath())
 				.withLineBreaks()
 				.build();
 	}
-	
+
+	public static class Builder extends DataSource.Builder<Builder> {
+		private String positionsFilePath;
+		private String securityMasterFilePath;
+		private String portfoliosFilePath;
+		private String benchmarkAssociationsFilePath;
+
+		public CSVDataSource build() {
+			return new CSVDataSource(this);
+		}
+
+		public Builder withPositionsFilePath(String positionsFilePath) {
+			this.positionsFilePath = positionsFilePath;
+			return this;
+		}
+
+		public Builder withSecurityMasterFilePath(String securityMasterFilePath) {
+			this.securityMasterFilePath = securityMasterFilePath;
+			return this;
+		}
+
+		public Builder withPortfoliosFilePath(String portfoliosFilePath) {
+			this.portfoliosFilePath = portfoliosFilePath;
+			return this;
+		}
+
+		public Builder withBenchmarkAssociationsFilePath(String benchmarkAssociationsFilePath) {
+			this.benchmarkAssociationsFilePath = benchmarkAssociationsFilePath;
+			return this;
+		}
+	}
+
+	@Override
+	public DataSourceType getDataSourceType() {
+		return DataSourceType.CSV;
+	}
+
 	@Override
 	public Portfolios getPortfolios() {
-		if(portfolios != null) {
-			return portfolios;
-		}
-		getTimer().start("GetPortfolios");
-		portfolios = new Portfolios();
-		CSVParser csvParser = null;
-		try {
-			String filePath = getPortfoliosFilePath();
-			Assertions.notNull(filePath, "PortfoliosFilePath");
-			InputStream inputStream = new FileInputStream(filePath);
-			Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
-			csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
+		if(portfolios == null) {
+			getTimer().start("GetPortfolios");
+			portfolios = new Portfolios();
+			CSVParser csvParser = null;
+			try {
+				String filePath = getPortfoliosFilePath();
+				Assertions.notNull(filePath, "PortfoliosFilePath");
+				InputStream inputStream = new FileInputStream(filePath);
+				Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
+				csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
 
-			if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-				Map<String, Integer> headerMap = csvParser.getHeaderMap();
-				System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
-			}
-
-			List<CSVRecord> csvRecords = csvParser.getRecords();
-			for(CSVRecord csvRecord: csvRecords) {
-				long recordNumber = csvRecord.getRecordNumber();
-				String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
-				String portfolioGroup = csvRecord.get(CsvHeader.PORTFOLIO_GROUP.getName());
-				Portfolio portfolio = new Portfolio(portfolioName, portfolioGroup);
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-					System.out.println("Record [" + recordNumber + "] Portfolio [" + portfolio.toString() + "]");
+					Map<String, Integer> headerMap = csvParser.getHeaderMap();
+					System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
 				}
-				portfolios.add(portfolio);
+
+				List<CSVRecord> csvRecords = csvParser.getRecords();
+				for(CSVRecord csvRecord: csvRecords) {
+					long recordNumber = csvRecord.getRecordNumber();
+					String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
+					String portfolioGroup = csvRecord.get(CsvHeader.PORTFOLIO_GROUP.getName());
+					Portfolio portfolio = new Portfolio(portfolioName, portfolioGroup);
+					if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
+						System.out.println("Record [" + recordNumber + "] Portfolio [" + portfolio.toString() + "]");
+					}
+					portfolios.add(portfolio);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				PluginUtil.close(csvParser);
+				getTimer().stop();
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			PluginUtil.close(csvParser);
-			getTimer().stop();
 		}
 		return portfolios;
 	}
-	
+
 	@Override
 	public BenchmarkAssociations getBenchmarkAssociations() {
-		if(benchmarkAssociations != null) {
-			return benchmarkAssociations;
-		}
-		getTimer().start("BenchmarkAssociations");
-		benchmarkAssociations = new BenchmarkAssociations();
-		CSVParser csvParser = null;
-		try {
-			String filePath = getBenchmarkAssociationsFilePath();
-			Assertions.notNull(filePath, "BenchmarkAssociationsFilePath");
-			InputStream inputStream = new FileInputStream(filePath);
-			Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
-			//TODO: make this csvParser a field
-			csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
+		if(benchmarkAssociations == null) {
+			getTimer().start("BenchmarkAssociations");
+			benchmarkAssociations = new BenchmarkAssociations();
+			CSVParser csvParser = null;
+			try {
+				String filePath = getBenchmarkAssociationsFilePath();
+				Assertions.notNull(filePath, "BenchmarkAssociationsFilePath");
+				InputStream inputStream = new FileInputStream(filePath);
+				Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
+				//TODO: make this csvParser a field
+				csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
 
-			if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-				Map<String, Integer> headerMap = csvParser.getHeaderMap();
-				System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
-			}
-
-			List<CSVRecord> csvRecords = csvParser.getRecords();
-			for(CSVRecord csvRecord: csvRecords) {
-				long recordNumber = csvRecord.getRecordNumber();
-
-				String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
-				String benchmarkName = csvRecord.get(CsvHeader.BENCHMARK.getName());
-				Portfolio portfolio = getPortfolios().get(portfolioName);
-				Portfolio benchmark = getPortfolios().get(benchmarkName);
-				BenchmarkAssociation benchmarkAssociation = new BenchmarkAssociation(portfolio, benchmark);
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-					System.out.println("Record [" + recordNumber + "] BenchmarkAssociation [" + benchmarkAssociation.toString() + "]");
+					Map<String, Integer> headerMap = csvParser.getHeaderMap();
+					System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
 				}
-				benchmarkAssociations.add(benchmarkAssociation);
+
+				List<CSVRecord> csvRecords = csvParser.getRecords();
+				for(CSVRecord csvRecord: csvRecords) {
+					long recordNumber = csvRecord.getRecordNumber();
+
+					String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
+					String benchmarkName = csvRecord.get(CsvHeader.BENCHMARK.getName());
+					Portfolio portfolio = getPortfolios().get(portfolioName);
+					Portfolio benchmark = getPortfolios().get(benchmarkName);
+					BenchmarkAssociation benchmarkAssociation = new BenchmarkAssociation(portfolio, benchmark);
+					if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
+						System.out.println("Record [" + recordNumber + "] BenchmarkAssociation [" + benchmarkAssociation.toString() + "]");
+					}
+					benchmarkAssociations.add(benchmarkAssociation);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				PluginUtil.close(csvParser);
+				getTimer().stop();
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			PluginUtil.close(csvParser);
-			getTimer().stop();
 		}
 		return benchmarkAssociations;
 	}
 
 	@Override
 	public SecurityMasters getSecurityMasterData() {
-		if(securityMasterData != null) {
-			return securityMasterData;
-		}
-		getTimer().start("GetSecurityMasterData");
-		securityMasterData = new SecurityMasters();
-		CSVParser csvParser = null;
-		try {
-			String filePath = getSecurityMasterFilePath();
-			Assertions.notNull(filePath, "SecurityMasterFilePath");
-			InputStream inputStream = new FileInputStream(filePath);
-			Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
-			csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
-
-			if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-				Map<String, Integer> headerMap = csvParser.getHeaderMap();
-				System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
-			}
-
-			List<CSVRecord> csvRecords = csvParser.getRecords();
-			for(CSVRecord csvRecord: csvRecords) {
-				long recordNumber = csvRecord.getRecordNumber();
-
-				String instrumentId = csvRecord.get(CsvHeader.INSTRUMENT_ID.getName());
-				String maturityDateStr = csvRecord.get(CsvHeader.MATURITY_DATE.getName());
-				String assetClassStr = csvRecord.get(CsvHeader.ASSET_CLASS.getName());
-				String riskGroupStr = csvRecord.get(CsvHeader.RISK_GROUP.getName());
-				String industryGroupStr = csvRecord.get(CsvHeader.INDUSTRY_GROUP.getName());
-				String sectorStr = csvRecord.get(CsvHeader.SECTOR.getName());
-				String instrumentClassStr = csvRecord.get(CsvHeader.INSTRUMENT_CLASS.getName());
-
-				Date maturityDate = DateUtil.parseDate(maturityDateStr);
-				AssetClass assetClass = AssetClass.fromName(assetClassStr);
-				RiskGroup riskGroup = RiskGroup.fromName(riskGroupStr);
-				IndustryGroup industryGroup = IndustryGroup.fromName(industryGroupStr);
-				Sector sector = Sector.fromName(sectorStr);
-				InstrumentClass instrumentClass = InstrumentClass.fromName(instrumentClassStr);
-
-				SecurityMaster securityMaster = new SecurityMaster(instrumentId, maturityDate, industryGroup, sector,
-						riskGroup, instrumentClass, assetClass);
+		if(securityMasterData == null) {
+			getTimer().start("GetSecurityMasterData");
+			securityMasterData = new SecurityMasters();
+			CSVParser csvParser = null;
+			try {
+				String filePath = getSecurityMasterFilePath();
+				Assertions.notNull(filePath, "SecurityMasterFilePath");
+				InputStream inputStream = new FileInputStream(filePath);
+				Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
+				csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
 
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-					System.out.println("Record [" + recordNumber + "] SecurityMaster [" + securityMaster.toString() + "]");
+					Map<String, Integer> headerMap = csvParser.getHeaderMap();
+					System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
 				}
-				securityMasterData.add(securityMaster);
+
+				List<CSVRecord> csvRecords = csvParser.getRecords();
+				for(CSVRecord csvRecord: csvRecords) {
+					long recordNumber = csvRecord.getRecordNumber();
+
+					String instrumentId = csvRecord.get(CsvHeader.INSTRUMENT_ID.getName());
+					String maturityDateStr = csvRecord.get(CsvHeader.MATURITY_DATE.getName());
+					String assetClassStr = csvRecord.get(CsvHeader.ASSET_CLASS.getName());
+					String riskGroupStr = csvRecord.get(CsvHeader.RISK_GROUP.getName());
+					String industryGroupStr = csvRecord.get(CsvHeader.INDUSTRY_GROUP.getName());
+					String sectorStr = csvRecord.get(CsvHeader.SECTOR.getName());
+					String instrumentClassStr = csvRecord.get(CsvHeader.INSTRUMENT_CLASS.getName());
+
+					Date maturityDate = DateUtil.parseDate(maturityDateStr);
+					AssetClass assetClass = AssetClass.fromName(assetClassStr);
+					RiskGroup riskGroup = RiskGroup.fromName(riskGroupStr);
+					IndustryGroup industryGroup = IndustryGroup.fromName(industryGroupStr);
+					Sector sector = Sector.fromName(sectorStr);
+					InstrumentClass instrumentClass = InstrumentClass.fromName(instrumentClassStr);
+
+					SecurityMaster securityMaster = new SecurityMaster(instrumentId, maturityDate, industryGroup, sector,
+							riskGroup, instrumentClass, assetClass);
+
+					if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
+						System.out.println("Record [" + recordNumber + "] SecurityMaster [" + securityMaster.toString() + "]");
+					}
+					securityMasterData.add(securityMaster);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				PluginUtil.close(csvParser);
+				getTimer().stop();
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			PluginUtil.close(csvParser);
-			getTimer().stop();
 		}
 		return securityMasterData;
 	}
@@ -319,53 +347,32 @@ final public class CSVDataSource<T extends CSVDataSource> extends DataSource<T> 
 
 	@Override
 	public Cashflows getCashflows() {
-		if(cashflows != null) {
-			return cashflows;
+		if(cashflows == null) {
+			cashflows = new Cashflows();
+			getPositions();
+			getTimer().start("GetCashflows");
+			if(getPositions().size() > 0) {
+				//Cashflows are loaded during the position bootstrap
+				getTimer().stop();
+			} else {
+				throw new IllegalStateException("Failed to retrieve position details");
+			}
 		}
-		getTimer().start("GetCashflows");
-		cashflows = new Cashflows();
-		getPositions();
-		if(getPositions().size() > 0) {
-			//Cashflows are loaded during the position bootstrap
-			getTimer().stop();
-			return cashflows;
-		} else {
-			throw new IllegalStateException("Failed to retrieve position details");
-		}
-	}
-	
-	public T withPositionsFilePath(String positionsFilePath) {
-		this.positionsFilePath = positionsFilePath;
-		return (T) this;
-	}
-	
-	public T withSecurityMasterFilePath(String securityMasterFilePath) {
-		this.securityMasterFilePath = securityMasterFilePath;
-		return (T) this;
+		return cashflows;
 	}
 
-	public T withPortfoliosFilePath(String portfoliosFilePath) {
-		this.portfoliosFilePath = portfoliosFilePath;
-		return (T) this;
+	public String getPositionsFilePath() {
+		return positionsFilePath;
 	}
-	
-	public T withBenchmarkAssociationsFilePath(String benchmarkAssociationsFilePath) {
-		this.benchmarkAssociationsFilePath = benchmarkAssociationsFilePath;
-		return (T) this;
-	}
-	
+
 	public String getPortfoliosFilePath() {
 		return portfoliosFilePath;
 	}
-	
-	private String getPositionsFilePath() {
-		return positionsFilePath;
-	}
-	
+
 	public String getSecurityMasterFilePath() {
 		return securityMasterFilePath;
 	}
-	
+
 	public String getBenchmarkAssociationsFilePath() {
 		return benchmarkAssociationsFilePath;
 	}

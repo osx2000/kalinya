@@ -12,6 +12,7 @@ import com.kalinya.performance.PerformanceValue;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.PortfolioPerformanceResult;
 import com.kalinya.performance.Portfolios;
+import com.kalinya.performance.datasource.CSVDataSource;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
 import com.kalinya.performance.portfoliostatistics.PortfolioStatistics;
@@ -23,7 +24,7 @@ public class PerformanceServiceSandbox {
 	public static void main(String[] args) {
 		/*
 		 * TODO:
-		 * Support DayWeighting
+		 * Repair FindurPmm class
 		 * Support RoR calculation with/without fees
 		 * Handle non-USD cash flows
 		 * Handle SortinoRatio
@@ -78,17 +79,27 @@ public class PerformanceServiceSandbox {
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_LEG;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_PORTFOLIO;
 
-		DataSource csvDataSource =  DataSource.CSV
+		DataSource csvDataSource =  new CSVDataSource.Builder()
+											.withPortfoliosFilter(getPortfolios())
 											.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
-											.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
+											.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
 											.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
+											.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
 											.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
 											//TODO: fix this because the order is critical
-											.withPortfoliosFilter(getPortfolios())
-											.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
 											.build();
 		
-		
+		/*DataSource findurPmmDataSource =  DataSource.Findur
+				.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
+				.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
+				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
+				.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
+				//TODO: fix this because the order is critical
+				.withPortfoliosFilter(getPortfolios())
+				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
+				.build();
+		*/
+		System.out.println(String.format("DataSource Details [%s]", csvDataSource.toString()));
 		PerformanceResult performanceResults = null;
 		//performanceResults = pf.calculateResults(csvDataSource, performanceDimensions);
 		performanceResults = pf.calculateResults(csvDataSource.getPortfolios(), csvDataSource.getBenchmarkAssociations(), csvDataSource.getSecurityMasterData(),
@@ -97,7 +108,7 @@ public class PerformanceServiceSandbox {
 		if (csvDataSource.requiresFindurSession()) {
 			findurSession.getSession().getDebug().viewTable(performanceResults.asTable());
 			if(performanceDimensions.equals(PerformanceDimensions.BY_DATE_BY_PORTFOLIO)) {
-				csvDataSource.extractToUserTable("USER_perf_results_by_portfolio");
+				//csvDataSource.extractToUserTable("USER_perf_results_by_portfolio");
 			}
 			if(performanceDimensions.equals(PerformanceDimensions.BY_DATE_BY_LEG)) {
 				performanceResults.extractToUserTable("USER_perf_results_by_leg");
