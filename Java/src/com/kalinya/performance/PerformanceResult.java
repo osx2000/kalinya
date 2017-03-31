@@ -18,7 +18,13 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.csv.CSVPrinter;
+import org.joda.time.Days;
+import org.joda.time.Instant;
+import org.joda.time.Interval;
+import org.joda.time.ReadableInstant;
 
+import com.kalinya.enums.CurrencyBasis;
+import com.kalinya.enums.DayWeighting;
 import com.kalinya.enums.DebugLevel;
 import com.kalinya.javafx.util.RowData;
 import com.kalinya.performance.datasource.DataSource;
@@ -28,7 +34,6 @@ import com.kalinya.performance.dimensions.InstrumentLegPerformanceDimension;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
 import com.kalinya.performance.dimensions.PortfolioPerformanceDimension;
 import com.kalinya.performance.enums.CsvHeader;
-import com.kalinya.performance.enums.CurrencyBasis;
 import com.kalinya.performance.enums.InstrumentClass;
 import com.kalinya.performance.enums.SecurityMasterEnum;
 import com.kalinya.util.Assertions;
@@ -49,8 +54,8 @@ import javafx.collections.ObservableList;
 public class PerformanceResult implements Serializable {
 	private static String DEBUG_INSTRUMENT_ID = "SMHL 13-1 A RMBS +95";
 	private PerformanceFactory performanceFactory;
-	private int scale = 12;
-	private RoundingMode roundingMode = RoundingMode.HALF_UP;
+	private static int scale = 12;
+	private static RoundingMode roundingMode = RoundingMode.HALF_UP;
 	private DataSource dataSource;
 	private Portfolios portfolios;
 	private BenchmarkAssociations benchmarkAssociations;
@@ -132,7 +137,9 @@ public class PerformanceResult implements Serializable {
 				if(instrumentLeg.getInstrumentId().equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
 					System.out.println(String.format("InstrumentId [%s]",instrumentLeg.getInstrumentId()));
 				}
+				Date priorDate = null;
 				if(startLocalMarketValue == null) {
+					priorDate = date;
 					startLocalMarketValue = position.getMarketValue();
 					startBaseMarketValue = position.getBaseMarketValue();
 				} else {
@@ -151,7 +158,7 @@ public class PerformanceResult implements Serializable {
 					}
 					key.addAll(instrumentLeg.getPerformanceDimensionsKey(getPerformanceFactory(), performanceDimensions));
 					PerformanceValue performanceValue = new PerformanceValue(
-							date, startLocalMarketValue, startBaseMarketValue,
+							date, priorDate, startLocalMarketValue, startBaseMarketValue,
 							endLocalMarketValue, endBaseMarketValue, localCashflowsAmount, baseCashflowsAmount, localGainLoss, baseGainLoss);
 					if(getPerformanceValues().containsKey(key)) {
 						getPerformanceValues().put(key, getPerformanceValues().get(key).add(performanceValue));
@@ -162,6 +169,7 @@ public class PerformanceResult implements Serializable {
 					//Reset the start MV as the current day end MV
 					startLocalMarketValue = position.getMarketValue();
 					startBaseMarketValue = position.getBaseMarketValue();
+					priorDate = date;
 				}
 			}
 		}
@@ -177,11 +185,12 @@ public class PerformanceResult implements Serializable {
 			}
 
 			//Local Rate of Return
-			BigDecimal localRateOfReturn = calculateRateOfReturn(performanceValue, CurrencyBasis.LOCAL);
+			BigDecimal localRateOfReturn = calculateModifiedDietzRateOfReturn(performanceValue, getDayWeighting(), CurrencyBasis.LOCAL);
 			performanceValue.setLocalRateOfReturn(localRateOfReturn);
 
 			//Base Rate of Return
-			BigDecimal baseRateOfReturn = calculateRateOfReturn(performanceValue, CurrencyBasis.BASE);
+			//TODO: test and delete
+			BigDecimal baseRateOfReturn = calculateModifiedDietzRateOfReturn(performanceValue, getDayWeighting(), CurrencyBasis.BASE);
 			performanceValue.setBaseRateOfReturn(baseRateOfReturn);
 		}
 
@@ -211,6 +220,11 @@ public class PerformanceResult implements Serializable {
 		getTimer().print(true);
 	}
 
+	private DayWeighting getDayWeighting() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	private BigDecimal calculateRateOfReturn(PerformanceValue performanceValue, CurrencyBasis currencyBasis) {
 		//Place holder calculates RoR using the start market value as the divisor
 		BigDecimal divisor = performanceValue.getStartMarketValue(currencyBasis);
@@ -220,6 +234,29 @@ public class PerformanceResult implements Serializable {
 		BigDecimal rateOfReturn = BigDecimal.ZERO;
 		if(divisor.compareTo(BigDecimal.ZERO) != 0) {
 			rateOfReturn = performanceValue.getGainLoss(currencyBasis).divide(divisor , getScale(), getRoundingMode());
+		}
+		return rateOfReturn;
+	}
+	
+	protected static BigDecimal calculateModifiedDietzRateOfReturn(PerformanceValue performanceValue, DayWeighting dayWeighting, CurrencyBasis currencyBasis) {
+		BigDecimal numerator = performanceValue.getGainLoss(currencyBasis);
+		BigDecimal weightedCashflows = BigDecimal.ZERO;
+		if(performanceValue.getPriorDate() != null) {
+			Days days = Days.daysBetween(performanceValue.getPriorDateInstant(), performanceValue.getDateInstant());
+			BigDecimal dayCount = NumberUtil.newBigDecimal(days.getDays());
+			if(dayCount.compareTo(BigDecimal.ZERO) != 0) {
+				weightedCashflows = dayWeighting.getWeight()
+						.divide(dayCount, getScale(), getRoundingMode())
+						.multiply(performanceValue.getCashflowsAmount(currencyBasis));
+			}
+		}
+		BigDecimal divisor = performanceValue.getStartMarketValue(currencyBasis).add(weightedCashflows);
+		if(divisor.compareTo(BigDecimal.ZERO) == 0) {
+			divisor = performanceValue.getEndMarketValue(currencyBasis);
+		}
+		BigDecimal rateOfReturn = BigDecimal.ZERO;
+		if(divisor.compareTo(BigDecimal.ZERO) != 0) {
+			rateOfReturn = performanceValue.getGainLoss(currencyBasis).divide(divisor, getScale(), getRoundingMode());
 		}
 		return rateOfReturn;
 	}
@@ -564,7 +601,7 @@ public class PerformanceResult implements Serializable {
 		this.performanceDimensions = performanceDimensions;
 	}
 
-	public int getScale() {
+	public static int getScale() {
 		return scale ;
 	}
 
@@ -572,7 +609,7 @@ public class PerformanceResult implements Serializable {
 		this.scale = scale;
 	}
 
-	public RoundingMode getRoundingMode() {
+	public static RoundingMode getRoundingMode() {
 		return roundingMode;
 	}
 
@@ -788,35 +825,37 @@ public class PerformanceResult implements Serializable {
 				performanceResultsEntry.add(instrumentLeg.getCurrency());
 			}
 
+			PerformanceValue performanceValue = performanceValues.get(key);
+			
 			//CsvHeader.START_LOCAL_MARKET_VALUE
-			BigDecimal startLocalMarketValue = performanceValues.get(key).getStartLocalMarketValue();
+			BigDecimal startLocalMarketValue = performanceValue.getStartLocalMarketValue();
 			performanceResultsEntry.add(StringUtil.formatDouble(startLocalMarketValue));
 			//CsvHeader.START_BASE_MARKET_VALUE
-			BigDecimal startBaseMarketValue = performanceValues.get(key).getStartBaseMarketValue();
+			BigDecimal startBaseMarketValue = performanceValue.getStartBaseMarketValue();
 			performanceResultsEntry.add(StringUtil.formatDouble(startBaseMarketValue));
 			//CsvHeader.END_LOCAL_MARKET_VALUE
-			BigDecimal endLocalMarketValue = performanceValues.get(key).getEndLocalMarketValue();
+			BigDecimal endLocalMarketValue = performanceValue.getEndLocalMarketValue();
 			performanceResultsEntry.add(StringUtil.formatDouble(endLocalMarketValue));
 			//CsvHeader.END_BASE_MARKET_VALUE
-			BigDecimal endBaseMarketValue = performanceValues.get(key).getEndBaseMarketValue();
+			BigDecimal endBaseMarketValue = performanceValue.getEndBaseMarketValue();
 			performanceResultsEntry.add(StringUtil.formatDouble(endBaseMarketValue));
 			//CsvHeader.LOCAL_CASHFLOWS_AMOUNT
-			BigDecimal localCashflowsAmount = performanceValues.get(key).getLocalCashflowsAmount();
+			BigDecimal localCashflowsAmount = performanceValue.getLocalCashflowsAmount();
 			performanceResultsEntry.add(StringUtil.formatDouble(localCashflowsAmount));
 			//CsvHeader.BASE_CASHFLOWS_AMOUNT
-			BigDecimal baseCashflowsAmount = performanceValues.get(key).getLocalCashflowsAmount();
+			BigDecimal baseCashflowsAmount =performanceValue.getLocalCashflowsAmount();
 			performanceResultsEntry.add(StringUtil.formatDouble(baseCashflowsAmount));
 			//CsvHeader.LOCAL_GAIN_LOSS
-			BigDecimal localGainLoss = performanceValues.get(key).getLocalGainLoss();
+			BigDecimal localGainLoss = performanceValue.getLocalGainLoss();
 			performanceResultsEntry.add(StringUtil.formatDouble(localGainLoss));
 			//CsvHeader.BASE_GAIN_LOSS
-			BigDecimal baseGainLoss = performanceValues.get(key).getBaseGainLoss();
+			BigDecimal baseGainLoss = performanceValue.getBaseGainLoss();
 			performanceResultsEntry.add(StringUtil.formatDouble(baseGainLoss));
 			//LOCAL_RATE_OF_RETURN
-			BigDecimal localRateOfReturn = performanceValues.get(key).getLocalRateOfReturn();
+			BigDecimal localRateOfReturn = performanceValue.getLocalRateOfReturn();
 			performanceResultsEntry.add(StringUtil.formatPrice(localRateOfReturn));
 			//CsvHeader.BASE_RATE_OF_RETURN
-			BigDecimal baseRateOfReturn = performanceValues.get(key).getBaseRateOfReturn();
+			BigDecimal baseRateOfReturn = performanceValue.getBaseRateOfReturn();
 			performanceResultsEntry.add(StringUtil.formatPrice(baseRateOfReturn));
 
 			performanceResultsSummary.add(performanceResultsEntry);

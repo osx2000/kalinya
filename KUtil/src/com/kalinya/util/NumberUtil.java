@@ -74,6 +74,10 @@ public class NumberUtil {
 		}
 	}
 	
+	public static BigDecimal newBigDecimal(int i) {
+		return newBigDecimal(String.valueOf(i));
+	}
+	
 	public static BigDecimal newBigDecimal(double d) {
 		return newBigDecimal(d, SCALE);
 	}

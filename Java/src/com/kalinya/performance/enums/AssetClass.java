@@ -2,6 +2,7 @@ package com.kalinya.performance.enums;
 
 import java.util.Map;
 
+import com.kalinya.enums.EnumIdName;
 import com.olf.openrisk.application.Session;
 
 public enum AssetClass implements EnumIdName, SecurityMasterEnum {

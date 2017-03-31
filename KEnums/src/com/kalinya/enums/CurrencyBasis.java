@@ -1,16 +1,13 @@
-package com.kalinya.performance.enums;
-
-import com.kalinya.util.StringUtil;
-
+package com.kalinya.enums;
+import org.apache.commons.lang3.text.WordUtils;
 /**
  * The currency basis (local currency or base currency)
- * @author Stephen
  *
  */
 public enum CurrencyBasis {
 	LOCAL,BASE;
 
 	public String getName() {
-		return StringUtil.toTitleCase(name());
+		return WordUtils.capitalizeFully(name());
 	}
 }

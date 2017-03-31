@@ -1,5 +1,7 @@
 package com.kalinya.performance.enums;
 
+import com.kalinya.enums.EnumIdName;
+
 public enum RiskGroup implements EnumIdName {
 	UNKNOWN(-1, "Unknown"),
 	CASH(1, "Cash"),

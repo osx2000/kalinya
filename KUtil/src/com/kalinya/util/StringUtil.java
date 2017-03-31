@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 public class StringUtil {
 	/**
 	 * Formats a date as MM/dd/yyyy
@@ -74,9 +76,9 @@ public class StringUtil {
 	}
 	
 	public static String toTitleCase(String input) {
-	    StringBuilder titleCase = new StringBuilder();
+		return WordUtils.capitalizeFully(input);
+	    /*StringBuilder titleCase = new StringBuilder();
 	    boolean nextTitleCase = true;
-
 	    for (char c : input.toCharArray()) {
 	        if (Character.isSpaceChar(c)) {
 	            nextTitleCase = true;
@@ -89,8 +91,7 @@ public class StringUtil {
 
 	        titleCase.append(c);
 	    }
-
-	    return titleCase.toString();
+	    return titleCase.toString();*/
 	}
 	
 	public static <K,V> String getMapAsStringWithLineBreaks(Map<K, V> map) {

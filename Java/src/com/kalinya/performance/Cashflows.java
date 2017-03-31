@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.kalinya.performance.enums.CurrencyBasis;
+import com.kalinya.enums.CurrencyBasis;
 import com.kalinya.util.BaseSet;
 
 public class Cashflows extends BaseSet<Cashflow> {

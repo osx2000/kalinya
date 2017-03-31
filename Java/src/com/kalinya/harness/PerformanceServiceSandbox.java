@@ -23,11 +23,11 @@ public class PerformanceServiceSandbox {
 	public static void main(String[] args) {
 		/*
 		 * TODO:
-		 * Use proper formula to calculate RoR
+		 * Support DayWeighting
 		 * Support RoR calculation with/without fees
 		 * Handle non-USD cash flows
 		 * Handle SortinoRatio
-		 * BenchmarkAssociations
+		 * BenchmarkAssociations needs to have a BenchmarkType
 		 * Add StartDate, EndDate to getPositions() filters
 		 * Create BenchmarkType to support PRIMARY, RISK_FREE
 		 * 
@@ -109,7 +109,8 @@ public class PerformanceServiceSandbox {
 		//deserializePerformanceResults();
 		System.out.println("Absolute results: " + performanceResults.toString());
 		
-		if(performanceResults instanceof PortfolioPerformanceResult) {
+		boolean examinePortfolioStatistics = false;
+		if(examinePortfolioStatistics  && performanceResults instanceof PortfolioPerformanceResult) {
 			PortfolioStatistics portfolioStatistics = pf.createPortfolioStatistics();
 			portfolioStatistics.add(PortfolioStatistics.ACTIVE_RETURN);
 			portfolioStatistics.add(PortfolioStatistics.EXCESS_RETURN);

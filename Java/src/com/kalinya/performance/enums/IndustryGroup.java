@@ -1,5 +1,7 @@
 package com.kalinya.performance.enums;
 
+import com.kalinya.enums.EnumIdName;
+
 /**
  * GICS Industries
  * @see <a href="https://www.msci.com/gics">https://www.msci.com/gics</a>

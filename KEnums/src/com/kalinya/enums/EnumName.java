@@ -1,4 +1,4 @@
-package com.kalinya.performance.enums;
+package com.kalinya.enums;
 
 public interface EnumName {
 	public String getName();

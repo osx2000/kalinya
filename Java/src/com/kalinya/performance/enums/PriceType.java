@@ -1,5 +1,7 @@
 package com.kalinya.performance.enums;
 
+import com.kalinya.enums.EnumName;
+
 public enum PriceType implements EnumName {
 	UNKNOWN("Unknown"),
 	EXCHANGE_RATE("Exchange Rate"), 

@@ -1,5 +1,7 @@
 package com.kalinya.performance.enums;
 
+import com.kalinya.enums.EnumName;
+
 public enum CsvHeader implements EnumName {
 	DATE("Date","eod_date"), 
 	PORTFOLIO("Portfolio","portfolio_name"), 

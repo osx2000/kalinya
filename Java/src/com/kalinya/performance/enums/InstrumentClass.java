@@ -1,5 +1,7 @@
 package com.kalinya.performance.enums;
 
+import com.kalinya.enums.EnumIdName;
+
 public enum InstrumentClass implements EnumIdName, SecurityMasterEnum {
 	UNKNOWN(-1, "Unknown"),
 	SHAREABLE(10,"Shared"),

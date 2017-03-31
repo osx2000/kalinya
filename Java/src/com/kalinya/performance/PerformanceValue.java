@@ -4,12 +4,16 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import com.kalinya.performance.enums.CurrencyBasis;
+import org.joda.time.Instant;
+import org.joda.time.ReadableInstant;
+
+import com.kalinya.enums.CurrencyBasis;
 import com.kalinya.util.StringUtil;
 
 final public class PerformanceValue implements Serializable {
 	private Positions positions;
 	private Date date;
+	private Date priorDate;
 	private BigDecimal startLocalMarketValue;
 	private BigDecimal startBaseMarketValue;
 	private BigDecimal endLocalMarketValue;
@@ -24,7 +28,7 @@ final public class PerformanceValue implements Serializable {
 	private PerformanceValue() {
 	}
 	
-	public PerformanceValue(Date date, BigDecimal startLocalMarketValue,
+	public PerformanceValue(Date date, Date priorDate, BigDecimal startLocalMarketValue,
 			BigDecimal startBaseMarketValue, BigDecimal endLocalMarketValue,
 			BigDecimal endBaseMarketValue, BigDecimal localCashflowsAmount,
 			BigDecimal baseCashflowsAmount, BigDecimal localGainLoss,
@@ -32,6 +36,7 @@ final public class PerformanceValue implements Serializable {
 		// TODO: add contributions, fees
 		this();
 		setDate(date);
+		setPriorDate(priorDate);
 		setStartLocalMarketValue(startLocalMarketValue);
 		setStartBaseMarketValue(startBaseMarketValue);
 		setEndLocalMarketValue(endLocalMarketValue);
@@ -68,6 +73,14 @@ final public class PerformanceValue implements Serializable {
 	
 	public void setDate(Date date) {
 		this.date = date;
+	}
+	
+	public Date getPriorDate() {
+		return priorDate;
+	}
+	
+	public void setPriorDate(Date priorDate) {
+		this.priorDate = priorDate;
 	}
 
 	public BigDecimal getStartMarketValue(CurrencyBasis currencyBasis) {
@@ -218,8 +231,17 @@ final public class PerformanceValue implements Serializable {
 		BigDecimal localGainLoss = getLocalGainLoss().add(augend.getLocalGainLoss());
 		BigDecimal baseGainLoss = getBaseGainLoss().add(augend.getBaseGainLoss());
 		
-		return new PerformanceValue(augend.getDate(), startLocalMarketValue,
-				startBaseMarketValue, endLocalMarketValue, endBaseMarketValue,
+		return new PerformanceValue(augend.getDate(), 
+				(getPriorDate() == null ? augend.getPriorDate() : getPriorDate()),
+				startLocalMarketValue, startBaseMarketValue, endLocalMarketValue, endBaseMarketValue,
 				localCashflowsAmount, baseCashflowsAmount, localGainLoss, baseGainLoss);
+	}
+
+	public ReadableInstant getDateInstant() {
+		return new Instant(getDateInstant());
+	}
+	
+	public ReadableInstant getPriorDateInstant() {
+		return new Instant(getPriorDateInstant());
 	}
 }
