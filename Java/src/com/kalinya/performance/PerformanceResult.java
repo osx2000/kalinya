@@ -74,8 +74,9 @@ public class PerformanceResult implements Serializable {
 	}
 
 	public PerformanceResult(final PerformanceFactory performanceFactory, final DataSource dataSource) {
-		this(performanceFactory, dataSource.getPortfolios(), dataSource.getBenchmarkAssociations(), dataSource.getSecurityMasterData(),
-				dataSource.getInstruments(), dataSource.getInstrumentLegs(), dataSource.getPositions(), dataSource.getCashflows());
+		this(performanceFactory, dataSource.getPortfolios(), dataSource.getBenchmarkAssociations(),
+				dataSource.getSecurityMasterData(), dataSource.getInstruments(), dataSource.getInstrumentLegs(),
+				dataSource.getPositions(), dataSource.getCashflows());
 		setDataSource(dataSource);
 	}
 

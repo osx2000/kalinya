@@ -14,6 +14,7 @@ import com.kalinya.performance.Configurator;
 import com.kalinya.performance.PerformanceFactory;
 import com.kalinya.performance.PerformanceResult;
 import com.kalinya.performance.PortfolioPerformanceResult;
+import com.kalinya.performance.datasource.CSVDataSource;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.datasource.DataSource1;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
@@ -215,10 +216,11 @@ public class PerformanceMeasurementForm implements javafx.fxml.Initializable {
 		FindurSession findurSession = new FindurSession();
 		PerformanceFactory pf = findurSession.getPerformanceFactory();
 
-		DataSource csvDataSource =  DataSource.CSV
-				.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
+		DataSource csvDataSource =  new CSVDataSource.Builder()
+				//.withPortfoliosFilter(getPortfolios())
 				.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
 				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
+				.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
 				.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
 				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
 				.build();
@@ -231,7 +233,7 @@ public class PerformanceMeasurementForm implements javafx.fxml.Initializable {
 		if (csvDataSource.requiresFindurSession()) {
 			findurSession.getSession().getDebug().viewTable(performanceResults.asTable());
 			if(getPerformanceDimensions().equals(PerformanceDimensions.BY_DATE_BY_PORTFOLIO)) {
-				csvDataSource.extractToUserTable("USER_perf_results_by_portfolio");
+				//csvDataSource.extractToUserTable("USER_perf_results_by_portfolio");
 			}
 			if(getPerformanceDimensions().equals(PerformanceDimensions.BY_DATE_BY_LEG)) {
 				performanceResults.extractToUserTable("USER_perf_results_by_leg");

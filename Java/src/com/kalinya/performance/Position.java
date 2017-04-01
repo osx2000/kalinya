@@ -15,6 +15,10 @@ import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.StringUtil;
 
+/**
+ * @author Stephen
+ *
+ */
 public final class Position implements Comparable<Position>, SecurityMasterData, Serializable {
 	private Portfolio portfolio;
 	private Instrument instrument;
@@ -44,7 +48,21 @@ public final class Position implements Comparable<Position>, SecurityMasterData,
 		setCashflows(cashflows);		
 	}
 	
-	public Position(InstrumentLeg instrumentLeg, Date date) {
+	/**
+	 * Creates a new Position without cashflows. Use
+	 * {@link Position#setCashflows(Cashflows)} to set the cashflows.
+	 * 
+	 * @param instrumentLeg
+	 * @param date
+	 * @param marketValue
+	 * @param baseMarketValue
+	 */
+	public Position(final InstrumentLeg instrumentLeg, final Date date,
+			final BigDecimal marketValue, final BigDecimal baseMarketValue) {
+		this(instrumentLeg, date, marketValue, baseMarketValue, Cashflows.EMPTY);
+	}
+	
+	public Position(final InstrumentLeg instrumentLeg, final Date date) {
 		this(instrumentLeg, date, BigDecimal.ZERO, BigDecimal.ZERO, Cashflows.EMPTY);
 	}
 

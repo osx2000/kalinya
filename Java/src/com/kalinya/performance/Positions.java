@@ -166,4 +166,20 @@ public class Positions extends BaseSet<Position> {
 			}
 		}
 	}
+
+	public void injectCashflows(Cashflows cashflows) {
+		for(Cashflow cashflow: cashflows) {
+			InstrumentLeg cashflowInstrumentLeg = cashflow.getInstrumentLeg();
+			Date cashflowDate = cashflow.getDate();
+			Position position = getPosition(cashflowDate, cashflowInstrumentLeg);
+			if(position != null) {
+				position.getCashflows().add(cashflow);
+			} else {
+				throw new IllegalArgumentException(String.format(
+						"Failed to retrieve Position to inject cashflows for InstrumentLeg[%s], Date [%s]",
+						cashflowInstrumentLeg, 
+						StringUtil.formatDate(cashflowDate)));
+			}
+		}
+	}
 }

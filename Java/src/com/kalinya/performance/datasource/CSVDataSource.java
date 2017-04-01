@@ -13,7 +13,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
-import org.apache.commons.lang3.NotImplementedException;
 
 import com.kalinya.enums.DebugLevel;
 import com.kalinya.performance.BenchmarkAssociation;
@@ -22,6 +21,8 @@ import com.kalinya.performance.Cashflow;
 import com.kalinya.performance.Cashflows;
 import com.kalinya.performance.Instrument;
 import com.kalinya.performance.InstrumentLeg;
+import com.kalinya.performance.InstrumentLegs;
+import com.kalinya.performance.Instruments;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.Portfolios;
 import com.kalinya.performance.Position;
@@ -77,6 +78,7 @@ final public class CSVDataSource extends DataSource {
 		private String portfoliosFilePath;
 		private String benchmarkAssociationsFilePath;
 
+		@Override
 		public CSVDataSource build() {
 			return new CSVDataSource(this);
 		}
@@ -108,7 +110,7 @@ final public class CSVDataSource extends DataSource {
 	}
 
 	@Override
-	public Portfolios getPortfolios() {
+	public void retrievePortfolios() {
 		if(portfolios == null) {
 			getTimer().start("GetPortfolios");
 			portfolios = new Portfolios();
@@ -143,11 +145,10 @@ final public class CSVDataSource extends DataSource {
 				getTimer().stop();
 			}
 		}
-		return portfolios;
 	}
 
 	@Override
-	public BenchmarkAssociations getBenchmarkAssociations() {
+	public void retrieveBenchmarkAssociations(Portfolios portfolios) {
 		if(benchmarkAssociations == null) {
 			getTimer().start("BenchmarkAssociations");
 			benchmarkAssociations = new BenchmarkAssociations();
@@ -157,7 +158,6 @@ final public class CSVDataSource extends DataSource {
 				Assertions.notNull(filePath, "BenchmarkAssociationsFilePath");
 				InputStream inputStream = new FileInputStream(filePath);
 				Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
-				//TODO: make this csvParser a field
 				csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
 
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
@@ -168,11 +168,10 @@ final public class CSVDataSource extends DataSource {
 				List<CSVRecord> csvRecords = csvParser.getRecords();
 				for(CSVRecord csvRecord: csvRecords) {
 					long recordNumber = csvRecord.getRecordNumber();
-
 					String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
 					String benchmarkName = csvRecord.get(CsvHeader.BENCHMARK.getName());
-					Portfolio portfolio = getPortfolios().get(portfolioName);
-					Portfolio benchmark = getPortfolios().get(benchmarkName);
+					Portfolio portfolio = portfolios.get(portfolioName);
+					Portfolio benchmark = portfolios.get(benchmarkName);
 					BenchmarkAssociation benchmarkAssociation = new BenchmarkAssociation(portfolio, benchmark);
 					if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
 						System.out.println("Record [" + recordNumber + "] BenchmarkAssociation [" + benchmarkAssociation.toString() + "]");
@@ -186,11 +185,10 @@ final public class CSVDataSource extends DataSource {
 				getTimer().stop();
 			}
 		}
-		return benchmarkAssociations;
 	}
 
 	@Override
-	public SecurityMasters getSecurityMasterData() {
+	public void retrieveSecurityMasterData() {
 		if(securityMasterData == null) {
 			getTimer().start("GetSecurityMasterData");
 			securityMasterData = new SecurityMasters();
@@ -241,17 +239,19 @@ final public class CSVDataSource extends DataSource {
 				getTimer().stop();
 			}
 		}
-		return securityMasterData;
 	}
 
 	@Override
-	public Positions getPositions() {
-		if(positions != null) {
-			return positions;
-		}
-		positions = new Positions();
-		getTimer().start("GetPositions");
-		if(getPortfolios().size() > 0) {
+	public void retrievePositions(Portfolios portfolios, Instruments instruments, InstrumentLegs instrumentLegs,
+			Portfolios portfoliosFilter) {
+		if (positions == null) {
+			positions = new Positions();
+			getTimer().start("GetPositions");
+			Assertions.notNullOrEmpty("portfolios", portfolios);
+			Assertions.notNullOrEmpty("instruments", instruments);
+			if(!retrieveInstrumentLegsFromPositions()) {
+				Assertions.notNullOrEmpty("instrumentLegs", instrumentLegs);
+			}
 			boolean getCashflows = false;
 			if(cashflows == null) {
 				getCashflows = true;
@@ -282,27 +282,34 @@ final public class CSVDataSource extends DataSource {
 					String marketValueStr = csvRecord.get(CsvHeader.END_LOCAL_MARKET_VALUE.getName());
 					String baseMarketValueStr = csvRecord.get(CsvHeader.END_BASE_MARKET_VALUE.getName());
 					String cashFlowStr = csvRecord.get(CsvHeader.CASH_FLOW.getName());
-					Portfolio portfolio = getPortfolios().get(portfolioName);
-					if(portfolio == null || !getPortfolios().contains(portfolio)) {
+					Portfolio portfolio = portfolios.get(portfolioName);
+					if(portfolio == null || !portfolios.contains(portfolio)) {
 						throw new IllegalStateException(
 								String.format("Unknown portfolio [%s] in positions file [%s]", 
-								portfolioName, 
-								getPositionsFilePath()));
+										portfolioName, 
+										getPositionsFilePath()));
 					}
-					if(!getPortfoliosFilter().contains(portfolio)) {
+					if(portfoliosFilter.size() > 0 && !portfoliosFilter.contains(portfolio)) {
 						System.out.println(
 								String.format("Filtering position RecordId [%s] in Portfolio [%s]", 
-								recordNumber,
-								portfolio.getName()));
+										recordNumber,
+										portfolio.getName()));
 						continue;
 					}
-					Instrument instrument = getInstruments().getInstrument(instrumentId, false);
-					if(instrument == null || !getInstruments().contains(instrument)) {
+					Instrument instrument = instruments.getInstrument(instrumentId, false);
+					if(instrument == null || !instruments.contains(instrument)) {
 						throw new IllegalStateException(String.format("Unknown InstrumentId [%s] in positions file [%s]", 
-																		instrumentId, 
-																		getPositionsFilePath()));
+								instrumentId, 
+								getPositionsFilePath()));
 					}
-					InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
+					//TODO: delete. stopped instantiating the InstrumentLeg during the Positions bootstrap
+					//InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
+					InstrumentLeg instrumentLeg = null;
+					if(retrieveInstrumentLegsFromPositions()) {
+						instrumentLegs.getInstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr));
+					} else {
+						instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
+					}
 					Date date = DateUtil.parseDate(dateStr);
 					Cashflows instrumentLegCashflows = new Cashflows();
 					Cashflow instrumentLegCashflow = new Cashflow(instrumentLeg, date, currency, NumberUtil.newBigDecimal(cashFlowStr));
@@ -338,26 +345,14 @@ final public class CSVDataSource extends DataSource {
 				throw new IllegalStateException(message.toString());
 			}
 			getTimer().stop();
-			return positions;
-		} else {
-			throw new IllegalStateException("Failed to retrieve portfolio details");
 		}
 	}
 
 	@Override
-	public Cashflows getCashflows() {
-		if(cashflows == null) {
-			cashflows = new Cashflows();
-			getPositions();
-			getTimer().start("GetCashflows");
-			if(getPositions().size() > 0) {
-				//Cashflows are loaded during the position bootstrap
-				getTimer().stop();
-			} else {
-				throw new IllegalStateException("Failed to retrieve position details");
-			}
-		}
-		return cashflows;
+	public void retrieveCashflows(Portfolios portfolios, Instruments instruments, InstrumentLegs instrumentLegs) {
+		//Cashflows are loaded during the position bootstrap
+		retrievePositions(portfolios, instruments, instrumentLegs, portfolios.EMPTY);
+		Assertions.notNull("Cashflows", "Failed to retrieve position details during position bootstrap", cashflows);
 	}
 
 	public String getPositionsFilePath() {

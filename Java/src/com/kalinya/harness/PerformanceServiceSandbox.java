@@ -83,11 +83,10 @@ public class PerformanceServiceSandbox {
 		DataSource csvDataSource =  new CSVDataSource.Builder()
 											.withPortfoliosFilter(getPortfolios())
 											.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
-											.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
 											.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
 											.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
 											.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
-											//TODO: fix this because the order is critical
+											.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
 											.build();
 		
 		/*DataSource findurPmmDataSource =  DataSource.Findur
@@ -95,7 +94,6 @@ public class PerformanceServiceSandbox {
 				.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
 				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
 				.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
-				//TODO: fix this because the order is critical
 				.withPortfoliosFilter(getPortfolios())
 				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
 				.build();

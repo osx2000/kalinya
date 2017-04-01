@@ -25,6 +25,7 @@ import com.kalinya.performance.Cashflows;
 import com.kalinya.performance.Instrument;
 import com.kalinya.performance.InstrumentLeg;
 import com.kalinya.performance.InstrumentLegs;
+import com.kalinya.performance.Instruments;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.Portfolios;
 import com.kalinya.performance.Position;
@@ -72,7 +73,7 @@ final public class FindurPmmDataSource extends DataSource {
 	}
 
 	@Override
-	public Portfolios getPortfolios() {
+	public void retrievePortfolios() {
 		if(portfolios == null) {
 			getTimer().start("GetPortfolios");
 			portfolios = new Portfolios();
@@ -98,10 +99,9 @@ final public class FindurPmmDataSource extends DataSource {
 			}
 			getTimer().stop();
 		}
-		return portfolios;
 	}
 
-	private Table getCashflowTableDataFromFindurPmm() {
+	private Table getCashflowTableDataFromFindurPmm(Portfolios portfolios) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ");
 		sql.append(String.format("pstl.eod_date '%s'", CsvHeader.DATE.getName()));
@@ -115,7 +115,7 @@ final public class FindurPmmDataSource extends DataSource {
 		sql.append("\nFROM perf_sec_tran_log pstl");
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = pstl.src_security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = pstl.portfolio_id");
-		if(getPortfolios().size() > 0) {
+		if(portfolios.size() > 0) {
 			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = pstl.currency");
@@ -138,7 +138,7 @@ final public class FindurPmmDataSource extends DataSource {
 		sql.append("\nFROM perf_sec_tran_log pstl");
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = pstl.security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = pstl.portfolio_id");
-		if(getPortfolios().size() > 0) {
+		if(portfolios.size() > 0) {
 			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = pstl.currency");
@@ -149,32 +149,6 @@ final public class FindurPmmDataSource extends DataSource {
 
 		sql.append("\nORDER BY pstl.eod_date, p.name, psd.security_name");
 		return getSession().getIOFactory().runSQL(sql.toString());
-	}
-
-	/**
-	 * @param table
-	 * @return
-	 * @deprecated get InstrumentLegs from the Positions
-	 */
-	private InstrumentLegs getInstrumentLegs(Table table) {
-		InstrumentLegs instrumentLegs = new InstrumentLegs();
-		if(table != null) {
-			int rowCount = table.getRowCount();
-			for(int rowId = 0; rowId < rowCount; rowId++) {
-				String portfolioStr = table.getString(CsvHeader.PORTFOLIO.getName(), rowId);
-				String instrumentId = table.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);
-				if(instrumentId.equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
-					System.out.println(String.format("InstrumentId [%s]",instrumentId));
-				}
-				int legId = table.getInt(CsvHeader.LEG_ID.getName(), rowId);
-				String currencyName = table.getString(CsvHeader.CURRENCY.getName(), rowId);
-				Portfolio portfolio = new Portfolio(portfolioStr);
-				Instrument instrument = getInstruments().getInstrument(instrumentId, false);
-				InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
-				instrumentLegs.add(instrumentLeg);
-			}
-		}
-		return instrumentLegs;
 	}
 
 	private Table getPositionTableDataFromFindurPmm() {
@@ -190,7 +164,7 @@ final public class FindurPmmDataSource extends DataSource {
 		sql.append("\nFROM perf_sec_values psv");
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = psv.security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = psv.portfolio_id");
-		if(getPortfolios().size() > 0) {
+		if(portfolios.size() > 0) {
 			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = psv.currency");
@@ -204,9 +178,8 @@ final public class FindurPmmDataSource extends DataSource {
 	}
 
 	@Override
-	public BenchmarkAssociations getBenchmarkAssociations() {
+	public void retrieveBenchmarkAssociations(Portfolios portfolios) {
 		if(benchmarkAssociations == null) {
-			getPortfolios();
 			getTimer().start("GetBenchmarkAssociations");
 			benchmarkAssociations = new BenchmarkAssociations();
 			Table table = null;
@@ -220,8 +193,8 @@ final public class FindurPmmDataSource extends DataSource {
 					for(int rowId = 0; rowId < rowCount; rowId++) {
 						String portfolioName = table.getString(CsvHeader.PORTFOLIO.getName(), rowId);
 						String benchmarkName = table.getString(CsvHeader.BENCHMARK.getName(), rowId);
-						Portfolio portfolio = getPortfolios().get(portfolioName);
-						Portfolio benchmark = getPortfolios().get(benchmarkName);
+						Portfolio portfolio = portfolios.get(portfolioName);
+						Portfolio benchmark = portfolios.get(benchmarkName);
 						BenchmarkAssociation benchmarkAssociation = new BenchmarkAssociation(portfolio, benchmark);
 						if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
 							System.out.println(String.format("BenchmarkAssociation [%s]", benchmarkAssociation.toString()));
@@ -236,11 +209,10 @@ final public class FindurPmmDataSource extends DataSource {
 			}
 			getTimer().stop();
 		}
-		return benchmarkAssociations;
 	}
 
 	@Override
-	public SecurityMasters getSecurityMasterData() {
+	public void retrieveSecurityMasterData() {
 		if(securityMasterData == null) {
 			getTimer().start("GetSecurityMasterData");
 			securityMasterData = new SecurityMasters();
@@ -255,11 +227,10 @@ final public class FindurPmmDataSource extends DataSource {
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
 					System.out.println(String.format("InsNum [%s] InstrumentId [%s] SecurityMaster [%s]", insNum, instrumentId, securityMaster.toString()));
 				}
-				getSecurityMasterData().add(securityMaster);
+				securityMasterData.add(securityMaster);
 			}
 			getTimer().stop();
 		}
-		return securityMasterData;
 	}
 
 	private Map<Integer, String> getInstrumentIdsFromFindur() {
@@ -321,10 +292,10 @@ final public class FindurPmmDataSource extends DataSource {
 	}
 
 	@Override
-	public Positions getPositions() {
+	public void retrievePositions(final Portfolios portfolios, final Instruments instruments, InstrumentLegs instrumentLegs,
+			Portfolios portfoliosFilter) {
 		if(positions == null) {
-			getCashflows();
-			getTimer().start("GetPositions");
+			getTimer().start("RetrievePositions");
 			positions = new Positions();
 			Integer insNum = null;
 			Table positionsTable = null;
@@ -347,17 +318,18 @@ final public class FindurPmmDataSource extends DataSource {
 						//TODO: handle cash flows
 						BigDecimal localAmount = NumberUtil.newBigDecimal("0");
 
-						Portfolio portfolio = getPortfolios().get(portfolioName);
-						Instrument instrument = getInstruments().getInstrument(instrumentId, false);
+						Portfolio portfolio = portfolios.get(portfolioName);
+						Instrument instrument = instruments.getInstrument(instrumentId, false);
 						//TODO: there is circularity here
-						InstrumentLeg instrumentLeg = getInstrumentLegs().getInstrumentLeg(portfolio, instrument, legId, false);
+						InstrumentLeg instrumentLeg = instrumentLegs.getInstrumentLeg(portfolio, instrument, legId, false);
 						if(instrumentLeg == null) {
 							instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
-							getInstrumentLegs().add(instrumentLeg);
+							instrumentLegs.add(instrumentLeg);
 						}
-						Cashflows cashflows = getCashflows().getCashflows(date, instrumentLeg);
+						//Cashflows cashflows = retrieveCashflows().getCashflows(date, instrumentLeg);
 						//TODO: might need a method to inject Cashflows into the Positions
-						Position position = new Position(instrumentLeg, date, marketValue, baseMarketValue, cashflows);
+						//Position position = new Position(instrumentLeg, date, marketValue, baseMarketValue, cashflows);
+						Position position = new Position(instrumentLeg, date, marketValue, baseMarketValue);
 						if (getDebugLevel().atLeast(DebugLevel.HIGH)) {
 							System.out.println("InsNum [" + insNum + "] Position [" + position.toString() + "]");
 						}
@@ -374,16 +346,15 @@ final public class FindurPmmDataSource extends DataSource {
 			}
 			getTimer().stop();
 		}
-		return positions;
 	}
 
 	@Override
-	public Cashflows getCashflows() {
+	public void retrieveCashflows(final Portfolios portfolios, final Instruments instruments, final InstrumentLegs instrumentLegs) {
 		if(cashflows == null) {
 			getTimer().start("GetCashflows");
 			Table cashflowTable = null;
 			try {
-				cashflowTable = getCashflowTableDataFromFindurPmm();
+				cashflowTable = getCashflowTableDataFromFindurPmm(portfolios);
 				Cashflows cashflows = new Cashflows();
 				if(cashflowTable != null) {
 					int rowCount = cashflowTable.getRowCount();
@@ -393,9 +364,10 @@ final public class FindurPmmDataSource extends DataSource {
 						String portfolioName = cashflowTable.getString(CsvHeader.PORTFOLIO.getName(), rowId);
 						String instrumentId = cashflowTable.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);
 						int legId = cashflowTable.getInt(CsvHeader.LEG_ID.getName(), rowId);
-						Portfolio portfolio = getPortfolios().get(portfolioName);
-						Instrument instrument = getInstruments().getInstrument(instrumentId, false);
-						InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
+						Portfolio portfolio = portfolios.get(portfolioName);
+						Instrument instrument = instruments.getInstrument(instrumentId, false);
+						InstrumentLeg instrumentLeg = instrumentLegs.getInstrumentLeg(portfolio, instrument, legId);
+						//InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
 						if(instrumentId.equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
 							System.out.println(String.format("InstrumentId [%s]",instrumentId));
 						}
@@ -409,7 +381,6 @@ final public class FindurPmmDataSource extends DataSource {
 				PluginUtil.dispose(cashflowTable);
 			}
 		}
-		return cashflows;
 	}
 
 	public Session getSession(){

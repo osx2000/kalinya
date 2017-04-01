@@ -5,6 +5,8 @@ import java.util.Collection;
 import com.kalinya.util.BaseSet;
 
 public class Portfolios extends BaseSet<Portfolio>{
+	public static final Portfolios EMPTY = new Portfolios();
+
 	public Portfolios() {
 		super();
 	}
