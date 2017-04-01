@@ -249,9 +249,8 @@ final public class CSVDataSource extends DataSource {
 		if(positions != null) {
 			return positions;
 		}
-		getTimer().start("GetPositions");
 		positions = new Positions();
-		getPortfolios();
+		getTimer().start("GetPositions");
 		if(getPortfolios().size() > 0) {
 			boolean getCashflows = false;
 			if(cashflows == null) {
@@ -283,7 +282,7 @@ final public class CSVDataSource extends DataSource {
 					String marketValueStr = csvRecord.get(CsvHeader.END_LOCAL_MARKET_VALUE.getName());
 					String baseMarketValueStr = csvRecord.get(CsvHeader.END_BASE_MARKET_VALUE.getName());
 					String cashFlowStr = csvRecord.get(CsvHeader.CASH_FLOW.getName());
-					Portfolio portfolio = portfolios.get(portfolioName);
+					Portfolio portfolio = getPortfolios().get(portfolioName);
 					if(portfolio == null || !getPortfolios().contains(portfolio)) {
 						throw new IllegalStateException(
 								String.format("Unknown portfolio [%s] in positions file [%s]", 

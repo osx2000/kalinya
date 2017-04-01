@@ -17,6 +17,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 
 import com.kalinya.enums.DebugLevel;
+import com.kalinya.oc.util.TableUtil;
 import com.kalinya.performance.BenchmarkAssociation;
 import com.kalinya.performance.BenchmarkAssociations;
 import com.kalinya.performance.Cashflow;
@@ -44,6 +45,7 @@ import com.kalinya.util.PluginUtil;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
+import com.sun.browser.plugin.PluginHandler;
 
 final public class FindurPmmDataSource extends DataSource {
 	private static String DEBUG_INSTRUMENT_ID = "SMHL 13-1 A RMBS +95";
@@ -73,88 +75,27 @@ final public class FindurPmmDataSource extends DataSource {
 	public Portfolios getPortfolios() {
 		if(portfolios == null) {
 			getTimer().start("GetPortfolios");
-			positions = new Positions();
-			Integer insNum = null;
-			Table positionsTable = null;
-			Table cashflowTable = null;
+			portfolios = new Portfolios();
+			Table table = null;
 			try {
-				cashflowTable = getCashflowTableDataFromFindurPmm();
-				//TODO: figure out why I did it this way
-				instrumentLegs.addAll(getInstrumentLegs(cashflowTable));
-				//TODO: investigate which InstrumentLeg was added (before=179, after=180)
-				Cashflows pmmCashflows = new Cashflows();
-				if(cashflowTable != null) {
-					int rowCount = cashflowTable.getRowCount();
+				StringBuilder sql = new StringBuilder();
+				//TODO: hit the database for perf_portfolios and get portfolio_group
+				sql.append("SELECT * FROM portfolio");
+				table = getSession().getIOFactory().runSQL(sql.toString());
+				if(table != null || table.getRowCount() == 0) {
+					int rowCount = table.getRowCount();
 					for(int rowId = 0; rowId < rowCount; rowId++) {
-						Date date = cashflowTable.getDate(CsvHeader.DATE.getName(), rowId);
-						String currencyName = cashflowTable.getString(CsvHeader.CURRENCY.getName(), rowId);
-						String portfolioStr = cashflowTable.getString(CsvHeader.PORTFOLIO.getName(), rowId);
-						String instrumentId = cashflowTable.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);
-						int legId = cashflowTable.getInt(CsvHeader.LEG_ID.getName(), rowId);
-						Portfolio portfolio = new Portfolio(portfolioStr);
-						Instrument instrument = getInstruments().getInstrument(instrumentId, false);
-						InstrumentLeg instrumentLeg = getInstrumentLegs().getInstrumentLeg(portfolio, instrument, legId);
-						if(instrumentLeg == null) {
-							instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
-							getInstrumentLegs().add(instrumentLeg);
-						}
-						if(instrumentId.equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
-							System.out.println(String.format("InstrumentId [%s] InsNum [%s]",instrumentId,insNum));
-						}
-						BigDecimal localCashFlowAmount = NumberUtil.newBigDecimal(cashflowTable.getDouble(CsvHeader.LOCAL_CASHFLOWS_AMOUNT.getName(), rowId));
-						BigDecimal baseCashFlowAmount = NumberUtil.newBigDecimal(cashflowTable.getDouble(CsvHeader.BASE_CASHFLOWS_AMOUNT.getName(), rowId));
-						pmmCashflows.add(new Cashflow(instrumentLeg, date, currencyName, localCashFlowAmount, baseCashFlowAmount));
+						String portfolioName = table.getString(CsvHeader.PORTFOLIO.getName(), rowId);
+						String portfolioGroup = table.getString(CsvHeader.PORTFOLIO_GROUP.getName(), rowId);;
+						Portfolio portfolio = new Portfolio(portfolioName, portfolioGroup);
+						portfolios.add(portfolio);
 					}
+				} else {
+					throw new RuntimeException("Failed to retrieve portfolios");
 				}
-
-				positionsTable = getPositionTableDataFromFindurPmm();
-				instrumentLegs.addAll(getInstrumentLegs(positionsTable));
-				if(positionsTable != null) {
-					int rowCount = positionsTable.getRowCount();
-					for(int rowId = 0; rowId < rowCount; rowId++) {
-						String portfolioStr = positionsTable.getString(CsvHeader.PORTFOLIO.getName(), rowId);
-						String instrumentId = positionsTable.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);
-						if(instrumentId.equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
-							System.out.println(String.format("InstrumentId [%s] InsNum [%s]",instrumentId,insNum));
-						}
-						Date date = positionsTable.getDate(CsvHeader.DATE.getName(), rowId);
-						int legId = positionsTable.getInt(CsvHeader.LEG_ID.getName(), rowId);
-						String currencyName = positionsTable.getString(CsvHeader.CURRENCY.getName(), rowId);
-						BigDecimal marketValue = NumberUtil.newBigDecimal(positionsTable.getDouble(CsvHeader.END_LOCAL_MARKET_VALUE.getName(), rowId));
-						BigDecimal baseMarketValue = NumberUtil.newBigDecimal(positionsTable.getDouble(CsvHeader.END_BASE_MARKET_VALUE.getName(), rowId));
-
-						//TODO: handle cash flows
-						BigDecimal localAmount = NumberUtil.newBigDecimal("0");
-
-						Portfolio portfolio = new Portfolio(portfolioStr);
-						Instrument instrument = getInstruments().getInstrument(instrumentId, false);
-						InstrumentLeg instrumentLeg = getInstrumentLegs().getInstrumentLeg(portfolio, instrument, legId, false);
-						if(instrumentLeg == null) {
-							instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
-						}
-						/*
-						 * Cashflows cashflows = new Cashflows();
-						 * cashflows.add(new Cashflow(instrumentLeg, date, currencyName, localAmount, localAmount));
-						 */
-						Cashflows cashflows = pmmCashflows.getCashflows(date, instrumentLeg);
-
-						Position position = new Position(instrumentLeg, date, marketValue, baseMarketValue, cashflows);
-						if (getDebugLevel().atLeast(DebugLevel.HIGH)) {
-							System.out.println("InsNum [" + insNum + "] Position [" + position.toString() + "]");
-						}
-						getPositions().add(position);
-					}
-				}
-				getPositions().requirePositionForDate(getStartDate());
-				getPositions().requirePositionForDate(getEndDate());
-			} catch (Exception e) {
-				System.out.println(String.format("Failed to parse InsNum [%s]", insNum));
-				throw new RuntimeException(e);
 			} finally {
-				PluginUtil.dispose(positionsTable);
-				PluginUtil.dispose(cashflowTable);
+				PluginUtil.dispose(table);
 			}
-
 			getTimer().stop();
 		}
 		return portfolios;
@@ -209,7 +150,12 @@ final public class FindurPmmDataSource extends DataSource {
 		sql.append("\nORDER BY pstl.eod_date, p.name, psd.security_name");
 		return getSession().getIOFactory().runSQL(sql.toString());
 	}
-	
+
+	/**
+	 * @param table
+	 * @return
+	 * @deprecated get InstrumentLegs from the Positions
+	 */
 	private InstrumentLegs getInstrumentLegs(Table table) {
 		InstrumentLegs instrumentLegs = new InstrumentLegs();
 		if(table != null) {
@@ -259,44 +205,35 @@ final public class FindurPmmDataSource extends DataSource {
 
 	@Override
 	public BenchmarkAssociations getBenchmarkAssociations() {
-		if(benchmarkAssociations != null) {
-			return benchmarkAssociations;
-		}
-		getTimer().start("BenchmarkAssociations");
-		benchmarkAssociations = new BenchmarkAssociations();
-		CSVParser csvParser = null;
-		try {
-			//TODO: Get BenchmarkAssociations for FindurPMM
-			String filePath = getBenchmarkAssociationsFilePath();
-			Assertions.notNull(filePath, "BenchmarkAssociationsFilePath");
-			InputStream inputStream = new FileInputStream(filePath);
-			Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
-			//TODO: make this csvParser a field
-			csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
-
-			if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-				Map<String, Integer> headerMap = csvParser.getHeaderMap();
-				System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
-			}
-
-			List<CSVRecord> csvRecords = csvParser.getRecords();
-			for(CSVRecord csvRecord: csvRecords) {
-				long recordNumber = csvRecord.getRecordNumber();
-
-				String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
-				String benchmarkName = csvRecord.get(CsvHeader.BENCHMARK.getName());
-				Portfolio portfolio = getPortfolios().get(portfolioName);
-				Portfolio benchmark = getPortfolios().get(benchmarkName);
-				BenchmarkAssociation benchmarkAssociation = new BenchmarkAssociation(portfolio, benchmark);
-				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-					System.out.println("Record [" + recordNumber + "] BenchmarkAssociation [" + benchmarkAssociation.toString() + "]");
+		if(benchmarkAssociations == null) {
+			getPortfolios();
+			getTimer().start("GetBenchmarkAssociations");
+			benchmarkAssociations = new BenchmarkAssociations();
+			Table table = null;
+			try {
+				StringBuilder sql = new StringBuilder();
+				//TODO: hit the database to get the benchmark associations
+				sql.append("SELECT * FROM portfolio");
+				table = getSession().getIOFactory().runSQL(sql.toString());
+				if(table != null || table.getRowCount() == 0) {
+					int rowCount = table.getRowCount();
+					for(int rowId = 0; rowId < rowCount; rowId++) {
+						String portfolioName = table.getString(CsvHeader.PORTFOLIO.getName(), rowId);
+						String benchmarkName = table.getString(CsvHeader.BENCHMARK.getName(), rowId);
+						Portfolio portfolio = getPortfolios().get(portfolioName);
+						Portfolio benchmark = getPortfolios().get(benchmarkName);
+						BenchmarkAssociation benchmarkAssociation = new BenchmarkAssociation(portfolio, benchmark);
+						if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
+							System.out.println(String.format("BenchmarkAssociation [%s]", benchmarkAssociation.toString()));
+						}
+						benchmarkAssociations.add(benchmarkAssociation);
+					}
+				} else {
+					throw new RuntimeException("Failed to retrieve benchmark associations");
 				}
-				benchmarkAssociations.add(benchmarkAssociation);
+			} finally {
+				PluginUtil.dispose(table);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			PluginUtil.close(csvParser);
 			getTimer().stop();
 		}
 		return benchmarkAssociations;
@@ -349,7 +286,7 @@ final public class FindurPmmDataSource extends DataSource {
 		}
 		return map;
 	}
-	
+
 	private <E extends SecurityMasterEnum> Map<Integer, SecurityMasterEnum> getSecurityMasterDataFromFindur(Class<E> clazz) {
 		Map<Integer, SecurityMasterEnum> map = new HashMap<>();
 		String sql = null;
@@ -373,7 +310,7 @@ final public class FindurPmmDataSource extends DataSource {
 		}
 		return map;
 	}
-	
+
 	private String getSqlStringForInstrumentClass() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT DISTINCT ab.ins_num 'key', ic.name 'value'");
@@ -385,120 +322,94 @@ final public class FindurPmmDataSource extends DataSource {
 
 	@Override
 	public Positions getPositions() {
-		if(positions != null) {
-			return positions;
-		}
-		getTimer().start("GetPositions");
-		positions = new Positions();
-		getPortfolios();
-		if(getPortfolios().size() > 0) {
-			boolean getCashflows = false;
-			if(cashflows == null) {
-				getCashflows = true;
-				cashflows = new Cashflows();
-			}
-			CSVParser csvParser = null;
-			Long recordNumber = null;
+		if(positions == null) {
+			getCashflows();
+			getTimer().start("GetPositions");
+			positions = new Positions();
+			Integer insNum = null;
+			Table positionsTable = null;
 			try {
-				String filePath = getPositionsFilePath();
-				Assertions.notNull(filePath, "PositionsFilePath");
-				InputStream inputStream = new FileInputStream(filePath);
-				Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
-				csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim().withIgnoreEmptyLines());
+				positionsTable = getPositionTableDataFromFindurPmm();
+				if(positionsTable != null) {
+					int rowCount = positionsTable.getRowCount();
+					for(int rowId = 0; rowId < rowCount; rowId++) {
+						String portfolioName = positionsTable.getString(CsvHeader.PORTFOLIO.getName(), rowId);
+						String instrumentId = positionsTable.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);
+						if(instrumentId.equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
+							System.out.println(String.format("InstrumentId [%s] InsNum [%s]",instrumentId,insNum));
+						}
+						Date date = positionsTable.getDate(CsvHeader.DATE.getName(), rowId);
+						int legId = positionsTable.getInt(CsvHeader.LEG_ID.getName(), rowId);
+						String currencyName = positionsTable.getString(CsvHeader.CURRENCY.getName(), rowId);
+						BigDecimal marketValue = NumberUtil.newBigDecimal(positionsTable.getDouble(CsvHeader.END_LOCAL_MARKET_VALUE.getName(), rowId));
+						BigDecimal baseMarketValue = NumberUtil.newBigDecimal(positionsTable.getDouble(CsvHeader.END_BASE_MARKET_VALUE.getName(), rowId));
 
-				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-					Map<String, Integer> headerMap = csvParser.getHeaderMap();
-					System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
-				}
+						//TODO: handle cash flows
+						BigDecimal localAmount = NumberUtil.newBigDecimal("0");
 
-				List<CSVRecord> csvRecords = csvParser.getRecords();
-				for(CSVRecord csvRecord: csvRecords) {
-					recordNumber = csvRecord.getRecordNumber();
-					String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
-					String instrumentId = csvRecord.get(CsvHeader.INSTRUMENT_ID.getName());
-					String dateStr = csvRecord.get(CsvHeader.DATE.getName());
-					String legIdStr = csvRecord.get(CsvHeader.LEG_ID.getName());
-					String currency = csvRecord.get(CsvHeader.CURRENCY.getName());
-					String marketValueStr = csvRecord.get(CsvHeader.END_LOCAL_MARKET_VALUE.getName());
-					String baseMarketValueStr = csvRecord.get(CsvHeader.END_BASE_MARKET_VALUE.getName());
-					String cashFlowStr = csvRecord.get(CsvHeader.CASH_FLOW.getName());
-					Portfolio portfolio = portfolios.get(portfolioName);
-					if(portfolio == null || !getPortfolios().contains(portfolio)) {
-						throw new IllegalStateException(
-								String.format("Unknown portfolio [%s] in positions file [%s]", 
-										portfolioName, 
-										getPositionsFilePath()));
+						Portfolio portfolio = getPortfolios().get(portfolioName);
+						Instrument instrument = getInstruments().getInstrument(instrumentId, false);
+						//TODO: there is circularity here
+						InstrumentLeg instrumentLeg = getInstrumentLegs().getInstrumentLeg(portfolio, instrument, legId, false);
+						if(instrumentLeg == null) {
+							instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
+							getInstrumentLegs().add(instrumentLeg);
+						}
+						Cashflows cashflows = getCashflows().getCashflows(date, instrumentLeg);
+						//TODO: might need a method to inject Cashflows into the Positions
+						Position position = new Position(instrumentLeg, date, marketValue, baseMarketValue, cashflows);
+						if (getDebugLevel().atLeast(DebugLevel.HIGH)) {
+							System.out.println("InsNum [" + insNum + "] Position [" + position.toString() + "]");
+						}
+						positions.add(position);
 					}
-					if(!getPortfoliosFilter().contains(portfolio)) {
-						System.out.println(
-								String.format("Filtering position RecordId [%s] in Portfolio [%s]", 
-										recordNumber,
-										portfolio.getName()));
-						continue;
-					}
-					Instrument instrument = getInstruments().getInstrument(instrumentId, false);
-					if(instrument == null || !getInstruments().contains(instrument)) {
-						throw new IllegalStateException(String.format("Unknown InstrumentId [%s] in positions file [%s]", 
-								instrumentId, 
-								getPositionsFilePath()));
-					}
-					InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
-					Date date = DateUtil.parseDate(dateStr);
-					Cashflows instrumentLegCashflows = new Cashflows();
-					Cashflow instrumentLegCashflow = new Cashflow(instrumentLeg, date, currency, NumberUtil.newBigDecimal(cashFlowStr));
-					instrumentLegCashflows.add(instrumentLegCashflow );
-					if(getCashflows) {
-						cashflows.add(instrumentLegCashflow);
-					}
-					Position position = new Position(instrumentLeg, date, NumberUtil.newBigDecimal(marketValueStr),
-							NumberUtil.newBigDecimal(baseMarketValueStr), instrumentLegCashflows);
-					if (getDebugLevel().atLeast(DebugLevel.HIGH)) {
-						System.out.println("Record [" + recordNumber + "] Position [" + position.toString() + "]");
-					}
-					positions.add(position);
 				}
+				positions.requirePositionForDate(getStartDate());
+				positions.requirePositionForDate(getEndDate());
 			} catch (Exception e) {
-				System.out.println(String.format("Failed to parse record number [%s]", recordNumber));
+				System.out.println(String.format("Failed to parse InsNum [%s]", insNum));
 				throw new RuntimeException(e);
 			} finally {
-				PluginUtil.close(csvParser);
-			}
-			if(positions.size() == 0) {
-				StringBuilder message = new StringBuilder();
-				message.append(String.format("No positions were extracted from [%s]", getPositionsFilePath()));
-				if(getStartDate() != null && getStartDate().compareTo(DateUtil.MINIMUM_DATE) > 0) {
-					message.append(String.format(" StartDate [%s]", getStartDate()));
-				}
-				if(getEndDate() != null && getEndDate().compareTo(DateUtil.MAXIMUM_DATE) < 0) {
-					message.append(String.format(" EndDate [%s]", getEndDate()));
-				}
-				if(getPortfoliosFilter() != null && getPortfoliosFilter().size() > 0) {
-					message.append(String.format(" PortfoliosFilter [%s]", getPortfoliosFilter().toMinimalString()));
-				}
-				throw new IllegalStateException(message.toString());
+				PluginUtil.dispose(positionsTable);
 			}
 			getTimer().stop();
-			return positions;
-		} else {
-			throw new IllegalStateException("Failed to retrieve portfolio details");
 		}
+		return positions;
 	}
 
 	@Override
 	public Cashflows getCashflows() {
-		if(cashflows != null) {
-			return cashflows;
+		if(cashflows == null) {
+			getTimer().start("GetCashflows");
+			Table cashflowTable = null;
+			try {
+				cashflowTable = getCashflowTableDataFromFindurPmm();
+				Cashflows cashflows = new Cashflows();
+				if(cashflowTable != null) {
+					int rowCount = cashflowTable.getRowCount();
+					for(int rowId = 0; rowId < rowCount; rowId++) {
+						Date date = cashflowTable.getDate(CsvHeader.DATE.getName(), rowId);
+						String currencyName = cashflowTable.getString(CsvHeader.CURRENCY.getName(), rowId);
+						String portfolioName = cashflowTable.getString(CsvHeader.PORTFOLIO.getName(), rowId);
+						String instrumentId = cashflowTable.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);
+						int legId = cashflowTable.getInt(CsvHeader.LEG_ID.getName(), rowId);
+						Portfolio portfolio = getPortfolios().get(portfolioName);
+						Instrument instrument = getInstruments().getInstrument(instrumentId, false);
+						InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
+						if(instrumentId.equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
+							System.out.println(String.format("InstrumentId [%s]",instrumentId));
+						}
+						BigDecimal localCashFlowAmount = NumberUtil.newBigDecimal(cashflowTable.getDouble(CsvHeader.LOCAL_CASHFLOWS_AMOUNT.getName(), rowId));
+						BigDecimal baseCashFlowAmount = NumberUtil.newBigDecimal(cashflowTable.getDouble(CsvHeader.BASE_CASHFLOWS_AMOUNT.getName(), rowId));
+						cashflows.add(new Cashflow(instrumentLeg, date, currencyName, localCashFlowAmount, baseCashFlowAmount));
+					}
+				}
+				getTimer().stop();
+			} finally {
+				PluginUtil.dispose(cashflowTable);
+			}
 		}
-		getTimer().start("GetCashflows");
-		cashflows = new Cashflows();
-		getPositions();
-		if(getPositions().size() > 0) {
-			//Cashflows are loaded during the position bootstrap
-			getTimer().stop();
-			return cashflows;
-		} else {
-			throw new IllegalStateException("Failed to retrieve position details");
-		}
+		return cashflows;
 	}
 
 	public Session getSession(){

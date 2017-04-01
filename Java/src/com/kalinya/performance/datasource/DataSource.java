@@ -163,29 +163,6 @@ public class DataSource implements Serializable, Debuggable {
 		return "";
 	}
 
-	public DataSourceType getDataSourceType() {
-		throw new NotImplementedException(notImplementedExceptionMessage);
-	}
-	
-	public Portfolios getPortfolios() {
-		throw new NotImplementedException(notImplementedExceptionMessage);
-	}
-
-	public Positions getPositions() {
-		throw new NotImplementedException(notImplementedExceptionMessage);
-	}
-	public Cashflows getCashflows() {
-		throw new NotImplementedException(notImplementedExceptionMessage);
-	}
-
-	public BenchmarkAssociations getBenchmarkAssociations() {
-		throw new NotImplementedException(notImplementedExceptionMessage);
-	}
-
-	public SecurityMasters getSecurityMasterData() {
-		throw new NotImplementedException(notImplementedExceptionMessage);
-	}
-
 	public final Instruments getInstruments() {
 		if(instruments == null) {
 			instruments = new Instruments();
@@ -212,5 +189,28 @@ public class DataSource implements Serializable, Debuggable {
 			getTimer().stop();
 		}
 		return instrumentLegs;
+	}
+	
+	public DataSourceType getDataSourceType() {
+		throw new NotImplementedException(notImplementedExceptionMessage);
+	}
+	
+	public Portfolios getPortfolios() {
+		throw new NotImplementedException(notImplementedExceptionMessage);
+	}
+
+	public Positions getPositions() {
+		throw new NotImplementedException(notImplementedExceptionMessage);
+	}
+	public Cashflows getCashflows() {
+		throw new NotImplementedException(notImplementedExceptionMessage);
+	}
+
+	public BenchmarkAssociations getBenchmarkAssociations() {
+		throw new NotImplementedException(notImplementedExceptionMessage);
+	}
+
+	public SecurityMasters getSecurityMasterData() {
+		throw new NotImplementedException(notImplementedExceptionMessage);
 	}
 }

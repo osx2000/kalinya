@@ -25,6 +25,7 @@ public class PerformanceServiceSandbox {
 		/*
 		 * TODO:
 		 * Repair FindurPmm class
+		 * Support Start/End DayWeighting
 		 * Support RoR calculation with/without fees
 		 * Handle non-USD cash flows
 		 * Handle SortinoRatio
