@@ -13,6 +13,7 @@ public class BaseSet<E extends Comparable<E>> implements Set<E>, Serializable {
 	
 	public BaseSet() {
 		set = createSet();
+		
 	}
 	
 	protected Set<E> createSet() {
