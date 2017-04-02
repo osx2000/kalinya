@@ -55,8 +55,20 @@ final public class CSVDataSource extends DataSource {
 		securityMasterFilePath = builder.securityMasterFilePath;
 		portfoliosFilePath = builder.portfoliosFilePath;
 		benchmarkAssociationsFilePath = builder.benchmarkAssociationsFilePath;
+		loadData();
 	}
 	
+	@Override
+	public void loadData() {
+		retrievePortfolios();
+		retrieveBenchmarkAssociations();
+		retrieveSecurityMasterData();
+		retrieveInstruments();
+		retrievePositions();
+		retrieveCashflows();
+		retrieveInstrumentLegs();
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
@@ -148,7 +160,7 @@ final public class CSVDataSource extends DataSource {
 	}
 
 	@Override
-	public void retrieveBenchmarkAssociations(Portfolios portfolios) {
+	public void retrieveBenchmarkAssociations() {
 		if(benchmarkAssociations == null) {
 			getTimer().start("BenchmarkAssociations");
 			benchmarkAssociations = new BenchmarkAssociations();
@@ -242,16 +254,12 @@ final public class CSVDataSource extends DataSource {
 	}
 
 	@Override
-	public void retrievePositions(Portfolios portfolios, Instruments instruments, InstrumentLegs instrumentLegs,
-			Portfolios portfoliosFilter) {
+	public void retrievePositions() {
 		if (positions == null) {
 			positions = new Positions();
 			getTimer().start("GetPositions");
 			Assertions.notNullOrEmpty("portfolios", portfolios);
 			Assertions.notNullOrEmpty("instruments", instruments);
-			if(!retrieveInstrumentLegsFromPositions()) {
-				Assertions.notNullOrEmpty("instrumentLegs", instrumentLegs);
-			}
 			boolean getCashflows = false;
 			if(cashflows == null) {
 				getCashflows = true;
@@ -289,7 +297,7 @@ final public class CSVDataSource extends DataSource {
 										portfolioName, 
 										getPositionsFilePath()));
 					}
-					if(portfoliosFilter.size() > 0 && !portfoliosFilter.contains(portfolio)) {
+					if(getPortfoliosFilter().size() > 0 && !getPortfoliosFilter().contains(portfolio)) {
 						System.out.println(
 								String.format("Filtering position RecordId [%s] in Portfolio [%s]", 
 										recordNumber,
@@ -302,14 +310,7 @@ final public class CSVDataSource extends DataSource {
 								instrumentId, 
 								getPositionsFilePath()));
 					}
-					//TODO: delete. stopped instantiating the InstrumentLeg during the Positions bootstrap
-					//InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
-					InstrumentLeg instrumentLeg = null;
-					if(retrieveInstrumentLegsFromPositions()) {
-						instrumentLegs.getInstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr));
-					} else {
-						instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
-					}
+					InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
 					Date date = DateUtil.parseDate(dateStr);
 					Cashflows instrumentLegCashflows = new Cashflows();
 					Cashflow instrumentLegCashflow = new Cashflow(instrumentLeg, date, currency, NumberUtil.newBigDecimal(cashFlowStr));
@@ -349,10 +350,23 @@ final public class CSVDataSource extends DataSource {
 	}
 
 	@Override
-	public void retrieveCashflows(Portfolios portfolios, Instruments instruments, InstrumentLegs instrumentLegs) {
+	public void retrieveCashflows() {
 		//Cashflows are loaded during the position bootstrap
-		retrievePositions(portfolios, instruments, instrumentLegs, portfolios.EMPTY);
+		retrievePositions();
 		Assertions.notNull("Cashflows", "Failed to retrieve position details during position bootstrap", cashflows);
+	}
+	
+	@Override
+	public void retrieveInstrumentLegs() {
+		if(instrumentLegs == null) {
+			Assertions.notNullOrEmpty("Positions", "No positions data available to load InstrumentLegs", positions);
+			instrumentLegs = new InstrumentLegs();
+			getTimer().start("GetInstrumentLegs");
+			for(Position position: positions) {
+				instrumentLegs.add(position.getInstrumentLeg());
+			}
+			getTimer().stop();
+		}
 	}
 
 	public String getPositionsFilePath() {

@@ -56,6 +56,17 @@ final public class FindurPmmDataSource extends DataSource {
 		super(builder);
 		this.session = builder.session;
 	}
+	
+	@Override
+	public void loadData() {
+		retrievePortfolios();
+		retrieveBenchmarkAssociations();
+		retrieveSecurityMasterData();
+		retrieveInstruments();
+		retrievePositions();
+		retrieveCashflows();
+		retrieveInstrumentLegs();
+	}
 
 	public static class Builder extends DataSource.Builder<Builder> {
 		private Session session;
@@ -178,7 +189,7 @@ final public class FindurPmmDataSource extends DataSource {
 	}
 
 	@Override
-	public void retrieveBenchmarkAssociations(Portfolios portfolios) {
+	public void retrieveBenchmarkAssociations() {
 		if(benchmarkAssociations == null) {
 			getTimer().start("GetBenchmarkAssociations");
 			benchmarkAssociations = new BenchmarkAssociations();
@@ -292,8 +303,7 @@ final public class FindurPmmDataSource extends DataSource {
 	}
 
 	@Override
-	public void retrievePositions(final Portfolios portfolios, final Instruments instruments, InstrumentLegs instrumentLegs,
-			Portfolios portfoliosFilter) {
+	public void retrievePositions() {
 		if(positions == null) {
 			getTimer().start("RetrievePositions");
 			positions = new Positions();
@@ -349,7 +359,7 @@ final public class FindurPmmDataSource extends DataSource {
 	}
 
 	@Override
-	public void retrieveCashflows(final Portfolios portfolios, final Instruments instruments, final InstrumentLegs instrumentLegs) {
+	public void retrieveCashflows() {
 		if(cashflows == null) {
 			getTimer().start("GetCashflows");
 			Table cashflowTable = null;

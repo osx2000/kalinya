@@ -53,8 +53,8 @@ public class DataSource implements Serializable, Debuggable {
 	protected Portfolios portfolios;
 	protected BenchmarkAssociations benchmarkAssociations;
 	protected SecurityMasters securityMasterData;
-	private Instruments instruments;
-	private InstrumentLegs instrumentLegs;
+	protected Instruments instruments;
+	protected InstrumentLegs instrumentLegs;
 	protected Positions positions;
 	protected Cashflows cashflows;
 
@@ -63,7 +63,6 @@ public class DataSource implements Serializable, Debuggable {
 	private Date endDate;
 	private DebugLevel debugLevel;
 	private String resultsExtractFilePath;
-	private boolean retrieveInstrumentLegsFromPositions = true;
 
 	public DataSource(Builder builder) {
 		timer = new Timer();
@@ -123,7 +122,7 @@ public class DataSource implements Serializable, Debuggable {
 		}
 
 		/**
-		 * Typical order of data load -
+		 * CSV order of data load -
 		 * <ul>
 		 * <li>getPortfolios();</li>
 		 * <li>getBenchmarkAssociations();</li>
@@ -132,7 +131,6 @@ public class DataSource implements Serializable, Debuggable {
 		 * <li>getPositions();</li>
 		 * <li>getInstrumentLegs();</li>
 		 * <li>getCashflows();</li>
-		 * <li>getTimer().print(true);</li>
 		 * </ul>
 		 * 
 		 * @return
@@ -179,13 +177,13 @@ public class DataSource implements Serializable, Debuggable {
 		return "";
 	}
 
-	public final Instruments retrieveInstruments(SecurityMasters securityMasters) {
+	public final Instruments retrieveInstruments() {
 		if(instruments == null) {
-			Assertions.notNullOrEmpty("SecurityMasters", "No security master data available", securityMasters);
+			Assertions.notNullOrEmpty("SecurityMasters", "No security master data available", securityMasterData);
 			instruments = new Instruments();
 			getTimer().start("GetInstruments");
 			Assertions.notNullOrEmpty("SecurityMasterData", getSecurityMasterData());
-			for(String instrumentId: securityMasters.getInstrumentIds()) {
+			for(String instrumentId: securityMasterData.getInstrumentIds()) {
 				instruments.add(new Instrument(instrumentId));
 			}
 			getTimer().stop();
@@ -193,19 +191,6 @@ public class DataSource implements Serializable, Debuggable {
 		return instruments;
 	}
 
-	public final InstrumentLegs retrieveInstrumentLegs(Positions positions) {
-		if(instrumentLegs == null) {
-			Assertions.notNullOrEmpty("Positions", "No positions data available to load InstrumentLegs", positions);
-			instrumentLegs = new InstrumentLegs();
-			getTimer().start("GetInstrumentLegs");
-			for(Position position: positions) {
-				instrumentLegs.add(position.getInstrumentLeg());
-			}
-			getTimer().stop();
-		}
-		return instrumentLegs;
-	}
-	
 	public void retrieveInstrumentLegs() {
 		throw new NotImplementedException(notImplementedExceptionMessage);
 	}
@@ -218,24 +203,33 @@ public class DataSource implements Serializable, Debuggable {
 		throw new NotImplementedException(notImplementedExceptionMessage);
 	}
 
-	public void retrievePositions(Portfolios portfolios, Instruments instruments, InstrumentLegs instrumentLegs,
-			Portfolios portfoliosFilter) {
+	public void retrievePositions() {
 		throw new NotImplementedException(notImplementedExceptionMessage);
 	}
 
-	public void retrieveCashflows(Portfolios portfolios, Instruments instruments, InstrumentLegs instrumentLegs) {
+	public void retrieveCashflows() {
 		throw new NotImplementedException(notImplementedExceptionMessage);
 	}
 	
-	public void retrieveBenchmarkAssociations(Portfolios portfolios) {
+	public void retrieveBenchmarkAssociations() {
 		throw new NotImplementedException(notImplementedExceptionMessage);
 	}
 
 	public void retrieveSecurityMasterData() {
 		throw new NotImplementedException(notImplementedExceptionMessage);
 	}
+	
+	public void loadData() {
+		retrievePortfolios();
+		retrieveBenchmarkAssociations();
+		retrieveSecurityMasterData();
+		retrieveInstruments();
+		retrievePositions();
+		retrieveCashflows();
+		retrieveInstrumentLegs();
+	}
 
-	public void injectCashflowsToPositions(Positions positions, Cashflows cashflows) {
+	public void injectCashflowsToPositions() {
 		positions.injectCashflows(cashflows);
 	}
 
@@ -248,7 +242,7 @@ public class DataSource implements Serializable, Debuggable {
 
 	public BenchmarkAssociations getBenchmarkAssociations() {
 		if(benchmarkAssociations == null) {
-			retrieveBenchmarkAssociations(getPortfolios());
+			retrieveBenchmarkAssociations();
 		}
 		return benchmarkAssociations;
 	}
@@ -262,38 +256,29 @@ public class DataSource implements Serializable, Debuggable {
 
 	public Instruments getInstruments() {
 		if(instruments == null) {
-			retrieveInstruments(getSecurityMasterData());
+			retrieveInstruments();
 		}
 		return instruments;
 	}
 
 	public InstrumentLegs getInstrumentLegs() {
 		if(instrumentLegs == null) {
-			if(retrieveInstrumentLegsFromPositions()) {
-				retrieveInstrumentLegs(getPositions());
-			} else {
 				retrieveInstrumentLegs();
-			}
 		}
 		return instrumentLegs;
 	}
 
-	protected boolean retrieveInstrumentLegsFromPositions() {
-		return retrieveInstrumentLegsFromPositions;
-	}
-
 	public Positions getPositions() {
 		if(positions == null) {
-			retrievePositions(getPortfolios(), getInstruments(), getInstrumentLegs(), getPortfoliosFilter());
+			retrievePositions();
 		}
 		return positions;
 	}
 
 	public Cashflows getCashflows() {
 		if(cashflows == null) {
-			retrieveCashflows(getPortfolios(), getInstruments(), getInstrumentLegs());
+			retrieveCashflows();
 		}
 		return cashflows;
 	}
-
 }
