@@ -2,6 +2,12 @@ package com.kalinya.performance.dimensions;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import com.kalinya.performance.Instrument;
+import com.kalinya.util.ComparableEqualsBuilder;
+
 public class BasePerformanceDimension implements Comparable<BasePerformanceDimension>, Serializable {
 	public BasePerformanceDimension() {
 	}
@@ -13,24 +19,22 @@ public class BasePerformanceDimension implements Comparable<BasePerformanceDimen
 	
 	@Override
 	public boolean equals(Object obj) {
-        if(!(obj instanceof BasePerformanceDimension)) {
-            return false;
-        }
-        return this.compareTo((BasePerformanceDimension) obj) == 0;
-    }
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
+	}
+	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(getName())
+				.build();
+	}
 	
 	@Override
 	public int compareTo(BasePerformanceDimension that) {
-		if (this == that) {
-			return 0;
-		}
-		
-		int i;
-		
-		i = getName().compareTo(that.getName());
-		if(i != 0) return i;
-		
-		return 0;
+		return new CompareToBuilder()
+				.append(getName(), that.getName())
+				.build();
 	}
 
 	public String getName() {
