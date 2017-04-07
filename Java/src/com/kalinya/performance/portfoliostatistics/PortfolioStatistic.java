@@ -10,8 +10,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.kalinya.performance.BenchmarkAssociations;
+import com.kalinya.performance.Instrument;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.Portfolios;
+import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.StringUtil;
 import com.kalinya.util.ToStringBuilder;
 
@@ -23,12 +25,33 @@ abstract public class PortfolioStatistic implements Comparable<PortfolioStatisti
 		name = getClass().getSimpleName();
 	}
 
+	@Override
 	public String toString() {
 		if(getValues() != null) {
 			return asString();
 		}
 		return new ToStringBuilder(this)
 				.withClassName()
+				.build();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
+	}
+	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(name)
+				.build();
+	}
+	
+	@Override
+	public int compareTo(PortfolioStatistic that) {
+		return new CompareToBuilder()
+				.append(name, that.name)
 				.build();
 	}
 	
@@ -68,36 +91,4 @@ abstract public class PortfolioStatistic implements Comparable<PortfolioStatisti
 	 * @param portfolioStatistics
 	 */
 	public abstract void calculate(PortfolioStatistics portfolioStatistics);
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (obj == this) {
-			return true;
-		}
-		if (obj.getClass() != getClass()) {
-			return false;
-		}
-		PortfolioStatistic that = (PortfolioStatistic) obj;
-		return new EqualsBuilder()
-				.appendSuper(super.equals(obj))
-				.append(name, that.name)
-				.build();
-	}
-	
-	@Override
-	public int compareTo(PortfolioStatistic that) {
-		return new CompareToBuilder()
-				.append(name, that.name)
-				.build();
-	}
-	
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder()
-				.append(name)
-				.build();
-	}
 }

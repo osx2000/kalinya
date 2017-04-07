@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.ToStringBuilder;
 
 public class Portfolio implements Comparable<Portfolio>, Serializable {
@@ -45,26 +46,22 @@ public class Portfolio implements Comparable<Portfolio>, Serializable {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
+	}
+	
+    @Override
+    public int hashCode() {
+    	return new HashCodeBuilder()
+				.append(name.toUpperCase())
+				.build();
+    }
+	
+	@Override
 	public int compareTo(Portfolio that) {
 		return new CompareToBuilder()
 				.append(name.toUpperCase(), that.name.toUpperCase())
 				.build();
 	}
-	
-	@Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Portfolio other = (Portfolio) obj;
-        return compareTo(other) == 0;
-    }
-	
-    @Override
-    public int hashCode() {
-    	return Objects.hash(getName().toUpperCase());
-    }
 }

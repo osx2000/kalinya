@@ -13,12 +13,9 @@ import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
 import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
+import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.StringUtil;
 
-/**
- * @author Stephen
- *
- */
 public final class Position implements Comparable<Position>, SecurityMasterData, Serializable {
 	private Portfolio portfolio;
 	private Instrument instrument;
@@ -29,15 +26,15 @@ public final class Position implements Comparable<Position>, SecurityMasterData,
 	private BigDecimal baseMarketValue;
 	private Cashflows cashflows;
 	
-	//Disable default ctor
-	@SuppressWarnings("unused")
 	private Position() {
+		//Disable default ctor
 	}
 	
 	public Position(InstrumentLeg instrumentLeg, Date date,
 			BigDecimal marketValue, BigDecimal baseMarketValue,
 			Cashflows cashflows) {
 		// TODO: add Contributions, Fees
+		this();
 		setInstrumentLeg(instrumentLeg);
 		setPortfolio(getInstrumentLeg().getPortfolio());
 		setInstrument(getInstrumentLeg().getInstrument());
@@ -159,30 +156,27 @@ public final class Position implements Comparable<Position>, SecurityMasterData,
 
 	@Override
 	public boolean equals(Object obj) {
-        if(!(obj instanceof Position)) {
-            return false;
-        }
-        return this.compareTo((Position) obj) == 0;
-    }
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
+	}
 	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(date)
+				.append(portfolio)
+				.append(instrumentLeg)
+				.build();
+	}
 	@Override
 	public int compareTo(Position that) {
 		return new CompareToBuilder()
 		.append(this.date, that.date)
 		.append(this.portfolio, that.portfolio)
 		.append(this.instrumentLeg, that.instrumentLeg)
-		.toComparison();
+		.build();
 	}
 	
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 17)
-			.append(date)
-			.append(portfolio)
-			.append(instrumentLeg)
-			.toHashCode();
-	}
-
 	public BigDecimal getMarketValue() {
 		return marketValue;
 	}

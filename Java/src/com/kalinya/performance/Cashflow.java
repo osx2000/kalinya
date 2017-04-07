@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.StringUtil;
 
 public final class Cashflow implements Comparable<Cashflow>, Serializable {
@@ -44,28 +48,31 @@ public final class Cashflow implements Comparable<Cashflow>, Serializable {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
+	}
+	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(date)
+				.append(currency)
+				.append(localAmount)
+				.append(baseAmount)
+				.build();
+	}
+	
+	@Override
 	public int compareTo(Cashflow that) {
-		if (this == that) {
-			return 0;
-		}
-		int i = getDate().compareTo(that.getDate());
-		if(i != 0) return i;
-		
-		i = getInstrumentLeg().compareTo(that.getInstrumentLeg());
-		if(i != 0) return i;
-		
-		i = getCurrency().compareTo(that.getCurrency());
-		if(i != 0) return i;
-		
-		i = getLocalAmount().compareTo(that.getLocalAmount());
-		if(i != 0) return i;
-		
-		i = getBaseAmount().compareTo(that.getBaseAmount());
-		if(i != 0) return i;
-		
-		//TODO: use CompareToBuilder
+		return new CompareToBuilder()
+				.append(date, that.date)
+				.append(instrumentLeg, that.instrumentLeg)
+				.append(currency, that.currency)
+				.append(localAmount, that.localAmount)
+				.append(baseAmount, that.baseAmount)
+				.build();
 		//TODO: this won't permit having two cashflows on the same instrument, same date and same amount.
-		return 0;
 	}
 	
 	public InstrumentLeg getInstrumentLeg() {

@@ -24,6 +24,7 @@ public class PerformanceServiceSandbox {
 	public static void main(String[] args) {
 		/*
 		 * TODO:
+		 * fix bug with CUMULATIVE_BY_PORTFOLIO
 		 * Repair FindurPmm class
 		 * Support Start/End DayWeighting
 		 * Support RoR calculation with/without fees
@@ -74,11 +75,12 @@ public class PerformanceServiceSandbox {
 		PerformanceFactory pf = findurSession.getPerformanceFactory();
 
 		PerformanceDimensions performanceDimensions = null;
-		//performanceDimensions = PerformanceDimensions.BY_DATE;
 		//performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_LEG;
-		//performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO;
+		performanceDimensions = PerformanceDimensions.BY_DATE;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_LEG;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_PORTFOLIO;
+		//TODO: fix bug with CUMULATIVE_BY_PORTFOLIO
+		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO;
 
 		DataSource csvDataSource =  new CSVDataSource.Builder()
 											.withPortfoliosFilter(getPortfolios())

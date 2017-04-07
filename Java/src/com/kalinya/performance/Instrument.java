@@ -5,11 +5,16 @@ import java.util.Date;
 
 import javax.xml.bind.annotation.XmlElement;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
 import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
+import com.kalinya.util.ComparableEqualsBuilder;
 
 public class Instrument implements Comparable<Instrument>, SecurityMasterData, Serializable {
 	private String instrumentId;
@@ -77,11 +82,23 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
+	}
+	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(instrumentId)
+				.build();
+	}
+	
+	@Override
 	public int compareTo(Instrument that) {
-		if (this == that) {
-			return 0;
-		}
-		return getInstrumentId().compareTo(that.getInstrumentId());
+		return new CompareToBuilder()
+				.append(instrumentId, that.instrumentId)
+				.build();
 	}
 	
 	@XmlElement

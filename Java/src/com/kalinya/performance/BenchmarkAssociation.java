@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.ToStringBuilder;
 
 public class BenchmarkAssociation implements Comparable<BenchmarkAssociation>, Serializable {
@@ -33,6 +34,20 @@ public class BenchmarkAssociation implements Comparable<BenchmarkAssociation>, S
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
+	}
+	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(portfolio.getName().toUpperCase())
+				.append(benchmark.getName().toUpperCase())
+				.build();
+	}
+	
+	@Override
 	public int compareTo(BenchmarkAssociation that) {
 		return new CompareToBuilder()
 				.append(portfolio.getName().toUpperCase(), that.portfolio.getName().toUpperCase())
@@ -40,25 +55,6 @@ public class BenchmarkAssociation implements Comparable<BenchmarkAssociation>, S
 				.build();
 	}
 	
-	@Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        BenchmarkAssociation other = (BenchmarkAssociation) obj;
-        return compareTo(other) == 0;
-    }
-	
-    @Override
-    public int hashCode() {
-    	return Objects.hash(
-    			portfolio.getName().toUpperCase(),
-    			benchmark.getName().toUpperCase());
-    }
-
 	public Portfolio getPortfolio() {
 		return portfolio;
 	}

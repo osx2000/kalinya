@@ -3,11 +3,15 @@ package com.kalinya.performance;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
 import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
+import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.StringUtil;
 
 public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMasterData, Serializable {
@@ -58,15 +62,27 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 		}
 		return sb.toString();
 	}
-
+	
 	@Override
-	public int compareTo(SecurityMaster that) {
-		if (this == that) {
-			return 0;
-		}
-		return getInstrumentId().toUpperCase().compareTo(that.getInstrumentId().toUpperCase());
+	public boolean equals(Object obj) {
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
 	}
 	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(instrumentId.toUpperCase())
+				.build();
+	}
+	
+	@Override
+	public int compareTo(SecurityMaster that) {
+		return new CompareToBuilder()
+				.append(instrumentId.toUpperCase(), that.instrumentId.toUpperCase())
+				.build();
+	}
+
 	@Override
 	public String getInstrumentId() {
 		return instrumentId;

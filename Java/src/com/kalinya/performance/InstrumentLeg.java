@@ -3,6 +3,9 @@ package com.kalinya.performance;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.kalinya.performance.dimensions.AssetClassPerformanceDimension;
 import com.kalinya.performance.dimensions.IndustryGroupPerformanceDimension;
 import com.kalinya.performance.dimensions.InstrumentClassPerformanceDimension;
@@ -16,6 +19,7 @@ import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
 import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
+import com.kalinya.util.ComparableEqualsBuilder;
 
 public class InstrumentLeg implements Comparable<InstrumentLeg>, SecurityMasterData, Serializable {
 	private Portfolio portfolio;
@@ -80,22 +84,29 @@ public class InstrumentLeg implements Comparable<InstrumentLeg>, SecurityMasterD
 		}
 		return sb.toString();
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return new ComparableEqualsBuilder(this, obj)
+				.build();
+	}
+	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(portfolio)
+				.append(instrument)
+				.append(legId)
+				.build();
+	}
 
 	@Override
 	public int compareTo(InstrumentLeg that) {
-		if (this == that) {
-			return 0;
-		}
-		int i;
-		if(getPortfolio() != null) {
-			i = getPortfolio().compareTo(that.getPortfolio());
-			if(i != 0) return i;
-		}
-		if(getInstrument() != null) {
-			i = getInstrument().compareTo(that.getInstrument());
-			if(i != 0) return i;
-		}
-		return getLegId().compareTo(that.getLegId());
+		return new CompareToBuilder()
+				.append(portfolio, that.portfolio)
+				.append(instrument, that.instrument)
+				.append(legId, that.legId)
+				.build();
 	}
 
 	public Portfolio getPortfolio() {
