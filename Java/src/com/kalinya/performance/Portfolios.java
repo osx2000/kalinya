@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.kalinya.util.BaseSet;
 
 public class Portfolios extends BaseSet<Portfolio>{
+	private static final long serialVersionUID = -5525677261700574992L;
 	public static final Portfolios EMPTY = new Portfolios();
 
 	public Portfolios() {

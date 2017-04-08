@@ -1,53 +1,28 @@
 package com.kalinya.performance.datasource;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.kalinya.enums.DebugLevel;
-import com.kalinya.performance.BenchmarkAssociation;
 import com.kalinya.performance.BenchmarkAssociations;
-import com.kalinya.performance.Cashflow;
 import com.kalinya.performance.Cashflows;
 import com.kalinya.performance.Instrument;
-import com.kalinya.performance.InstrumentLeg;
 import com.kalinya.performance.InstrumentLegs;
 import com.kalinya.performance.Instruments;
-import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.Portfolios;
-import com.kalinya.performance.Position;
 import com.kalinya.performance.Positions;
-import com.kalinya.performance.SecurityMaster;
 import com.kalinya.performance.SecurityMasters;
-import com.kalinya.performance.enums.AssetClass;
-import com.kalinya.performance.enums.CsvHeader;
 import com.kalinya.performance.enums.DataSourceType;
-import com.kalinya.performance.enums.IndustryGroup;
-import com.kalinya.performance.enums.InstrumentClass;
-import com.kalinya.performance.enums.RiskGroup;
-import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.Assertions;
-import com.kalinya.util.DateUtil;
 import com.kalinya.util.Debuggable;
-import com.kalinya.util.NumberUtil;
-import com.kalinya.util.PluginUtil;
 import com.kalinya.util.StringUtil;
 import com.kalinya.util.Timer;
 import com.kalinya.util.ToStringBuilder;
 
 public class DataSource implements Serializable, Debuggable {
+	private static final long serialVersionUID = 3465923737356378092L;
 	private final String notImplementedExceptionMessage = String.format("%s must implement this method", this.getClass().getSimpleName());
 	private Timer timer;
 	protected Portfolios portfolios;
@@ -80,7 +55,7 @@ public class DataSource implements Serializable, Debuggable {
 				.append("RequiresFindurSession", requiresFindurSession())
 				.append("StartDate", getStartDate())
 				.append("EndDate", getEndDate())
-				.append("Portfolios", getPortfolios())
+				.append("Portfolios", getPortfoliosFilter())
 				.append("ResultsExtractFilePath", getResultsExtractFilePath())
 				.withLineBreaks()
 				.build();
@@ -169,10 +144,22 @@ public class DataSource implements Serializable, Debuggable {
 		return resultsExtractFilePath;
 	}
 
-	public final String getPortfoliosAsString() {
-		if(getPortfolios().size() > 0) {
-			String[] portfoliosArray = getPortfolios().toArray(new String[getPortfolios().size()]);
+	public final String getPortfoliosFilterAsString() {
+		if(getPortfoliosFilter().size() > 0) {
+			Object[] portfoliosArray = getPortfolios().toArray();
 			return StringUtil.join(portfoliosArray, ",", "'");
+			/*
+			StringBuilder sb = new StringBuilder();
+			String loopDelimiter = "";
+			String delimiter = ",";
+			String quoteSymbol = "'";
+			for(Portfolio portfolio: getPortfoliosFilter()) {
+				sb.append(loopDelimiter);
+				sb.append(quoteSymbol + portfolio.getName() + quoteSymbol);
+				loopDelimiter = delimiter;
+			}
+			return sb.toString();
+			*/
 		}
 		return "";
 	}

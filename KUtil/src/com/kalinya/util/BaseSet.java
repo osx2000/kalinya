@@ -115,6 +115,7 @@ public class BaseSet<E extends Comparable<E>> implements Set<E>, Serializable {
 
 	@Override
 	public <T> T[] toArray(T[] arg0) {
+		//TODO: test this
 		return getSet().toArray(arg0);
 	}
 

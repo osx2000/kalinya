@@ -1,54 +1,37 @@
 package com.kalinya.performance.datasource;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.input.BOMInputStream;
-
+import com.kalinya.application.FindurSession;
 import com.kalinya.enums.DebugLevel;
-import com.kalinya.oc.util.TableUtil;
 import com.kalinya.performance.BenchmarkAssociation;
 import com.kalinya.performance.BenchmarkAssociations;
 import com.kalinya.performance.Cashflow;
 import com.kalinya.performance.Cashflows;
 import com.kalinya.performance.Instrument;
 import com.kalinya.performance.InstrumentLeg;
-import com.kalinya.performance.InstrumentLegs;
-import com.kalinya.performance.Instruments;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.Portfolios;
 import com.kalinya.performance.Position;
 import com.kalinya.performance.Positions;
 import com.kalinya.performance.SecurityMaster;
 import com.kalinya.performance.SecurityMasters;
-import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.CsvHeader;
-import com.kalinya.performance.enums.IndustryGroup;
+import com.kalinya.performance.enums.DataSourceType;
 import com.kalinya.performance.enums.InstrumentClass;
-import com.kalinya.performance.enums.RiskGroup;
-import com.kalinya.performance.enums.Sector;
 import com.kalinya.performance.enums.SecurityMasterEnum;
 import com.kalinya.util.Assertions;
-import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
 import com.kalinya.util.PluginUtil;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.sun.browser.plugin.PluginHandler;
 
 final public class FindurPmmDataSource extends DataSource {
+	private static final long serialVersionUID = 6456116169344992812L;
 	private static String DEBUG_INSTRUMENT_ID = "SMHL 13-1 A RMBS +95";
 	private Session session;
 
@@ -71,6 +54,15 @@ final public class FindurPmmDataSource extends DataSource {
 	public static class Builder extends DataSource.Builder<Builder> {
 		private Session session;
 
+		private Builder() {
+			//disable default ctor
+		}
+		
+		public Builder(FindurSession findurSession) {
+			this();
+			this.session = findurSession.getSession();
+		}
+
 		@Override
 		public FindurPmmDataSource build() {
 			Assertions.notNull("Session", "This data source requires a Findur Session", session);
@@ -84,6 +76,11 @@ final public class FindurPmmDataSource extends DataSource {
 	}
 
 	@Override
+	public DataSourceType getDataSourceType() {
+		return DataSourceType.FINDUR_PMM;
+	}
+	
+	@Override
 	public void retrievePortfolios() {
 		if(portfolios == null) {
 			getTimer().start("GetPortfolios");
@@ -91,10 +88,13 @@ final public class FindurPmmDataSource extends DataSource {
 			Table table = null;
 			try {
 				StringBuilder sql = new StringBuilder();
-				//TODO: hit the database for perf_portfolios and get portfolio_group
-				sql.append("SELECT * FROM portfolio");
+				sql.append(String.format("SELECT p.id_number, p.name '%s', pt.name '%s'",
+						CsvHeader.PORTFOLIO.getName(), CsvHeader.PORTFOLIO_GROUP.getName()));
+				sql.append("\nFROM perf_portfolio pp");
+				sql.append("\nJOIN portfolio p ON p.id_number = pp.portfolio_id"); 
+				sql.append("\nLEFT JOIN portfolio_type pt ON pt.id_number = p.portfolio_type");
 				table = getSession().getIOFactory().runSQL(sql.toString());
-				if(table != null || table.getRowCount() == 0) {
+				if(table != null) {
 					int rowCount = table.getRowCount();
 					for(int rowId = 0; rowId < rowCount; rowId++) {
 						String portfolioName = table.getString(CsvHeader.PORTFOLIO.getName(), rowId);
@@ -127,7 +127,7 @@ final public class FindurPmmDataSource extends DataSource {
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = pstl.src_security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = pstl.portfolio_id");
 		if(portfolios.size() > 0) {
-			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosAsString()));
+			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosFilterAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = pstl.currency");
 		Date startDate = getStartDate();
@@ -150,7 +150,7 @@ final public class FindurPmmDataSource extends DataSource {
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = pstl.security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = pstl.portfolio_id");
 		if(portfolios.size() > 0) {
-			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosAsString()));
+			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosFilterAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = pstl.currency");
 		sql.append(String.format("\nWHERE pstl.eod_date > '%s' AND pstl.eod_date <= '%s'",
@@ -175,8 +175,8 @@ final public class FindurPmmDataSource extends DataSource {
 		sql.append("\nFROM perf_sec_values psv");
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = psv.security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = psv.portfolio_id");
-		if(portfolios.size() > 0) {
-			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosAsString()));
+		if(getPortfoliosFilter().size() > 0) {
+			sql.append(String.format("\n AND p.name IN (%s)", getPortfoliosFilterAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = psv.currency");
 		Date startDate = getStartDate();
@@ -197,9 +197,15 @@ final public class FindurPmmDataSource extends DataSource {
 			try {
 				StringBuilder sql = new StringBuilder();
 				//TODO: hit the database to get the benchmark associations
-				sql.append("SELECT * FROM portfolio");
+				sql.append(String.format("SELECT p.name '%s', bmk.name '%s'", 
+						CsvHeader.PORTFOLIO.getName(), CsvHeader.BENCHMARK.getName()));
+				sql.append("\nFROM perf_portfolio_benchmark ppb");
+				sql.append("\nJOIN portfolio p ON p.id_number = ppb.portfolio_id");
+				sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = ppb.benchmark_id");
+				sql.append("\nJOIN portfolio bmk ON bmk.id_number = psd.model_pfolio_id");
+				sql.append("\nWHERE ppb.primary_bench = 1");
 				table = getSession().getIOFactory().runSQL(sql.toString());
-				if(table != null || table.getRowCount() == 0) {
+				if(table != null) {
 					int rowCount = table.getRowCount();
 					for(int rowId = 0; rowId < rowCount; rowId++) {
 						String portfolioName = table.getString(CsvHeader.PORTFOLIO.getName(), rowId);
@@ -233,10 +239,11 @@ final public class FindurPmmDataSource extends DataSource {
 			for(int insNum: instrumentIds.keySet()) {
 				String instrumentId = instrumentIds.get(insNum);
 				InstrumentClass instrumentClass = (InstrumentClass) instrumentClasses.get(insNum);
-				SecurityMaster securityMaster = new SecurityMaster(instrumentId , null, null, null,
+				SecurityMaster securityMaster = new SecurityMaster(instrumentId, null, null, null,
 						null, instrumentClass, null);
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
-					System.out.println(String.format("InsNum [%s] InstrumentId [%s] SecurityMaster [%s]", insNum, instrumentId, securityMaster.toString()));
+					System.out.println(String.format("InsNum [%s] InstrumentId [%s] SecurityMaster [%s]", 
+							insNum, instrumentId, securityMaster.toString()));
 				}
 				securityMasterData.add(securityMaster);
 			}
@@ -250,7 +257,8 @@ final public class FindurPmmDataSource extends DataSource {
 		sql.append("SELECT DISTINCT ab.ins_num 'key', psd.security_name 'value'");
 		sql.append("\nFROM perf_sec_defn psd");
 		sql.append("\nJOIN ab_tran ab ON ab.deal_tracking_num = psd.deal_tracking_num");
-		sql.append(String.format("\n AND ab.tran_status IN (%s,%s)", EnumTranStatus.Validated.getValue(), EnumTranStatus.Matured.getValue()));
+		sql.append(String.format("\n AND ab.tran_status IN (%s,%s)", 
+				EnumTranStatus.Validated.getValue(), EnumTranStatus.Matured.getValue()));
 
 		Table table = null;
 		try {
@@ -298,7 +306,8 @@ final public class FindurPmmDataSource extends DataSource {
 		sb.append("SELECT DISTINCT ab.ins_num 'key', ic.name 'value'");
 		sb.append("\nFROM ab_tran ab");
 		sb.append("\nJOIN ins_class ic ON ic.id_number = ab.ins_class");
-		sb.append(String.format("\nWHERE ab.tran_status IN (%s,%s)", EnumTranStatus.Validated.getValue(), EnumTranStatus.Matured.getValue()));
+		sb.append(String.format("\nWHERE ab.tran_status IN (%s,%s)", 
+				EnumTranStatus.Validated.getValue(), EnumTranStatus.Matured.getValue()));
 		return sb.toString();
 	}
 
@@ -307,12 +316,12 @@ final public class FindurPmmDataSource extends DataSource {
 		if(positions == null) {
 			getTimer().start("RetrievePositions");
 			positions = new Positions();
-			Integer insNum = null;
+			int insNum = -1;
 			Table positionsTable = null;
 			try {
 				positionsTable = getPositionTableDataFromFindurPmm();
 				if(positionsTable != null) {
-					int rowCount = positionsTable.getRowCount();
+					int rowCount = 4159;//positionsTable.getRowCount();
 					for(int rowId = 0; rowId < rowCount; rowId++) {
 						String portfolioName = positionsTable.getString(CsvHeader.PORTFOLIO.getName(), rowId);
 						String instrumentId = positionsTable.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);

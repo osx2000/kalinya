@@ -12,12 +12,15 @@ import com.kalinya.performance.PerformanceValue;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.PortfolioPerformanceResult;
 import com.kalinya.performance.Portfolios;
-import com.kalinya.performance.datasource.CSVDataSource;
 import com.kalinya.performance.datasource.DataSource;
+import com.kalinya.performance.datasource.FindurPmmDataSource;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
 import com.kalinya.performance.portfoliostatistics.PortfolioStatistics;
 import com.kalinya.util.BaseSet;
+import com.kalinya.util.DateUtil;
 import com.kalinya.util.PluginUtil;
+import com.olf.openrisk.application.Application;
+import com.olf.openrisk.application.Session;
 
 public class PerformanceServiceSandbox {
 
@@ -76,47 +79,53 @@ public class PerformanceServiceSandbox {
 
 		PerformanceDimensions performanceDimensions = null;
 		//performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_LEG;
+		//TODO: fix bug with CUMULATIVE_BY_PORTFOLIO
+		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO;
 		performanceDimensions = PerformanceDimensions.BY_DATE;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_LEG;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_PORTFOLIO;
-		//TODO: fix bug with CUMULATIVE_BY_PORTFOLIO
-		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO;
 
-		DataSource csvDataSource =  new CSVDataSource.Builder()
+		/*@SuppressWarnings("unused")
+		DataSource csvDataSource = new CSVDataSource.Builder()
 											.withPortfoliosFilter(getPortfolios())
 											.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
 											.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
 											.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
 											.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
 											.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
-											.build();
+											.build();*/
 		
-		/*DataSource findurPmmDataSource =  DataSource.Findur
-				.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
-				.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
-				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
-				.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
+		Application application = Application.getInstance();
+		Session session = application.attach();
+		findurSession = new FindurSession(session);
+		
+		DataSource findurPmmDataSource = new FindurPmmDataSource.Builder(findurSession)
 				.withPortfoliosFilter(getPortfolios())
+				.withStartDate(DateUtil.parseDate("8-Mar-2017"))
+				.withEndDate(DateUtil.parseDate("9-Mar-2017"))
 				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
 				.build();
-		*/
-		System.out.println(String.format("DataSource Details [%s]", csvDataSource.toString()));
+		
+		DataSource dataSource = findurPmmDataSource;
+		
+		System.out.println(String.format("DataSource Details [%s]", dataSource.toString()));
 		PerformanceResult performanceResults = null;
 		//performanceResults = pf.calculateResults(csvDataSource, performanceDimensions);
-		performanceResults = pf.calculateResults(csvDataSource.getPortfolios(), csvDataSource.getBenchmarkAssociations(), csvDataSource.getSecurityMasterData(),
-				csvDataSource.getInstruments(), csvDataSource.getInstrumentLegs(), csvDataSource.getPositions(),
-				csvDataSource.getCashflows(), performanceDimensions);
-		if (csvDataSource.requiresFindurSession()) {
+		dataSource.loadData();
+		performanceResults = pf.calculateResults(dataSource.getPortfolios(), dataSource.getBenchmarkAssociations(), dataSource.getSecurityMasterData(),
+				dataSource.getInstruments(), dataSource.getInstrumentLegs(), dataSource.getPositions(),
+				dataSource.getCashflows(), performanceDimensions);
+		if (dataSource.requiresFindurSession()) {
 			findurSession.getSession().getDebug().viewTable(performanceResults.asTable());
 			if(performanceDimensions.equals(PerformanceDimensions.BY_DATE_BY_PORTFOLIO)) {
-				//csvDataSource.extractToUserTable("USER_perf_results_by_portfolio");
+				//dataSource.extractToUserTable("USER_perf_results_by_portfolio");
 			}
 			if(performanceDimensions.equals(PerformanceDimensions.BY_DATE_BY_LEG)) {
 				performanceResults.extractToUserTable("USER_perf_results_by_leg");
 			}
 		}
-		performanceResults.printToCsvFile(csvDataSource.getResultsExtractFilePath());
-		System.out.println(String.format("Extracted to [%s]", csvDataSource.getResultsExtractFilePath()));
+		performanceResults.printToCsvFile(dataSource.getResultsExtractFilePath());
+		System.out.println(String.format("Extracted to [%s]", dataSource.getResultsExtractFilePath()));
 		performanceResults.extractToSerializedFile(Configurator.SERIALIZED_FILE_PATH);
 		//deserializePerformanceResults();
 		System.out.println("Absolute results: " + performanceResults.toString());
@@ -129,7 +138,7 @@ public class PerformanceServiceSandbox {
 			portfolioStatistics.add(PortfolioStatistics.TRACKING_ERROR);
 			portfolioStatistics.add(PortfolioStatistics.STANDARD_DEIVATION);
 			portfolioStatistics.add(PortfolioStatistics.SHARPE_RATIO);
-			portfolioStatistics.calculate((PortfolioPerformanceResult) performanceResults, csvDataSource.getBenchmarkAssociations());
+			portfolioStatistics.calculate((PortfolioPerformanceResult) performanceResults, dataSource.getBenchmarkAssociations());
 		}
 	}
 

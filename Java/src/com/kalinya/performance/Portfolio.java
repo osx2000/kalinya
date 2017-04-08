@@ -1,15 +1,14 @@
 package com.kalinya.performance;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.kalinya.util.ComparableEqualsBuilder;
-import com.kalinya.util.ToStringBuilder;
 
 public class Portfolio implements Comparable<Portfolio>, Serializable {
+	private static final long serialVersionUID = -1881883571731118673L;
 	private String name;
 	private String portfolioGroup;
 	
@@ -40,14 +39,12 @@ public class Portfolio implements Comparable<Portfolio>, Serializable {
 	
 	@Override 
 	public String toString() {
-		return new ToStringBuilder(this)
-				.append("Name", name)
-				.append("Group", portfolioGroup).build();
+		return name;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<Portfolio>(this, obj)
 				.build();
 	}
 	

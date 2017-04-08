@@ -1,7 +1,6 @@
 package com.kalinya.performance;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -10,15 +9,16 @@ import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.ToStringBuilder;
 
 public class BenchmarkAssociation implements Comparable<BenchmarkAssociation>, Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5790953051999832009L;
 	private Portfolio portfolio;
 	private Portfolio benchmark;
 	
 	private BenchmarkAssociation() {
 	}
 
-	private BenchmarkAssociation(String name) {
-	}
-	
 	public BenchmarkAssociation(Portfolio portfolio, Portfolio benchmark) {
 		this();
 		this.portfolio = portfolio;
@@ -35,7 +35,7 @@ public class BenchmarkAssociation implements Comparable<BenchmarkAssociation>, S
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<BenchmarkAssociation>(this, obj)
 				.build();
 	}
 	

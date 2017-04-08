@@ -19,9 +19,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.Days;
-import org.joda.time.Instant;
-import org.joda.time.Interval;
-import org.joda.time.ReadableInstant;
 
 import com.kalinya.enums.CurrencyBasis;
 import com.kalinya.enums.DayWeighting;
@@ -52,6 +49,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import javafx.collections.ObservableList;
 
 public class PerformanceResult implements Serializable {
+	private static final long serialVersionUID = -3688283376622858629L;
 	private static String DEBUG_INSTRUMENT_ID = "SMHL 13-1 A RMBS +95";
 	private PerformanceFactory performanceFactory;
 	private static int scale = 12;
@@ -515,7 +513,7 @@ public class PerformanceResult implements Serializable {
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = pstl.src_security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = pstl.portfolio_id");
 		if(getDataSource().getPortfolios().size() > 0) {
-			sql.append(String.format("\n AND p.name IN (%s)", dataSource.getPortfoliosAsString()));
+			sql.append(String.format("\n AND p.name IN (%s)", dataSource.getPortfoliosFilterAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = pstl.currency");
 		Date startDate = dataSource.getStartDate();
@@ -538,7 +536,7 @@ public class PerformanceResult implements Serializable {
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = pstl.security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = pstl.portfolio_id");
 		if(getDataSource().getPortfolios().size() > 0) {
-			sql.append(String.format("\n AND p.name IN (%s)", dataSource.getPortfoliosAsString()));
+			sql.append(String.format("\n AND p.name IN (%s)", dataSource.getPortfoliosFilterAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = pstl.currency");
 		sql.append(String.format("\nWHERE pstl.eod_date > '%s' AND pstl.eod_date <= '%s'",
@@ -564,7 +562,7 @@ public class PerformanceResult implements Serializable {
 		sql.append("\nJOIN perf_sec_defn psd ON psd.security_id = psv.security_id");
 		sql.append("\nJOIN portfolio p ON p.id_number = psv.portfolio_id");
 		if(dataSource.getPortfolios().size() > 0) {
-			sql.append(String.format("\n AND p.name IN (%s)", dataSource.getPortfoliosAsString()));
+			sql.append(String.format("\n AND p.name IN (%s)", dataSource.getPortfoliosFilterAsString()));
 		}
 		sql.append("\nJOIN currency c ON c.id_number = psv.currency");
 		Date startDate = dataSource.getStartDate();
