@@ -40,6 +40,7 @@ import com.kalinya.util.Assertions;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
 import com.kalinya.util.PluginUtil;
+import com.kalinya.util.StringUtil;
 import com.kalinya.util.ToStringBuilder;
 
 final public class CSVDataSource extends DataSource {
@@ -285,6 +286,7 @@ final public class CSVDataSource extends DataSource {
 					String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
 					String instrumentId = csvRecord.get(CsvHeader.INSTRUMENT_ID.getName());
 					String dateStr = csvRecord.get(CsvHeader.DATE.getName());
+					Date date = DateUtil.parseDate(dateStr);
 					String legIdStr = csvRecord.get(CsvHeader.LEG_ID.getName());
 					String currency = csvRecord.get(CsvHeader.CURRENCY.getName());
 					String marketValueStr = csvRecord.get(CsvHeader.END_LOCAL_MARKET_VALUE.getName());
@@ -297,6 +299,8 @@ final public class CSVDataSource extends DataSource {
 										portfolioName, 
 										getPositionsFilePath()));
 					}
+					//TODO: this next bit about filtering needs to be shared
+					//Do not extract the position if it's in a filtered portfolio
 					if(getPortfoliosFilter().size() > 0 && !getPortfoliosFilter().contains(portfolio)) {
 						System.out.println(
 								String.format("Filtering position RecordId [%s] in Portfolio [%s]", 
@@ -304,6 +308,24 @@ final public class CSVDataSource extends DataSource {
 										portfolio.getName()));
 						continue;
 					}
+					//Do not extract the position if it's outside the start/end date period
+					if(getStartDate() != null && date.before(getStartDate())) {
+						System.out.println(
+								String.format("Filtering position RecordId [%s] on Date [%s] before StartDate [%s]", 
+										recordNumber,
+										StringUtil.formatDate(date),
+										StringUtil.formatDate(getStartDate())));
+						continue;
+					}
+					if(getEndDate() != null && date.after(getEndDate())) {
+						System.out.println(
+								String.format("Filtering position RecordId [%s] on Date [%s] after EndDate [%s]", 
+										recordNumber,
+										StringUtil.formatDate(date),
+										StringUtil.formatDate(getEndDate())));
+						continue;
+					}
+					
 					Instrument instrument = instruments.getInstrument(instrumentId, false);
 					if(instrument == null || !instruments.contains(instrument)) {
 						throw new IllegalStateException(String.format("Unknown InstrumentId [%s] in positions file [%s]", 
@@ -311,7 +333,6 @@ final public class CSVDataSource extends DataSource {
 								getPositionsFilePath()));
 					}
 					InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
-					Date date = DateUtil.parseDate(dateStr);
 					Cashflows instrumentLegCashflows = new Cashflows();
 					Cashflow instrumentLegCashflow = new Cashflow(instrumentLeg, date, currency, NumberUtil.newBigDecimal(cashFlowStr));
 					instrumentLegCashflows.add(instrumentLegCashflow );

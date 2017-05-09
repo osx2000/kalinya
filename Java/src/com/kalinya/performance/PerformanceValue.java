@@ -238,10 +238,10 @@ final public class PerformanceValue implements Serializable {
 	}
 
 	public ReadableInstant getDateInstant() {
-		return new Instant(getDateInstant());
+		return new Instant(getDate());
 	}
 	
 	public ReadableInstant getPriorDateInstant() {
-		return new Instant(getPriorDateInstant());
+		return new Instant(getPriorDate());
 	}
 }

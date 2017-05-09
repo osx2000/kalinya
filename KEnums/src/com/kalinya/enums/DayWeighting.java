@@ -3,8 +3,9 @@ package com.kalinya.enums;
 import java.math.BigDecimal;
 
 public enum DayWeighting implements EnumIdName {
-	END_OF_DAY(0, "End of Day", BigDecimal.ZERO),
-	START_OF_DAY(1, "Start of Day", BigDecimal.ONE);
+	END_OF_DAY(1, "End of Day", BigDecimal.ZERO),
+	START_OF_DAY(2, "Start of Day", BigDecimal.ONE), 
+	MIDDLE_OF_DAY(3, "Middle of Day", new BigDecimal("0.5"));
 
 	private final int id;
 	private final String name;

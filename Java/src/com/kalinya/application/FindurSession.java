@@ -1,7 +1,9 @@
 package com.kalinya.application;
 
 import com.kalinya.performance.PerformanceFactory;
+import com.olf.openrisk.application.Debug;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.table.Table;
 
 public final class FindurSession {
 	Session session;
@@ -33,6 +35,23 @@ public final class FindurSession {
 			this.performanceFactory = new PerformanceFactory(this);
 		}
 		return performanceFactory;
+	}
+
+	/**
+	 * Returns an object to assist with debugging
+	 */
+	public Debug getDebug() {
+		if(getSession() != null) {
+			return getSession().getDebug();
+		}
+		throw new IllegalStateException("There is no active Findur session");
+	}
+
+	/**
+	 * Displays the table contents in a window
+	 */
+	public void viewTable(Table table) {
+		getDebug().viewTable(table);
 	}
 	
 	//TODO: getTradingFactory(), etc

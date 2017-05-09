@@ -65,7 +65,7 @@ public class ToStringBuilder {
 		if(withLineBreaks) {
 			lineBreakCharacter = "\n";
 		} else {
-			lineBreakCharacter = "";
+			lineBreakCharacter = ",";
 		}
 		return this;
 	}

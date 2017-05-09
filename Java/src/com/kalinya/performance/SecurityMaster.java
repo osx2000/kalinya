@@ -12,9 +12,11 @@ import com.kalinya.performance.enums.InstrumentClass;
 import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.ComparableEqualsBuilder;
+import com.kalinya.util.DateUtil;
 import com.kalinya.util.StringUtil;
 
 public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMasterData, Serializable {
+	private static final Date MAXIMUM_MATURITY_DATE = DateUtil.parseDate("12/31/2099");
 	private String instrumentId;
 	private Date maturityDate;
 	private IndustryGroup industryGroup;
@@ -98,7 +100,11 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 	}
 	
 	private void setMaturityDate(Date maturityDate) {
-		this.maturityDate = maturityDate;
+		if(maturityDate == null) {
+			this.maturityDate = MAXIMUM_MATURITY_DATE;
+		} else {
+			this.maturityDate = maturityDate;
+		}
 	}
 	
 	@Override

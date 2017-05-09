@@ -23,6 +23,7 @@ import org.joda.time.Days;
 import com.kalinya.enums.CurrencyBasis;
 import com.kalinya.enums.DayWeighting;
 import com.kalinya.enums.DebugLevel;
+import com.kalinya.exception.FileLockedException;
 import com.kalinya.javafx.util.RowData;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.dimensions.CumulativePerformanceDimension;
@@ -50,7 +51,7 @@ import javafx.collections.ObservableList;
 
 public class PerformanceResult implements Serializable {
 	private static final long serialVersionUID = -3688283376622858629L;
-	private static String DEBUG_INSTRUMENT_ID = "SMHL 13-1 A RMBS +95";
+	private static String DEBUG_INSTRUMENT_ID = "AAPL";
 	private PerformanceFactory performanceFactory;
 	private static int scale = 12;
 	private static RoundingMode roundingMode = RoundingMode.HALF_UP;
@@ -110,7 +111,7 @@ public class PerformanceResult implements Serializable {
 		}
 		return sb.toString();
 	}
-	
+
 	public String getCumulativePerformanceValuesSummaryAsString() {
 		return BaseSet.getCollectionElementsAsString(getCumulativePerformanceValues());
 	}
@@ -131,12 +132,13 @@ public class PerformanceResult implements Serializable {
 			BigDecimal startBaseMarketValue = null;
 			BigDecimal endLocalMarketValue = BigDecimal.ZERO;
 			BigDecimal endBaseMarketValue = BigDecimal.ZERO;
+			Date priorDate = null;
 			for(Date date: dates) {
 				Position position = getPositions().getPosition(date, instrumentLeg);
 				if(instrumentLeg.getInstrumentId().equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
 					System.out.println(String.format("InstrumentId [%s]",instrumentLeg.getInstrumentId()));
 				}
-				Date priorDate = null;
+				//TODO: this bit doesn't work for purchases
 				if(startLocalMarketValue == null) {
 					priorDate = date;
 					startLocalMarketValue = position.getMarketValue();
@@ -220,8 +222,7 @@ public class PerformanceResult implements Serializable {
 	}
 
 	private DayWeighting getDayWeighting() {
-		// TODO Auto-generated method stub
-		return null;
+		return getPerformanceFactory().getDayWeighting();
 	}
 
 	private BigDecimal calculateRateOfReturn(PerformanceValue performanceValue, CurrencyBasis currencyBasis) {
@@ -236,7 +237,7 @@ public class PerformanceResult implements Serializable {
 		}
 		return rateOfReturn;
 	}
-	
+
 	protected static BigDecimal calculateModifiedDietzRateOfReturn(PerformanceValue performanceValue, DayWeighting dayWeighting, CurrencyBasis currencyBasis) {
 		BigDecimal numerator = performanceValue.getGainLoss(currencyBasis);
 		BigDecimal weightedCashflows = BigDecimal.ZERO;
@@ -319,7 +320,7 @@ public class PerformanceResult implements Serializable {
 	private void setInstruments(Instruments instruments) {
 		this.instruments = instruments;
 	}
-	
+
 	private void setInstruments(SecurityMasters securityMasterData) {
 		getTimer().start("GetInstruments");
 		instruments = new Instruments(securityMasterData);
@@ -328,11 +329,11 @@ public class PerformanceResult implements Serializable {
 	public InstrumentLegs getInstrumentLegs() {
 		return instrumentLegs;
 	}
-	
+
 	private void setInstrumentLegs(InstrumentLegs instrumentLegs) {
 		this.instrumentLegs = instrumentLegs;
 	}
-	
+
 	public Positions getPositions() {
 		return positions;
 	}
@@ -348,31 +349,31 @@ public class PerformanceResult implements Serializable {
 	public Portfolios getPortfolios() {
 		return portfolios;
 	}
-	
+
 	private void setPortfolios(Portfolios portfolios) {
 		this.portfolios = portfolios;
 	}
-	
+
 	public BenchmarkAssociations getBenchmarkAssociations() {
 		return benchmarkAssociations;
 	}
-	
+
 	private void setBenchmarkAssociations(BenchmarkAssociations benchmarkAssociations) {
 		this.benchmarkAssociations = benchmarkAssociations;
 	}
-	
+
 	private void setSecurityMasterData(SecurityMasters securityMasters) {
 		this.securityMasters = securityMasters;
 	}
-	
+
 	public Cashflows getCashflows() {
 		return cashflows;
 	}
-	
+
 	private void setCashflows(Cashflows cashflows) {
 		this.cashflows = cashflows;
 	}
-	
+
 
 	@Deprecated
 	public Positions getPositions(DataSource dataSource) {
@@ -457,7 +458,7 @@ public class PerformanceResult implements Serializable {
 					 * cashflows.add(new Cashflow(instrumentLeg, date, currencyName, localAmount, localAmount));
 					 */
 					Cashflows cashflows = pmmCashflows.getCashflows(date, instrumentLeg);
-					
+
 					Position position = new Position(instrumentLeg, date, marketValue, baseMarketValue, cashflows);
 					if (getDebugLevel().atLeast(DebugLevel.HIGH)) {
 						System.out.println("InsNum [" + insNum + "] Position [" + position.toString() + "]");
@@ -522,7 +523,7 @@ public class PerformanceResult implements Serializable {
 				getSession().getCalendarFactory().getSQLString(startDate),
 				getSession().getCalendarFactory().getSQLString(endDate)));
 		sql.append("\n AND perf_entry_type IN (3 /*Income*/, 9/*Proceeds*/)");
-		
+
 		sql.append("\nUNION\nSELECT ");
 		sql.append(String.format("pstl.eod_date '%s'", CsvHeader.DATE.getName()));
 		sql.append(String.format(", p.name '%s'", CsvHeader.PORTFOLIO.getName())); 
@@ -543,7 +544,7 @@ public class PerformanceResult implements Serializable {
 				getSession().getCalendarFactory().getSQLString(startDate),
 				getSession().getCalendarFactory().getSQLString(endDate)));
 		sql.append("\n AND perf_entry_type IN (3 /*Income*/, 9/*Proceeds*/)");
-		
+
 		sql.append("\nORDER BY pstl.eod_date, p.name, psd.security_name");
 		return getSession().getIOFactory().runSQL(sql.toString());
 	}
@@ -742,7 +743,12 @@ public class PerformanceResult implements Serializable {
 				csvFilePrinter.printRecord(performanceResultsEntry);
 			}
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			if(e.getMessage().contains("The process cannot access the file because it is being used by another process")) {
+				//TODO: handle this
+				//throw new FileLockedException(e);
+			} else {
+				throw new RuntimeException(e);
+			}
 		} finally {
 			PluginUtil.close(fileWriter);
 			PluginUtil.close(csvFilePrinter);
@@ -825,7 +831,7 @@ public class PerformanceResult implements Serializable {
 			}
 
 			PerformanceValue performanceValue = performanceValues.get(key);
-			
+
 			//CsvHeader.START_LOCAL_MARKET_VALUE
 			BigDecimal startLocalMarketValue = performanceValue.getStartLocalMarketValue();
 			performanceResultsEntry.add(StringUtil.formatDouble(startLocalMarketValue));
@@ -921,7 +927,7 @@ public class PerformanceResult implements Serializable {
 			System.out.println("No data to extract");
 		}
 	}
-	
+
 	public ObservableList<RowData> asObservableList() {
 		List<List<String>> performanceResultsSummary = null;
 		if(getPerformanceDimensions().contains(CumulativePerformanceDimension.getInstance())) {
@@ -931,7 +937,7 @@ public class PerformanceResult implements Serializable {
 		}
 		return CollectionUtil.getListAsObservableList(performanceResultsSummary, true, 2);
 	}
-	
+
 	public Table asTable() {
 		List<List<String>> performanceResultsSummary = null;
 		if(getPerformanceDimensions().contains(CumulativePerformanceDimension.getInstance())) {

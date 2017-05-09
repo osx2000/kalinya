@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.util.Map;
 
 import com.kalinya.application.FindurSession;
+import com.kalinya.enums.DayWeighting;
 import com.kalinya.performance.Configurator;
 import com.kalinya.performance.PerformanceFactory;
 import com.kalinya.performance.PerformanceResult;
@@ -12,6 +13,7 @@ import com.kalinya.performance.PerformanceValue;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.PortfolioPerformanceResult;
 import com.kalinya.performance.Portfolios;
+import com.kalinya.performance.datasource.CSVDataSource;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.datasource.FindurPmmDataSource;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
@@ -27,14 +29,12 @@ public class PerformanceServiceSandbox {
 	public static void main(String[] args) {
 		/*
 		 * TODO:
-		 * fix bug with CUMULATIVE_BY_PORTFOLIO
+		 * Handle purchase.  portfolio size is wrong on TradeDate 
 		 * Repair FindurPmm class
-		 * Support Start/End DayWeighting
 		 * Support RoR calculation with/without fees
 		 * Handle non-USD cash flows
 		 * Handle SortinoRatio
 		 * BenchmarkAssociations needs to have a BenchmarkType
-		 * Add StartDate, EndDate to getPositions() filters
 		 * Create BenchmarkType to support PRIMARY, RISK_FREE
 		 * 
 		 * Findur Integration 
@@ -44,7 +44,6 @@ public class PerformanceServiceSandbox {
 		 *  
 		 * Create Interface for retrieval of instrument details (getInstrumentId, etc)
 		 * Create PerformanceValues class to simplify some of the methods (.getLatestPerformanceValue(), etc)
-		 * Handle purchase
 		 * Handle maturity
 		 * Handle currency fruit salad
 		 * Support RoR calculations with base/local cash flows
@@ -79,44 +78,46 @@ public class PerformanceServiceSandbox {
 
 		PerformanceDimensions performanceDimensions = null;
 		//performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_LEG;
-		//TODO: fix bug with CUMULATIVE_BY_PORTFOLIO
-		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO;
 		performanceDimensions = PerformanceDimensions.BY_DATE;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_LEG;
+		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_PORTFOLIO;
 
-		/*@SuppressWarnings("unused")
-		DataSource csvDataSource = new CSVDataSource.Builder()
-											.withPortfoliosFilter(getPortfolios())
-											.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
-											.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
-											.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
-											.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
-											.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
-											.build();*/
-		
-		Application application = Application.getInstance();
-		Session session = application.attach();
-		findurSession = new FindurSession(session);
-		
-		DataSource findurPmmDataSource = new FindurPmmDataSource.Builder(findurSession)
-				.withPortfoliosFilter(getPortfolios())
-				.withStartDate(DateUtil.parseDate("8-Mar-2017"))
-				.withEndDate(DateUtil.parseDate("9-Mar-2017"))
-				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
-				.build();
-		
-		DataSource dataSource = findurPmmDataSource;
-		
+		DataSource dataSource = null;
+
+		boolean attachToFindur = false;
+		if(attachToFindur) {
+			Application application = Application.getInstance();
+			Session session = application.attach();
+			findurSession = new FindurSession(session);
+			dataSource = new FindurPmmDataSource.Builder(findurSession)
+					.withPortfoliosFilter(getPortfolios())
+					.withStartDate(DateUtil.parseDate("8-Mar-2017"))
+					.withEndDate(DateUtil.parseDate("9-Mar-2017"))
+					.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
+					.build();
+		} else {
+			dataSource = new CSVDataSource.Builder()
+					.withPortfoliosFilter(getPortfolios())
+					.withStartDate(DateUtil.parseDate("1-Jan-2017"))
+					.withEndDate(DateUtil.parseDate("4-Jan-2017"))
+					.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
+					.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
+					.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
+					.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
+					.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
+					.build();
+		}
+
 		System.out.println(String.format("DataSource Details [%s]", dataSource.toString()));
 		PerformanceResult performanceResults = null;
-		//performanceResults = pf.calculateResults(csvDataSource, performanceDimensions);
 		dataSource.loadData();
+		pf.setDayWeighting(DayWeighting.END_OF_DAY);
 		performanceResults = pf.calculateResults(dataSource.getPortfolios(), dataSource.getBenchmarkAssociations(), dataSource.getSecurityMasterData(),
 				dataSource.getInstruments(), dataSource.getInstrumentLegs(), dataSource.getPositions(),
 				dataSource.getCashflows(), performanceDimensions);
 		if (dataSource.requiresFindurSession()) {
-			findurSession.getSession().getDebug().viewTable(performanceResults.asTable());
+			findurSession.viewTable(performanceResults.asTable());
 			if(performanceDimensions.equals(PerformanceDimensions.BY_DATE_BY_PORTFOLIO)) {
 				//dataSource.extractToUserTable("USER_perf_results_by_portfolio");
 			}
@@ -127,9 +128,8 @@ public class PerformanceServiceSandbox {
 		performanceResults.printToCsvFile(dataSource.getResultsExtractFilePath());
 		System.out.println(String.format("Extracted to [%s]", dataSource.getResultsExtractFilePath()));
 		performanceResults.extractToSerializedFile(Configurator.SERIALIZED_FILE_PATH);
-		//deserializePerformanceResults();
 		System.out.println("Absolute results: " + performanceResults.toString());
-		
+
 		boolean examinePortfolioStatistics = false;
 		if(examinePortfolioStatistics  && performanceResults instanceof PortfolioPerformanceResult) {
 			PortfolioStatistics portfolioStatistics = pf.createPortfolioStatistics();
@@ -163,7 +163,7 @@ public class PerformanceServiceSandbox {
 		portfolios.add(new Portfolio("20002name"));
 		portfolios.add(new Portfolio("20001name"));
 		portfolios.add(new Portfolio("CashFundAssets"));
-		portfolios.add(new Portfolio("CashFundLiabilities"));
+		//portfolios.add(new Portfolio("CashFundLiabilities"));
 		portfolios.add(new Portfolio("LongTermAssets"));
 		portfolios.add(new Portfolio("20004name"));
 		/*portfolios.add("20005name");

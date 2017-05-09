@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.Collection;
 
 import com.kalinya.application.FindurSession;
+import com.kalinya.enums.DayWeighting;
 import com.kalinya.enums.DebugLevel;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
@@ -18,6 +19,7 @@ final public class PerformanceFactory {
 	public static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
 
 	private DebugLevel debugLevel;
+	private DayWeighting dayWeighting = DayWeighting.END_OF_DAY;
 
 	private PerformanceFactory() {
 		setDebugLevel(DebugLevel.LOW);
@@ -138,5 +140,13 @@ final public class PerformanceFactory {
 
 	public static BigDecimal getChainLinkedReturn(Collection<? extends BigDecimal> ratesOfReturn) {
 		return getChainLinkedReturn(ratesOfReturn.toArray(new BigDecimal[ratesOfReturn.size()]));
+	}
+	
+	public void setDayWeighting(DayWeighting dayWeighting) {
+		this.dayWeighting = dayWeighting;
+	}
+
+	public DayWeighting getDayWeighting() {
+		return dayWeighting;
 	}
 }

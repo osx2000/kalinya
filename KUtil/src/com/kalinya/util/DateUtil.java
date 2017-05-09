@@ -165,6 +165,9 @@ public class DateUtil {
 	public static Date parseDate(String s) {
 		Date date = null;
 		try {
+			if(s == null || s.length() == 0) {
+				return null;
+			}
 			date = DateUtils.parseDateStrictly(s, getDateParsePatterns());
 		} catch (ParseException e) {
 			throw new IllegalArgumentException(e);

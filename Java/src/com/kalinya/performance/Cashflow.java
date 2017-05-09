@@ -42,7 +42,7 @@ public final class Cashflow implements Comparable<Cashflow>, Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("InstrumentLeg [" + getInstrumentLeg().toString() + "] ");
 		sb.append("Date [" + StringUtil.formatDate(getDate()) + "] ");
-		sb.append("LocalAmount [" + StringUtil.formatDouble(getLocalAmount()) + "]");
+		sb.append("LocalAmount [" + StringUtil.formatDouble(getLocalAmount()) + "] ");
 		sb.append("BaseAmount [" + StringUtil.formatDouble(getBaseAmount()) + "]");
 		return sb.toString();
 	}
