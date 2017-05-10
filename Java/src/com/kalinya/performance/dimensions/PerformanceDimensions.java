@@ -20,12 +20,19 @@ import com.kalinya.util.BaseSet;
 import com.kalinya.util.StringUtil;
 
 public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> implements Comparable<PerformanceDimensions>, SecurityMasterData {
+
 	public enum Predefined {
     	ByDateByLeg(PerformanceDimensions.BY_DATE_BY_LEG),
     	ByDate(PerformanceDimensions.BY_DATE), 
     	ByDateByPortfolio(PerformanceDimensions.BY_DATE_BY_PORTFOLIO), 
     	CumulativeByLeg(PerformanceDimensions.CUMULATIVE_BY_LEG), 
-    	CumulativeByPortfolio(PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO),
+    	CumulativeByPortfolio(PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO), 
+    	
+    	ByDateByIndustry(PerformanceDimensions.BY_DATE_BY_INDUSTRY_GROUP), 
+    	ByDateBySector(PerformanceDimensions.BY_DATE_BY_SECTOR),
+    	ByDateByRiskGroup(PerformanceDimensions.BY_DATE_BY_RISK_GROUP),
+    	ByDateByInstrumentClass(PerformanceDimensions.BY_DATE_BY_INSTRUMENT_CLASS),
+    	ByDateByAssetClass(PerformanceDimensions.BY_DATE_BY_ASSET_CLASS)
     	;
 
         private final PerformanceDimensions performanceDimensions;
@@ -89,7 +96,14 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	public static final PerformanceDimensions BY_DATE = new PerformanceDimensions().withDateDimension();
 	public static final PerformanceDimensions BY_DATE_BY_PORTFOLIO = new PerformanceDimensions().withDateDimension().withPortfolioDimension();
     public static final PerformanceDimensions BY_DATE_BY_LEG = new PerformanceDimensions().withDateDimension().withInstrumentLegDimension();
+
+    //Using security master meta data
     public static final PerformanceDimensions BY_DATE_BY_INDUSTRY_GROUP = new PerformanceDimensions().withDateDimension().withIndustryGroupDimension();
+    public static final PerformanceDimensions BY_DATE_BY_SECTOR = new PerformanceDimensions().withDateDimension().withSectorDimension();
+    public static final PerformanceDimensions BY_DATE_BY_RISK_GROUP = new PerformanceDimensions().withDateDimension().withRiskGroupDimension();
+    public static final PerformanceDimensions BY_DATE_BY_INSTRUMENT_CLASS = new PerformanceDimensions().withDateDimension().withInstrumentClassDimension();
+    public static final PerformanceDimensions BY_DATE_BY_ASSET_CLASS = new PerformanceDimensions().withDateDimension().withAssetClassDimension();
+    
 	public static final PerformanceDimensions CUMULATIVE_BY_LEG = new PerformanceDimensions().withCumulativeDimension().withInstrumentLegDimension();
 	public static final PerformanceDimensions CUMULATIVE_BY_PORTFOLIO = new PerformanceDimensions().withCumulativeDimension().withPortfolioDimension();
 	public static final PerformanceDimensions CUMULATIVE_BY_INDUSTRY_GROUP = new PerformanceDimensions().withCumulativeDimension().withIndustryGroupDimension();
@@ -417,7 +431,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	}
 	
 	public PerformanceDimensions withSectorDimension(Sector sector) {
-		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), getSector(),
+		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), sector,
 				getRiskGroup(), getInstrumentClass(), getAssetClass());
 	}
 	

@@ -4,7 +4,7 @@ import com.kalinya.enums.EnumIdName;
 
 public enum InstrumentClass implements EnumIdName, SecurityMasterEnum {
 	UNKNOWN(-1, "Unknown"),
-	SHAREABLE(10,"Shared"),
+	SHAREABLE(10,"Shareable"),
 	UNIQUE(20,"Unique"),
 	PERPETUAL(30,"Perpetual")
 	;

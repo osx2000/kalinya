@@ -262,7 +262,10 @@ final public class PerformanceFactory {
 		args.add("--" + RuntimeArgumentName.ATTACH_TO_FINDUR.getLongName() + "=false");
 		args.add("--" + RuntimeArgumentName.START_DATE.getLongName() + "=1-Jan-2017");
 		args.add("--" + RuntimeArgumentName.END_DATE.getLongName() + "=4-Jan-2017");
-		args.add("--" + RuntimeArgumentName.PORTFOLIOS.getLongName() + "=CashFundAssets,CashFundLiabilities");
+		String portfolioNames = null;
+		portfolioNames = "CashFundAssets";
+		portfolioNames = "CashFundAssets,CashFundLiabilities";
+		args.add("--" + RuntimeArgumentName.PORTFOLIOS.getLongName() + "=" + portfolioNames );
 		
 		//File path arguments
 		args.add("--" + RuntimeArgumentName.POSITIONS_FILE_PATH.getLongName() 
@@ -284,6 +287,13 @@ final public class PerformanceFactory {
 		dim = PerformanceDimensions.Predefined.CumulativeByLeg;
 		dim = PerformanceDimensions.Predefined.ByDateByLeg;
 		dim = PerformanceDimensions.Predefined.ByDateByPortfolio;
+		
+		//Using security master meta data
+		dim = PerformanceDimensions.Predefined.ByDateByIndustry;
+		dim = PerformanceDimensions.Predefined.ByDateBySector;
+		dim = PerformanceDimensions.Predefined.ByDateByAssetClass;
+		dim = PerformanceDimensions.Predefined.ByDateByRiskGroup;
+		dim = PerformanceDimensions.Predefined.ByDateByInstrumentClass;
 		
 		args.add("--" + RuntimeArgumentName.PERFORMANCE_DIMENSIONS.getLongName() + "=" + dim.getName());
 		

@@ -40,6 +40,7 @@ public class PerformanceServiceSandbox {
 	public static void main(String[] args) {
 		/*
 		 * TODO:
+		 * Support dimensions: IndustryGroup, Sector, AssetClass, InstrumentClass, RiskGroup
 		 * Handle purchase.  portfolio size is wrong on TradeDate 
 		 * Repair FindurPmm class
 		 * Support RoR calculation with/without fees

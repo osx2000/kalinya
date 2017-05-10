@@ -173,6 +173,9 @@ public class DataSource implements Serializable, Debuggable {
 			for(String instrumentId: securityMasterData.getInstrumentIds()) {
 				instruments.add(new Instrument(instrumentId));
 			}
+			if(securityMasterData != null && securityMasterData.size() > 0) {
+				instruments.addSecurityMasterData(securityMasterData);
+			}
 			getTimer().stop();
 		}
 		return instruments;
