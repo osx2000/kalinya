@@ -48,4 +48,15 @@ public enum DayWeighting implements EnumIdName {
 		}
 		throw new IllegalArgumentException(String.format("Unknown enumeration name [%s]", s));
 	}
+	
+	public static String getNames() {
+		StringBuilder names = new StringBuilder();
+		String concatenator = "";
+		for(DayWeighting value: values()) {
+			names.append(concatenator);
+			names.append(value.getName());
+			concatenator = ",";
+		}
+		return names.toString();
+	}
 }

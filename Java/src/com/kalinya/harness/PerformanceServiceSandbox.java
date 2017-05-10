@@ -2,7 +2,16 @@ package com.kalinya.harness;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.Date;
 import java.util.Map;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import com.kalinya.application.FindurSession;
 import com.kalinya.enums.DayWeighting;
@@ -13,6 +22,8 @@ import com.kalinya.performance.PerformanceValue;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.PortfolioPerformanceResult;
 import com.kalinya.performance.Portfolios;
+import com.kalinya.performance.RuntimeArgumentName;
+import com.kalinya.performance.RuntimeArguments;
 import com.kalinya.performance.datasource.CSVDataSource;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.datasource.FindurPmmDataSource;
@@ -54,65 +65,66 @@ public class PerformanceServiceSandbox {
 		 * Consider redesigning SecurityMaster dimensions to support dynamic creation of Findur static data
 		 * Look for methods in PerformanceResult that could be made static
 		 * Handle ratings upgrades/downgrades
+		 * 
 		 */
-		FindurSession findurSession = new FindurSession();
-		/*DataSource1 dataSource = null;
-		dataSource = DataSource.FINDUR_PMM
-				.withStartDate(DateUtil.parseDate("8-Mar-2017"))
-				.withEndDate(DateUtil.parseDate("9-Mar-2017"))
-				.withPortfolios(getPortfolios())
-				.withResultsExtractFilePath(Configurator.U_PERFORMANCE_RESULTS_EXPORT_FILE_PATH);
 
-		dataSource = DataSource1.CSV
-				//.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH)
-				//.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_THREE_DAYS)
-				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
-				.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
-				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH);
-		if(dataSource.requiresFindurSession()) {
-			Application application = Application.getInstance();
-			Session session = application.attach();
-			findurSession = new FindurSession(session);
-		}*/
+		FindurSession findurSession = new FindurSession();
 		PerformanceFactory pf = findurSession.getPerformanceFactory();
 
+		//Get runtime arguments
+		RuntimeArguments runtimeArguments = pf.parseRuntimeArguments(args);
+		boolean attachToFindur = runtimeArguments.getAttachToFindur();
+		Date startDate = runtimeArguments.getStartDate();
+		Date endDate = runtimeArguments.getEndDate();
+		Portfolios portfolios = runtimeArguments.getPortfolios();
+		String performanceResultsExtractFilePath = runtimeArguments.getPerformanceResultsExtractFilePath();
+		DayWeighting dayWeighting = runtimeArguments.getDayWeighting();
+		pf.setDayWeighting(dayWeighting);
+		
 		PerformanceDimensions performanceDimensions = null;
-		//performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_LEG;
+		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_LEG;
 		performanceDimensions = PerformanceDimensions.BY_DATE;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_LEG;
 		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO;
 		performanceDimensions = PerformanceDimensions.BY_DATE_BY_PORTFOLIO;
 
+		//Use PerformanceDimensions from the command line interface
+		performanceDimensions = runtimeArguments.getPerformanceDimensions();
+		
 		DataSource dataSource = null;
 
-		boolean attachToFindur = false;
 		if(attachToFindur) {
 			Application application = Application.getInstance();
 			Session session = application.attach();
 			findurSession = new FindurSession(session);
 			dataSource = new FindurPmmDataSource.Builder(findurSession)
-					.withPortfoliosFilter(getPortfolios())
-					.withStartDate(DateUtil.parseDate("8-Mar-2017"))
-					.withEndDate(DateUtil.parseDate("9-Mar-2017"))
-					.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
+					.withPortfoliosFilter(portfolios)
+					//DateUtil.parseDate("8-Mar-2017")
+					.withStartDate(startDate)
+					//DateUtil.parseDate("9-Mar-2017")
+					.withEndDate(endDate)
+					.withResultsExtractFilePath(performanceResultsExtractFilePath)
 					.build();
 		} else {
+			String positionsFilePath = runtimeArguments.getPositionsFilePath();
+			String securityMasterFilePath = runtimeArguments.getSecurityMasterFilePath();
+			String portfoliosFilePath = runtimeArguments.getPortfoliosFilePath();
+			String benchmarkAssociationsFilePath = runtimeArguments.getBenchmarkAssociationsFilePath();
 			dataSource = new CSVDataSource.Builder()
-					.withPortfoliosFilter(getPortfolios())
-					.withStartDate(DateUtil.parseDate("1-Jan-2017"))
-					.withEndDate(DateUtil.parseDate("4-Jan-2017"))
-					.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
-					.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
-					.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
-					.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
-					.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
+					.withPortfoliosFilter(portfolios)
+					.withStartDate(startDate)
+					.withEndDate(endDate)
+					.withPositionsFilePath(positionsFilePath)
+					.withSecurityMasterFilePath(securityMasterFilePath)
+					.withPortfoliosFilePath(portfoliosFilePath)
+					.withBenchmarkAssociationsFilePath(benchmarkAssociationsFilePath)
+					.withResultsExtractFilePath(performanceResultsExtractFilePath)
 					.build();
 		}
 
 		System.out.println(String.format("DataSource Details [%s]", dataSource.toString()));
 		PerformanceResult performanceResults = null;
 		dataSource.loadData();
-		pf.setDayWeighting(DayWeighting.END_OF_DAY);
 		performanceResults = pf.calculateResults(dataSource.getPortfolios(), dataSource.getBenchmarkAssociations(), dataSource.getSecurityMasterData(),
 				dataSource.getInstruments(), dataSource.getInstrumentLegs(), dataSource.getPositions(),
 				dataSource.getCashflows(), performanceDimensions);

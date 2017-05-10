@@ -2,7 +2,16 @@ package com.kalinya.performance;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import com.kalinya.application.FindurSession;
 import com.kalinya.enums.DayWeighting;
@@ -11,6 +20,7 @@ import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
 import com.kalinya.performance.portfoliostatistics.PortfolioStatistics;
 import com.kalinya.util.Assertions;
+import com.kalinya.util.DateUtil;
 import com.olf.openrisk.application.Session;
 
 final public class PerformanceFactory {
@@ -148,5 +158,122 @@ final public class PerformanceFactory {
 
 	public DayWeighting getDayWeighting() {
 		return dayWeighting;
+	}
+
+	public RuntimeArguments parseRuntimeArguments(String[] args) {
+		CommandLineParser commandLineParser = new DefaultParser();
+		Options commandLineOptions = RuntimeArguments.getCommandLineOptions();
+		if(args == null || args.length == 0) {
+			args = getTestArguments();
+		}
+		boolean attachToFindur = false;
+		Date startDate = null;
+		Date endDate = null;
+		Portfolios portfolios = null;
+		DayWeighting dayWeighting = null;
+		String performanceDimensionsName = null;
+		String positionsFilePath = null;
+		String securityMasterFilePath = null;
+		String portfoliosFilePath = null;
+		String benchmarkAssociationsFilePath = null;
+		String performanceResultsExtractFilePath = null;
+		try {
+			// parse the command line arguments
+			CommandLine commandLine = commandLineParser.parse(commandLineOptions, args);
+
+			RuntimeArgumentName optionName = RuntimeArgumentName.ATTACH_TO_FINDUR;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				attachToFindur = Boolean.valueOf(commandLine.getOptionValue(optionName.getLongName()));
+			}
+			optionName = RuntimeArgumentName.START_DATE;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				startDate = DateUtil.parseDate(commandLine.getOptionValue(optionName.getLongName()));
+			}
+			optionName = RuntimeArgumentName.END_DATE;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				endDate = DateUtil.parseDate(commandLine.getOptionValue(optionName.getLongName()));
+			}
+			optionName = RuntimeArgumentName.PORTFOLIOS;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				String[] portfolioNames = commandLine.getOptionValues(optionName.getLongName());
+				portfolios = getPortfolios(portfolioNames);
+			}
+			optionName = RuntimeArgumentName.PERFORMANCE_DIMENSIONS;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				performanceDimensionsName  = commandLine.getOptionValue(optionName.getLongName());
+			}
+			optionName = RuntimeArgumentName.POSITIONS_FILE_PATH;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				positionsFilePath  = commandLine.getOptionValue(optionName.getLongName());
+			}
+			optionName = RuntimeArgumentName.SECURITY_MASTER_FILE_PATH;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				securityMasterFilePath  = commandLine.getOptionValue(optionName.getLongName());
+			}
+			optionName = RuntimeArgumentName.PORTFOLIOS_FILE_PATH;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				portfoliosFilePath  = commandLine.getOptionValue(optionName.getLongName());
+			}
+			optionName = RuntimeArgumentName.BENCHMARK_ASSOCIATIONS_FILE_PATH;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				benchmarkAssociationsFilePath = commandLine.getOptionValue(optionName.getLongName());
+			}
+			optionName = RuntimeArgumentName.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				performanceResultsExtractFilePath  = commandLine.getOptionValue(optionName.getLongName());
+			}
+			optionName = RuntimeArgumentName.DAY_WEIGHTING;
+			if(commandLine.hasOption(optionName.getLongName())) {
+				String dayWeightingName = commandLine.getOptionValue(optionName.getLongName());
+				dayWeighting = DayWeighting.fromName(dayWeightingName);
+			}
+		} catch(ParseException e) {
+			throw new RuntimeException("Unexpected exception parsing parameters [" + e.getMessage() + "]");
+		}
+		RuntimeArguments runtimeArguments = new RuntimeArguments.Builder()
+				.withStartDate(startDate)
+				.withEndDate(endDate)
+				.withPortfolios(portfolios)
+				.withDayWeighting(dayWeighting)
+				.attachToFindur(attachToFindur)
+				.withPerformanceDimensions(performanceDimensionsName)
+				.withPositionsFilePath(positionsFilePath)
+				.withSecurityMasterFilePath(securityMasterFilePath)
+				.withPortfoliosFilePath(portfoliosFilePath)
+				.withBenchmarkAssociationsFilePath(benchmarkAssociationsFilePath)
+				.withPerformanceResultsExtractFilePath(performanceResultsExtractFilePath)
+				.build();
+		return runtimeArguments;
+	}
+	
+	public static Portfolios getPortfolios(String[] portfolioNames) {
+		Portfolios portfolios = new Portfolios();
+		if(portfolioNames != null) {
+			for(String portfolioName: portfolioNames) {
+				portfolios.add(new Portfolio(portfolioName));
+			}
+		}
+		return portfolios;
+	}
+
+	private static String[] getTestArguments() {
+		List<String> args = new ArrayList<>();
+		args.add("--" + RuntimeArgumentName.ATTACH_TO_FINDUR.getLongName() + "=false");
+		args.add("--" + RuntimeArgumentName.START_DATE.getLongName() + "=1-Jan-2017");
+		args.add("--" + RuntimeArgumentName.END_DATE.getLongName() + "=4-Jan-2017");
+		args.add("--" + RuntimeArgumentName.PORTFOLIOS.getLongName() + "=CashFundAssets,CashFundLiabilities");
+		args.add("--" + RuntimeArgumentName.PERFORMANCE_DIMENSIONS.getLongName() + "=ByDateByPortfolio");
+		args.add("--" + RuntimeArgumentName.POSITIONS_FILE_PATH.getLongName() 
+						+ "=" + Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS);
+		args.add("--" + RuntimeArgumentName.SECURITY_MASTER_FILE_PATH.getLongName() 
+						+ "=" + Configurator.SECURITY_MASTER_FILE_PATH);
+		args.add("--" + RuntimeArgumentName.PORTFOLIOS_FILE_PATH.getLongName() 
+						+ "=" + Configurator.PORTFOLIOS_FILE_PATH);
+		args.add("--" + RuntimeArgumentName.BENCHMARK_ASSOCIATIONS_FILE_PATH.getLongName() 
+						+ "=" + Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH);
+		args.add("--" + RuntimeArgumentName.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH.getLongName() 
+						+ "=" + Configurator.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH);
+		args.add("--" + RuntimeArgumentName.DAY_WEIGHTING.getLongName() + "=" + DayWeighting.END_OF_DAY.getName());
+		return args.toArray(new String[args.size()]);
 	}
 }

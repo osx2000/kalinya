@@ -14,7 +14,7 @@ public class Configurator {
 	public static final String POSITIONS_FILE_PATH_TWO_YEARS = ROOT_FILE_PATH + "positions.2years.csv";
 	public static final String POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS = ROOT_FILE_PATH + "positions.multipleportfolios.csv";
 
-	public static final String PERFORMANCE_RESULTS_EXPORT_FILE_PATH = ROOT_FILE_PATH + "performance_results.csv";
+	public static final String PERFORMANCE_RESULTS_EXTRACT_FILE_PATH = ROOT_FILE_PATH + "performance_results.csv";
 	public static final String SECURITY_MASTER_FILE_PATH = ROOT_FILE_PATH + "security_master.csv";
 	public static final String PORTFOLIOS_FILE_PATH = ROOT_FILE_PATH + "portfolios.csv";
 	public static final String BENCHMARK_ASSOCIATIONS_FILE_PATH = ROOT_FILE_PATH + "benchmark_associations.csv";

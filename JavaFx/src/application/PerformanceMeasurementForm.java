@@ -222,7 +222,7 @@ public class PerformanceMeasurementForm implements javafx.fxml.Initializable {
 				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
 				.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
 				.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
-				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH)
+				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH)
 				.build();
 		
 		PerformanceResult performanceResults = null;
@@ -328,7 +328,7 @@ public class PerformanceMeasurementForm implements javafx.fxml.Initializable {
 	@FXML
 	private void extractToCsv() {
 		//TODO: create variable in form to control extract path
-		String path = Configurator.PERFORMANCE_RESULTS_EXPORT_FILE_PATH;
+		String path = Configurator.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH;
 		getPerformanceResults().printToCsvFile(path);
 		setStatusBarText(String.format("Results extracted to [%s]  ",path));
 	}
