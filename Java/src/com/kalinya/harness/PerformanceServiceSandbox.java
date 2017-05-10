@@ -82,11 +82,6 @@ public class PerformanceServiceSandbox {
 		pf.setDayWeighting(dayWeighting);
 		
 		PerformanceDimensions performanceDimensions = null;
-		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_LEG;
-		performanceDimensions = PerformanceDimensions.BY_DATE;
-		performanceDimensions = PerformanceDimensions.BY_DATE_BY_LEG;
-		performanceDimensions = PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO;
-		performanceDimensions = PerformanceDimensions.BY_DATE_BY_PORTFOLIO;
 
 		//Use PerformanceDimensions from the command line interface
 		performanceDimensions = runtimeArguments.getPerformanceDimensions();
@@ -168,18 +163,5 @@ public class PerformanceServiceSandbox {
 			PluginUtil.close(in);
 			PluginUtil.close(fileIn);
 		}
-	}
-
-	private static Portfolios getPortfolios() {
-		Portfolios portfolios = new Portfolios();
-		portfolios.add(new Portfolio("20002name"));
-		portfolios.add(new Portfolio("20001name"));
-		portfolios.add(new Portfolio("CashFundAssets"));
-		//portfolios.add(new Portfolio("CashFundLiabilities"));
-		portfolios.add(new Portfolio("LongTermAssets"));
-		portfolios.add(new Portfolio("20004name"));
-		/*portfolios.add("20005name");
-		portfolios.add("20006name");*/
-		return portfolios;
 	}
 }

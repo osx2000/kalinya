@@ -18,6 +18,7 @@ import com.kalinya.enums.DayWeighting;
 import com.kalinya.enums.DebugLevel;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
+import com.kalinya.performance.dimensions.PerformanceDimensions.Predefined;
 import com.kalinya.performance.portfoliostatistics.PortfolioStatistics;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.DateUtil;
@@ -262,7 +263,8 @@ final public class PerformanceFactory {
 		args.add("--" + RuntimeArgumentName.START_DATE.getLongName() + "=1-Jan-2017");
 		args.add("--" + RuntimeArgumentName.END_DATE.getLongName() + "=4-Jan-2017");
 		args.add("--" + RuntimeArgumentName.PORTFOLIOS.getLongName() + "=CashFundAssets,CashFundLiabilities");
-		args.add("--" + RuntimeArgumentName.PERFORMANCE_DIMENSIONS.getLongName() + "=ByDateByPortfolio");
+		
+		//File path arguments
 		args.add("--" + RuntimeArgumentName.POSITIONS_FILE_PATH.getLongName() 
 						+ "=" + Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS);
 		args.add("--" + RuntimeArgumentName.SECURITY_MASTER_FILE_PATH.getLongName() 
@@ -274,6 +276,17 @@ final public class PerformanceFactory {
 		args.add("--" + RuntimeArgumentName.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH.getLongName() 
 						+ "=" + Configurator.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH);
 		args.add("--" + RuntimeArgumentName.DAY_WEIGHTING.getLongName() + "=" + DayWeighting.END_OF_DAY.getName());
+		
+		//PerformanceDimensions arguments
+		Predefined dim = null;
+		dim = PerformanceDimensions.Predefined.ByDate;
+		dim = PerformanceDimensions.Predefined.CumulativeByPortfolio;
+		dim = PerformanceDimensions.Predefined.CumulativeByLeg;
+		dim = PerformanceDimensions.Predefined.ByDateByLeg;
+		dim = PerformanceDimensions.Predefined.ByDateByPortfolio;
+		
+		args.add("--" + RuntimeArgumentName.PERFORMANCE_DIMENSIONS.getLongName() + "=" + dim.getName());
+		
 		return args.toArray(new String[args.size()]);
 	}
 }

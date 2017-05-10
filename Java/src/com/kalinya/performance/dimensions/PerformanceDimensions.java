@@ -23,7 +23,9 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	public enum Predefined {
     	ByDateByLeg(PerformanceDimensions.BY_DATE_BY_LEG),
     	ByDate(PerformanceDimensions.BY_DATE), 
-    	ByDateByPortfolio(PerformanceDimensions.BY_DATE_BY_PORTFOLIO),
+    	ByDateByPortfolio(PerformanceDimensions.BY_DATE_BY_PORTFOLIO), 
+    	CumulativeByLeg(PerformanceDimensions.CUMULATIVE_BY_LEG), 
+    	CumulativeByPortfolio(PerformanceDimensions.CUMULATIVE_BY_PORTFOLIO),
     	;
 
         private final PerformanceDimensions performanceDimensions;
