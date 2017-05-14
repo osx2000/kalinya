@@ -301,7 +301,7 @@ final public class CSVDataSource extends DataSource {
 					}
 					//TODO: this next bit about filtering needs to be shared
 					//Do not extract the position if it's in a filtered portfolio
-					if(getPortfoliosFilter().size() > 0 && !getPortfoliosFilter().contains(portfolio)) {
+					if(getPortfoliosFilter() != null && getPortfoliosFilter().size() > 0 && !getPortfoliosFilter().contains(portfolio)) {
 						System.out.println(
 								String.format("Filtering position RecordId [%s] in Portfolio [%s]", 
 										recordNumber,

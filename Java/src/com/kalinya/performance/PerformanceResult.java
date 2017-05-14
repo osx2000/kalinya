@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.Days;
@@ -126,30 +127,39 @@ public class PerformanceResult implements Serializable {
 		//Track execution time
 		getTimer().start("CalculateReturns");
 		InstrumentLegs instrumentLegs = getPositions().getInstrumentLegs();
+		Date earliestDate = getPositions().getEarliestPositionDate();
 		for(InstrumentLeg instrumentLeg: instrumentLegs) {
-			Set<Date> dates = getPositions().getDates(instrumentLeg);
+			if(instrumentLeg.getInstrumentId().equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
+				System.out.println(String.format("InstrumentId [%s]",instrumentLeg.getInstrumentId()));
+			}
+			TreeSet<Date> dates = getPositions().getDates(instrumentLeg);
+			//Ensure that each InstrumentLeg has a record for the earliest date, to ensure the opening position is zero
+			if(!dates.contains(earliestDate)) {
+				dates.add(earliestDate);
+			}
 			BigDecimal startLocalMarketValue = null;
 			BigDecimal startBaseMarketValue = null;
 			BigDecimal endLocalMarketValue = BigDecimal.ZERO;
 			BigDecimal endBaseMarketValue = BigDecimal.ZERO;
 			Date priorDate = null;
 			for(Date date: dates) {
-				Position position = getPositions().getPosition(date, instrumentLeg);
-				if(instrumentLeg.getInstrumentId().equalsIgnoreCase(DEBUG_INSTRUMENT_ID)) {
-					System.out.println(String.format("InstrumentId [%s]",instrumentLeg.getInstrumentId()));
-				}
-				//TODO: this bit doesn't work for purchases
+				Position position = getPositions().getPosition(date, instrumentLeg, false);
 				if(startLocalMarketValue == null) {
 					priorDate = date;
-					startLocalMarketValue = position.getMarketValue();
-					startBaseMarketValue = position.getBaseMarketValue();
+					if(position == null) {
+						startLocalMarketValue = BigDecimal.ZERO;
+						startBaseMarketValue = BigDecimal.ZERO;
+					} else {
+						startLocalMarketValue = position.getMarketValue();
+						startBaseMarketValue = position.getBaseMarketValue();
+					}
 				} else {
 					endLocalMarketValue = position.getMarketValue();
 					endBaseMarketValue = position.getBaseMarketValue();
 					BigDecimal localCashflowsAmount = position.getLocalCashflowsAmount();
 					BigDecimal baseCashflowsAmount = position.getBaseCashflowsAmount();
-					BigDecimal baseGainLoss = endBaseMarketValue.subtract(startBaseMarketValue).subtract(localCashflowsAmount);
-					BigDecimal localGainLoss = endLocalMarketValue.subtract(startLocalMarketValue).subtract(localCashflowsAmount);
+					BigDecimal baseGainLoss = endBaseMarketValue.subtract(startBaseMarketValue).add(localCashflowsAmount);
+					BigDecimal localGainLoss = endLocalMarketValue.subtract(startLocalMarketValue).add(localCashflowsAmount);
 
 					//Get the dimensions used for reporting disaggregation
 					PerformanceDimensions key = getPerformanceFactory().createPerformanceDimensions();

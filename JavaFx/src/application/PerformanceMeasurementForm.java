@@ -216,14 +216,26 @@ public class PerformanceMeasurementForm implements javafx.fxml.Initializable {
 		FindurSession findurSession = new FindurSession();
 		PerformanceFactory pf = findurSession.getPerformanceFactory();
 
-		DataSource csvDataSource =  new CSVDataSource.Builder()
+		DataSource csvDataSource =  null;
+		
+		/*csvDataSource = new CSVDataSource.Builder()
 				//.withPortfoliosFilter(getPortfolios())
 				.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
 				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
 				.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
 				.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
 				.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH)
-				.build();
+				.build();*/
+		
+		csvDataSource = new CSVDataSource.Builder()
+		//.withStartDate(startDate)
+		//.withEndDate(endDate)
+		.withPositionsFilePath(Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS)
+		.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
+		.withPortfoliosFilePath(Configurator.PORTFOLIOS_FILE_PATH)
+		.withBenchmarkAssociationsFilePath(Configurator.BENCHMARK_ASSOCIATIONS_FILE_PATH)
+		.withResultsExtractFilePath(Configurator.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH)
+		.build();
 		
 		PerformanceResult performanceResults = null;
 		//performanceResults = pf.calculateResults(csvDataSource, performanceDimensions);
@@ -255,9 +267,10 @@ public class PerformanceMeasurementForm implements javafx.fxml.Initializable {
 			portfolioStatistics.calculate((PortfolioPerformanceResult) performanceResults, csvDataSource.getBenchmarkAssociations());
 		}
 		
-		if(getPerformanceResults().getSession() == null) {
+		if(performanceResults.getSession() == null) {
 			extractToTableButton.setDisable(true);
 		}
+		setPerformanceResults(performanceResults);
 	}
 
 	private PerformanceResult getPerformanceResults() {

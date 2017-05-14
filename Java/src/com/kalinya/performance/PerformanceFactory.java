@@ -269,7 +269,8 @@ final public class PerformanceFactory {
 		
 		//File path arguments
 		args.add("--" + RuntimeArgumentName.POSITIONS_FILE_PATH.getLongName() 
-						+ "=" + Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS);
+						//+ "=" + Configurator.POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS);
+						+ "=" + Configurator.POSITIONS_FILE_PATH_PURCHASE);
 		args.add("--" + RuntimeArgumentName.SECURITY_MASTER_FILE_PATH.getLongName() 
 						+ "=" + Configurator.SECURITY_MASTER_FILE_PATH);
 		args.add("--" + RuntimeArgumentName.PORTFOLIOS_FILE_PATH.getLongName() 
@@ -282,18 +283,24 @@ final public class PerformanceFactory {
 		
 		//PerformanceDimensions arguments
 		Predefined dim = null;
+		//a. Core dimensions
 		dim = PerformanceDimensions.Predefined.ByDate;
 		dim = PerformanceDimensions.Predefined.CumulativeByPortfolio;
 		dim = PerformanceDimensions.Predefined.CumulativeByLeg;
 		dim = PerformanceDimensions.Predefined.ByDateByLeg;
 		dim = PerformanceDimensions.Predefined.ByDateByPortfolio;
 		
-		//Using security master meta data
+		//b. Using security master meta data
 		dim = PerformanceDimensions.Predefined.ByDateByIndustry;
 		dim = PerformanceDimensions.Predefined.ByDateBySector;
 		dim = PerformanceDimensions.Predefined.ByDateByAssetClass;
 		dim = PerformanceDimensions.Predefined.ByDateByRiskGroup;
 		dim = PerformanceDimensions.Predefined.ByDateByInstrumentClass;
+		
+		//c. Using multiple dimensions of security master meta data 
+		dim = PerformanceDimensions.Predefined.ByDateByInstrumentClassByIndustry;
+		
+		dim = PerformanceDimensions.Predefined.ByDateByLeg;
 		
 		args.add("--" + RuntimeArgumentName.PERFORMANCE_DIMENSIONS.getLongName() + "=" + dim.getName());
 		

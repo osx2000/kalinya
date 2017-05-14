@@ -32,7 +32,8 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
     	ByDateBySector(PerformanceDimensions.BY_DATE_BY_SECTOR),
     	ByDateByRiskGroup(PerformanceDimensions.BY_DATE_BY_RISK_GROUP),
     	ByDateByInstrumentClass(PerformanceDimensions.BY_DATE_BY_INSTRUMENT_CLASS),
-    	ByDateByAssetClass(PerformanceDimensions.BY_DATE_BY_ASSET_CLASS)
+    	ByDateByAssetClass(PerformanceDimensions.BY_DATE_BY_ASSET_CLASS), 
+    	ByDateByInstrumentClassByIndustry(PerformanceDimensions.BY_DATE_BY_INSTRUMENT_CLASS_BY_INDUSTRY)
     	;
 
         private final PerformanceDimensions performanceDimensions;
@@ -103,11 +104,12 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
     public static final PerformanceDimensions BY_DATE_BY_RISK_GROUP = new PerformanceDimensions().withDateDimension().withRiskGroupDimension();
     public static final PerformanceDimensions BY_DATE_BY_INSTRUMENT_CLASS = new PerformanceDimensions().withDateDimension().withInstrumentClassDimension();
     public static final PerformanceDimensions BY_DATE_BY_ASSET_CLASS = new PerformanceDimensions().withDateDimension().withAssetClassDimension();
+    public static final PerformanceDimensions BY_DATE_BY_INSTRUMENT_CLASS_BY_INDUSTRY = new PerformanceDimensions().withDateDimension().withInstrumentClassDimension().withIndustryGroupDimension();
     
 	public static final PerformanceDimensions CUMULATIVE_BY_LEG = new PerformanceDimensions().withCumulativeDimension().withInstrumentLegDimension();
 	public static final PerformanceDimensions CUMULATIVE_BY_PORTFOLIO = new PerformanceDimensions().withCumulativeDimension().withPortfolioDimension();
 	public static final PerformanceDimensions CUMULATIVE_BY_INDUSTRY_GROUP = new PerformanceDimensions().withCumulativeDimension().withIndustryGroupDimension();
-
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

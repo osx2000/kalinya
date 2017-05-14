@@ -55,8 +55,8 @@ public class Positions extends BaseSet<Position> {
 		return dates;
 	}
 	
-	public Set<Date> getDates(InstrumentLeg instrumentLeg) {
-		Set<Date> dates = new TreeSet<Date>();
+	public TreeSet<Date> getDates(InstrumentLeg instrumentLeg) {
+		TreeSet<Date> dates = new TreeSet<Date>();
 		for(Position position: getSet()) {
 			if(position.getInstrumentLeg().compareTo(instrumentLeg) == 0) {
 				dates.add(position.getDate());
@@ -181,5 +181,19 @@ public class Positions extends BaseSet<Position> {
 						StringUtil.formatDate(cashflowDate)));
 			}
 		}
+	}
+
+	public Date getEarliestPositionDate() {
+		Date earliestDate = null;
+		for(Position position: getSet()) {
+			if(earliestDate == null) {
+				earliestDate = position.getDate();
+			} else {
+				if(position.getDate().before(earliestDate)) {
+					earliestDate = position.getDate();
+				}
+			}
+		}
+		return earliestDate;
 	}
 }

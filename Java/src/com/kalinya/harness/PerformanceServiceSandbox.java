@@ -5,24 +5,14 @@ import java.io.ObjectInputStream;
 import java.util.Date;
 import java.util.Map;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
 import com.kalinya.application.FindurSession;
 import com.kalinya.enums.DayWeighting;
 import com.kalinya.performance.Configurator;
 import com.kalinya.performance.PerformanceFactory;
 import com.kalinya.performance.PerformanceResult;
 import com.kalinya.performance.PerformanceValue;
-import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.PortfolioPerformanceResult;
 import com.kalinya.performance.Portfolios;
-import com.kalinya.performance.RuntimeArgumentName;
 import com.kalinya.performance.RuntimeArguments;
 import com.kalinya.performance.datasource.CSVDataSource;
 import com.kalinya.performance.datasource.DataSource;
@@ -30,7 +20,6 @@ import com.kalinya.performance.datasource.FindurPmmDataSource;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
 import com.kalinya.performance.portfoliostatistics.PortfolioStatistics;
 import com.kalinya.util.BaseSet;
-import com.kalinya.util.DateUtil;
 import com.kalinya.util.PluginUtil;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.Session;
@@ -40,8 +29,6 @@ public class PerformanceServiceSandbox {
 	public static void main(String[] args) {
 		/*
 		 * TODO:
-		 * Support dimensions: IndustryGroup, Sector, AssetClass, InstrumentClass, RiskGroup
-		 * Handle purchase.  portfolio size is wrong on TradeDate 
 		 * Repair FindurPmm class
 		 * Support RoR calculation with/without fees
 		 * Handle non-USD cash flows
@@ -61,8 +48,6 @@ public class PerformanceServiceSandbox {
 		 * Support RoR calculations with base/local cash flows
 		 * Design MTD/QTD/LTD RoR solution
 		 * Build JUnit tests 
-		 * Test AssetClass, RiskGroup and other PerformanceDimensions
-		 * Test multiple SecurityMaster PerformanceDimensions (e.g. ByInstrumentClassBySector)
 		 * Consider redesigning SecurityMaster dimensions to support dynamic creation of Findur static data
 		 * Look for methods in PerformanceResult that could be made static
 		 * Handle ratings upgrades/downgrades

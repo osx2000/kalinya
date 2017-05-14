@@ -13,6 +13,7 @@ public class Configurator {
 	public static final String POSITIONS_FILE_PATH_THREE_DAYS = ROOT_FILE_PATH + "positions.3days.csv";
 	public static final String POSITIONS_FILE_PATH_TWO_YEARS = ROOT_FILE_PATH + "positions.2years.csv";
 	public static final String POSITIONS_FILE_PATH_MULTIPLE_PORTFOLIOS = ROOT_FILE_PATH + "positions.multipleportfolios.csv";
+	public static final String POSITIONS_FILE_PATH_PURCHASE = ROOT_FILE_PATH + "positions.purchase.csv";
 
 	public static final String PERFORMANCE_RESULTS_EXTRACT_FILE_PATH = ROOT_FILE_PATH + "performance_results.csv";
 	public static final String SECURITY_MASTER_FILE_PATH = ROOT_FILE_PATH + "security_master.csv";
