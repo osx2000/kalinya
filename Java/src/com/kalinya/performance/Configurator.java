@@ -23,6 +23,8 @@ public class Configurator {
 	private static final String U_ROOT_FILE_PATH = "U:\\sdube\\data\\";
 	public static final String U_PERFORMANCE_RESULTS_EXPORT_FILE_PATH = U_ROOT_FILE_PATH + "performance_results.csv";
 	
+	public static final String OPTIMIZATION_ASSET_RETURNS_FILE_PATH = ROOT_FILE_PATH + "optimization_asset_returns.csv";
+	
 	/*
 	 * CSV configuration
 	 */
