@@ -251,7 +251,7 @@ public class PerformanceMeasurementForm implements javafx.fxml.Initializable {
 				performanceResults.extractToUserTable("USER_perf_results_by_leg");
 			}
 		}
-		performanceResults.printToCsvFile(csvDataSource.getResultsExtractFilePath());
+		performanceResults.extractToCsvFile(csvDataSource.getResultsExtractFilePath());
 		System.out.println(String.format("Extracted to [%s]", csvDataSource.getResultsExtractFilePath()));
 		performanceResults.extractToSerializedFile(Configurator.SERIALIZED_FILE_PATH);
 		//deserializePerformanceResults();
@@ -342,7 +342,7 @@ public class PerformanceMeasurementForm implements javafx.fxml.Initializable {
 	private void extractToCsv() {
 		//TODO: create variable in form to control extract path
 		String path = Configurator.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH;
-		getPerformanceResults().printToCsvFile(path);
+		getPerformanceResults().extractToCsvFile(path);
 		setStatusBarText(String.format("Results extracted to [%s]  ",path));
 	}
 

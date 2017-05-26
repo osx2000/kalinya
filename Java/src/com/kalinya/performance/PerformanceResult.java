@@ -735,7 +735,7 @@ public class PerformanceResult implements Serializable {
 		this.performanceFactory = performanceFactory;
 	}
 
-	public void printToCsvFile(String filePath) {
+	public void extractToCsvFile(String filePath) {
 		FileWriter fileWriter = null;
 		CSVPrinter csvFilePrinter = null;
 		try {

@@ -2,6 +2,8 @@ package com.kalinya.performance;
 
 import org.apache.commons.csv.CSVFormat;
 
+import com.kalinya.optimization.examples.EfficientFrontierExample;
+
 public class Configurator {
 	
 	public static final String ROOT_FILE_PATH = "C:\\Users\\Stephen\\Dropbox\\Kalinya\\Plugins\\Data\\";
@@ -24,6 +26,7 @@ public class Configurator {
 	public static final String U_PERFORMANCE_RESULTS_EXPORT_FILE_PATH = U_ROOT_FILE_PATH + "performance_results.csv";
 	
 	public static final String OPTIMIZATION_ASSET_RETURNS_FILE_PATH = ROOT_FILE_PATH + "optimization_asset_returns.csv";
+	public static final String EFFICIENT_FRONTIER_WEIGHTS_EXTRACT_FILE_PATH = ROOT_FILE_PATH + "optimization_efficient_frontier_weights.csv";
 	
 	/*
 	 * CSV configuration
@@ -35,6 +38,14 @@ public class Configurator {
 	public static final String ACS_RULE_NAME_MARKET_VALUE = "Performance Market Value";
 
 	public static final String SERIALIZED_FILE_PATH = ROOT_FILE_PATH + "PerformanceValues.ser";
+
+
+	public static String getRCode(Class<?> clazz) {
+		if(clazz.equals(EfficientFrontierExample.class)) {
+			return ROOT_FILE_PATH + "EfficientFrontierExample.txt";
+		}
+		throw new IllegalArgumentException(String.format("Unknown caller [%s]", clazz.getSimpleName()));
+	}
 
 
 

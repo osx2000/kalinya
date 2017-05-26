@@ -118,7 +118,7 @@ public class PerformanceServiceSandbox {
 				performanceResults.extractToUserTable("USER_perf_results_by_leg");
 			}
 		}
-		performanceResults.printToCsvFile(dataSource.getResultsExtractFilePath());
+		performanceResults.extractToCsvFile(dataSource.getResultsExtractFilePath());
 		System.out.println(String.format("Extracted to [%s]", dataSource.getResultsExtractFilePath()));
 		performanceResults.extractToSerializedFile(Configurator.SERIALIZED_FILE_PATH);
 		System.out.println("Absolute results: " + performanceResults.toString());
