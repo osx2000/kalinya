@@ -4,6 +4,7 @@ import org.apache.commons.csv.CSVFormat;
 
 import com.kalinya.optimization.examples.EfficientFrontierExample;
 import com.kalinya.optimization.examples.EfficientFrontierExampleNoShorts;
+import com.kalinya.optimization.examples.RomlExample;
 
 public class Configurator {
 	
@@ -46,6 +47,8 @@ public class Configurator {
 			return ROOT_FILE_PATH + "EfficientFrontierExample.R";
 		} else if(clazz.equals(EfficientFrontierExampleNoShorts.class)) {
 			return ROOT_FILE_PATH + "EfficientFrontierExampleNoShorts.R";
+		} else if(clazz.equals(RomlExample.class)) {
+			return ROOT_FILE_PATH + "RomlExample.R";
 		}
 		throw new IllegalArgumentException(String.format("Unknown caller [%s]", clazz.getSimpleName()));
 	}

@@ -3,6 +3,7 @@ package com.kalinya.optimization.examples;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,7 @@ import com.github.rcaller.rstuff.RCaller;
 import com.github.rcaller.rstuff.RCode;
 import com.github.rcaller.rstuff.ROutputParser;
 import com.kalinya.util.Assertions;
+import com.kalinya.util.NumberUtil;
 
 public class RUtil {
 
@@ -186,4 +188,57 @@ public class RUtil {
 			return parser.getAsDoubleMatrix(name);
         }
     }
+
+	/**
+	 * Adds R code to the RCaller RCode object that extracts details of the
+	 * version of R used at runtime
+	 * 
+	 * @param code
+	 *            The RCaller.RCode object to which code will be added
+	 * @see #getRDetailsVariableNamesCsv()
+	 */
+	public static void addRDetailsToRCode(RCode code) {
+		List<String> rDetailsCode = getRDetailsCode();
+		for(String codeLine: rDetailsCode) {
+			code.addRCode(codeLine);
+		}
+		
+	}
+
+	/**
+	 * Returns a list of R code to run that extracts details of the version of R
+	 * used at runtime
+	 * 
+	 * @see #getRDetailsVariableNamesCsv()
+	 */
+	public static List<String> getRDetailsCode() {
+		List<String> rDetailsCode = new ArrayList<>();
+		rDetailsCode.add("rPlatform <- R.Version()$platform");
+		rDetailsCode.add("rArchitecture <- R.Version()$arch");
+		rDetailsCode.add("rOperatingSystem <- R.Version()$os");
+		rDetailsCode.add("rSystem <- R.Version()$system");
+		rDetailsCode.add("rVersion <- R.Version()$version.string");
+		rDetailsCode.add("rNickname <- R.Version()$nickname");
+		return rDetailsCode;
+	}
+
+	/**
+	 * Returns a comma-separated String of variable names of the version of R
+	 * used at runtime
+	 * 
+	 * @see #getRDetailsCode()
+	 */
+	public static String getRDetailsVariableNamesCsv() {
+		//TODO: add enum, add List
+		return "rPlatform=rPlatform, rArchitecture=rArchitecture, rOperatingSystem=rOperatingSystem, rSystem=rSystem, rVersion=rVersion, rNickname=rNickname";
+	}
+
+	public static boolean hasFeasibleSolution(double[] dbls) {
+		for(double dbl: dbls) {
+			if(NumberUtil.newBigDecimal(dbl).compareTo(BigDecimal.ZERO) != 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

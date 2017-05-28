@@ -19,12 +19,6 @@ import com.kalinya.util.NumberUtil;
 import com.kalinya.util.StringUtil;
 import com.kalinya.util.Timer;
 
-/**
- *
- * @author Mehmet Hakan Satman
- * @since 2.0
- * @version 2.0
- */
 public class EfficientFrontierExample {
 
 	private DebugLevel debugLevel = DebugLevel.LOW;
