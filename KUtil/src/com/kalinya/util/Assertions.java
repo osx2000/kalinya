@@ -200,12 +200,14 @@ public final class Assertions {
 	 * Throws an IllegalStateException if the parameter map's values do not sum
 	 * to 1.000000
 	 * 
+	 * @param <K>
+	 * 
 	 * @param parameterName
 	 *            The name of the parameter
 	 * @param parameter
 	 *            The parameter to test
 	 */
-	public static void sumsToOne(final String parameterName, final Map<String, BigDecimal> parameter) {
+	public static <K> void sumsToOne(final String parameterName, final Map<K, BigDecimal> parameter) {
 		BigDecimal sum = ZERO;
 		for(BigDecimal value: parameter.values()) {
 			sum = sum.add(value);
@@ -213,6 +215,24 @@ public final class Assertions {
 		if(sum.setScale(SCALE, ROUNDING_MODE).compareTo(ONE) != 0) {
 			throw new IllegalStateException(String.format("Parameter [%s], value [%s] must sum to one!", 
 					parameterName, StringUtil.formatPrice(sum)));
+		}
+	}
+
+	/**
+	 * Throws an IllegalStateException if the parameter map's values do not
+	 * sum to 1.000000
+	 * 
+	 * @param <K>
+	 * @param <L>
+	 * 
+	 * @param parameterName
+	 *            The name of the parameter
+	 * @param parameter
+	 *            The parameter to test
+	 */
+	public static <K, L> void sumsToOneMapOfMap(final String parameterName, final Map<K, Map<L, BigDecimal>> parameter) {
+		for(K key: parameter.keySet()) {
+			Assertions.sumsToOne(parameterName, parameter.get(key));
 		}
 	}
 }

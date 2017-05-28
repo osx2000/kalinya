@@ -141,23 +141,28 @@ public class RUtil {
 		return -1;
 	}
 
-	public static double[][] getAsDoubleMatrix(RCaller caller, String name) {
-		// TODO Auto-generated method stub
-		double[][] rCallerMatrix = caller.getParser().getAsDoubleMatrix(name);
-		Assertions.notNullOrEmpty("RCallerMatrix", rCallerMatrix);
-		int n = rCallerMatrix.length;
-		int m = rCallerMatrix[0].length;
-		double[][] amendedMatrix = new double[n][m];
-		for(int i = 0; i < n; i++) {
-			for(int j = 0; j < m; j++) {
-				double entry = rCallerMatrix[i][j];
-				amendedMatrix[i][j] = 0;
-			}
-		}
-		
-		return null;
-	}
-	
+	/**
+	 * Returns a multi-dimensional array of {@code double}s
+	 * 
+	 * <p>
+	 * <b>Note</b> the RCaller output xml file registers the matrix values and
+	 * there was an occasion when the Parser did not build the equivalent java
+	 * double[][] correctly. The Parser unpacked the records from the xml file
+	 * by filling down from the first column then across. The correct order of
+	 * populating the POJO double[][] was to fill accross and then down.
+	 * 
+	 * @param parser
+	 *            The RCaller Parser object
+	 * @param name
+	 *            The name of the R matrix field to retrieve from the RCaller Parser
+	 * @param extractColumnValuesFirst
+	 *            {@code true} Reverses the order in which the Parser unpacks
+	 *            the multi-dimensional array of {@code double}s {@code false}
+	 *            Uses the native RCaller.Parser
+	 *            {@link com.github.rcaller.rstuff.ROutputParser#getAsDoubleMatrix(String)}
+	 * @return
+	 * @throws ParseException
+	 */
 	public static double[][] getAsDoubleMatrix(ROutputParser parser, String name, boolean extractColumnValuesFirst) throws ParseException {
 		if(extractColumnValuesFirst) {
 			int[] dims = parser.getDimensions(name);
@@ -166,6 +171,10 @@ public class RUtil {
 			double[][] result = new double[n][m];
 			double[] arr = parser.getAsDoubleArray(name);
 			int c = 0;
+			/*
+			 * Note that this part loops first on the inner-most array dimension
+			 * and then the outer-most array dimension
+			 */
 			for (int j = 0; j < m; j++) {
 				for (int i = 0; i < n; i++) {
 					result[i][j] = arr[c];
@@ -176,7 +185,5 @@ public class RUtil {
 		} else {
 			return parser.getAsDoubleMatrix(name);
         }
-		
     }
-
 }

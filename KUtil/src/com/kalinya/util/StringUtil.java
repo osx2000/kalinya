@@ -157,4 +157,44 @@ public class StringUtil {
 		return sb.toString();
 	}
 
+	/**
+	 * Prints the map to a map to the standard output stream
+	 * 
+	 * @param map
+	 *            The map to print
+	 * @param header
+	 *            A string header that will be printed at the beginning (may be
+	 *            {@code null})
+	 */
+	public static void printMapOfMap(Map<BigDecimal, Map<String, BigDecimal>> map, String header) {
+		if(header != null) {
+			System.out.println(header);
+		}
+		for(BigDecimal key: map.keySet()) {
+			System.out.println(String.format("Key Value: [%s]", StringUtil.formatPrice(key)));
+			Map<String, BigDecimal> values = map.get(key);
+			Assertions.sumsToOne("portfolioWeights", values);
+			printMap(values, null);
+		}
+	}
+	
+	/**
+	 * Prints the map to the standard output stream
+	 * 
+	 * @param value
+	 *            The map to print
+	 * @param header
+	 *            A string header that will be printed at the beginning (may be
+	 *            {@code null})
+	 */
+	public static void printMap(Map<String, BigDecimal> value, String header) {
+		if(header != null) {
+			System.out.println(header);
+		}
+		for(String key: value.keySet()) {
+			System.out.println(String.format("Key [%s] Value [%s]", key, StringUtil.formatPrice(value.get(key))));
+		}
+	}
+	
+
 }

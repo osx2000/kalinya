@@ -25,12 +25,12 @@ import com.kalinya.util.Timer;
  * @since 2.0
  * @version 2.0
  */
-public class EfficientFrontierExample {
+public class EfficientFrontierExampleNoShorts {
 
 	private DebugLevel debugLevel = DebugLevel.LOW;
 
 	/**
-	 * From Ruppert (2015) p 476
+	 * From Ruppert (2015) p 478
 	 * <p>
 	 * Example 16.6. Finding the efficient frontier, tangency portfolio, and
 	 * minimum variance portfolio using quadratic programming The following R
@@ -38,7 +38,7 @@ public class EfficientFrontierExample {
 	 * CRSPday data set in the Ecdat package. The function solve.QP() in the
 	 * quadprog package is used for quadratic programming.
 	 */
-	public EfficientFrontierExample() {
+	public EfficientFrontierExampleNoShorts() {
 		Timer timer = new Timer();
 		try {
 			timer.start("RCaller constructor");
@@ -112,7 +112,7 @@ public class EfficientFrontierExample {
 			caller.deleteTempFiles();
 			timer.print(true);
 		} catch (Exception e) {
-			Logger.getLogger(EfficientFrontierExample.class.getName()).log(Level.SEVERE, e.getMessage());
+			Logger.getLogger(EfficientFrontierExampleNoShorts.class.getName()).log(Level.SEVERE, e.getMessage());
 		}
 	}
 
@@ -155,7 +155,7 @@ public class EfficientFrontierExample {
 	}
 
 	public static void main(String[] args) {
-		new EfficientFrontierExample();
+		new EfficientFrontierExampleNoShorts();
 	}
 	
 	public final DebugLevel getDebugLevel() {

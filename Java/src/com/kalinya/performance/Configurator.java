@@ -3,6 +3,7 @@ package com.kalinya.performance;
 import org.apache.commons.csv.CSVFormat;
 
 import com.kalinya.optimization.examples.EfficientFrontierExample;
+import com.kalinya.optimization.examples.EfficientFrontierExampleNoShorts;
 
 public class Configurator {
 	
@@ -42,7 +43,9 @@ public class Configurator {
 
 	public static String getRCode(Class<?> clazz) {
 		if(clazz.equals(EfficientFrontierExample.class)) {
-			return ROOT_FILE_PATH + "EfficientFrontierExample.txt";
+			return ROOT_FILE_PATH + "EfficientFrontierExample.R";
+		} else if(clazz.equals(EfficientFrontierExampleNoShorts.class)) {
+			return ROOT_FILE_PATH + "EfficientFrontierExampleNoShorts.R";
 		}
 		throw new IllegalArgumentException(String.format("Unknown caller [%s]", clazz.getSimpleName()));
 	}
