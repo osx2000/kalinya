@@ -40,6 +40,10 @@ public final class CommonsFixedIncomeExample {
 			fixedIncomePortfolioMinimizeDuration();
 		} else if (i == 2) {
 			fixedIncomePortfolioMaximizeConvexity();
+		} else if (i == 3) {
+			fixedIncomePortfolioMaximizeYield();
+		} else if (i == 4) {
+			fixedIncomePortfolioMaximizeConvexity2();
 		} else {
 			throw new IllegalArgumentException(String.format("Unknown argument [%s]", i));
 		}
@@ -71,7 +75,7 @@ public final class CommonsFixedIncomeExample {
 			List<LinearConstraint> instrumentConcentrationConstraints = getWeightConstraints(instruments, Relationship.LEQ, new BigDecimal(0.13)); 
 			constraints.addAll(instrumentConcentrationConstraints);
 			
-			//Non-negative contraints
+			//Non-negative constraints
 			List<LinearConstraint> longOnlyConstraints = getWeightConstraints(instruments, Relationship.GEQ, BigDecimal.ZERO); 
 			constraints.addAll(longOnlyConstraints);
 			
@@ -115,7 +119,7 @@ public final class CommonsFixedIncomeExample {
 			List<LinearConstraint> instrumentConcentrationConstraints = getWeightConstraints(instruments, Relationship.LEQ, new BigDecimal(0.13)); 
 			constraints.addAll(instrumentConcentrationConstraints);
 			
-			//Non-negative contraints
+			//Non-negative constraints
 			List<LinearConstraint> longOnlyConstraints = getWeightConstraints(instruments, Relationship.GEQ, BigDecimal.ZERO); 
 			constraints.addAll(longOnlyConstraints);
 			
@@ -133,7 +137,102 @@ public final class CommonsFixedIncomeExample {
 		}
 	}
 	
+	private void fixedIncomePortfolioMaximizeYield() {
+		String methodName = "Fixed Income Portfolio Maximize Yield #2";
+		timer.start(methodName);
+		System.err.println(methodName);
+		SolutionCallback callback = new SolutionCallback();
+		List<Instrument> instruments = getInstruments2();
+		try {
+			double[] yields = getInstrumentYield(instruments);
+			LinearObjectiveFunction f = new LinearObjectiveFunction(yields, 0.0);
+			
+			List<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
 
+			//Weights sum to 100% (0% in cash)
+			double[] unitCoefficients = getUnitCoefficients(instruments.size());
+			constraints.add(new LinearConstraint(unitCoefficients, Relationship.EQ, 1.0));
+			
+			//Duration constraint
+			//Less than 4.52407262 years
+			double[] durations = getInstrumentDuration(instruments);
+			constraints.add(new LinearConstraint(durations, Relationship.LEQ, 4.52407262));
+			
+			//Yield constraint
+			//Greater than 3 percent
+			//constraints.add(new LinearConstraint(yields, Relationship.GEQ, 3.0));
+			
+			//Concentration limits
+			//Less than 13% of the portfolio in any one instrument
+			//List<LinearConstraint> instrumentConcentrationConstraints = getWeightConstraints(instruments, Relationship.LEQ, new BigDecimal(0.13)); 
+			//constraints.addAll(instrumentConcentrationConstraints);
+			
+			//Non-negative constraints
+			List<LinearConstraint> longOnlyConstraints = getWeightConstraints(instruments, Relationship.GEQ, BigDecimal.ZERO); 
+			constraints.addAll(longOnlyConstraints);
+			
+			SimplexSolver solver = new SimplexSolver();
+			PointValuePair result = solver.optimize(new MaxIter(100), f, new LinearConstraintSet(constraints),
+					GoalType.MAXIMIZE, new NonNegativeConstraint(true), callback);
+			printResult(instruments, result);
+		} catch (Exception e) {
+			PointValuePair lastIteration = callback.getSolution();
+			if(lastIteration !=  null) {
+				printResult(instruments, lastIteration);
+			} else {
+				Logger.getLogger(CommonsFixedIncomeExample.class.getName()).log(Level.SEVERE, e.getMessage());
+			}
+		}
+	}
+	
+	private void fixedIncomePortfolioMaximizeConvexity2() {
+		String methodName = "Fixed Income Portfolio Maximize Convexity #2";
+		timer.start(methodName);
+		System.err.println(methodName);
+		SolutionCallback callback = new SolutionCallback();
+		List<Instrument> instruments = getInstruments2();
+		try {
+			double[] convexitys = getInstrumentConvexity(instruments);
+			LinearObjectiveFunction f = new LinearObjectiveFunction(convexitys, 0.0);
+			
+			List<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
+
+			//Weights sum to 100% (0% in cash)
+			double[] unitCoefficients = getUnitCoefficients(instruments.size());
+			constraints.add(new LinearConstraint(unitCoefficients, Relationship.EQ, 1.0));
+			
+			//Duration constraint
+			//Less than 4.52 years
+			double[] durations = getInstrumentDuration(instruments);
+			constraints.add(new LinearConstraint(durations, Relationship.EQ, 4.52));
+			
+			//Yield constraint
+			//Greater than 3 percent
+			//constraints.add(new LinearConstraint(yields, Relationship.GEQ, 3.0));
+			
+			//Concentration limits
+			//Less than 13% of the portfolio in any one instrument
+			//List<LinearConstraint> instrumentConcentrationConstraints = getWeightConstraints(instruments, Relationship.LEQ, new BigDecimal(0.13)); 
+			//constraints.addAll(instrumentConcentrationConstraints);
+			
+			//Non-negative constraints
+			List<LinearConstraint> longOnlyConstraints = getWeightConstraints(instruments, Relationship.GEQ, BigDecimal.ZERO); 
+			constraints.addAll(longOnlyConstraints);
+			
+			SimplexSolver solver = new SimplexSolver();
+			PointValuePair result = solver.optimize(new MaxIter(100), f, new LinearConstraintSet(constraints),
+					GoalType.MAXIMIZE, new NonNegativeConstraint(true), callback);
+			printResult(instruments, result);
+		} catch (Exception e) {
+			PointValuePair lastIteration = callback.getSolution();
+			if(lastIteration !=  null) {
+				printResult(instruments, lastIteration);
+			} else {
+				Logger.getLogger(CommonsFixedIncomeExample.class.getName()).log(Level.SEVERE, e.getMessage());
+			}
+		}
+	}
+	
 	private double[] getUnitCoefficients(int size) {
 		double[] unitCoefficients = new double[size];
 		for(int i = 0; i < size; i++) {
@@ -168,8 +267,8 @@ public final class CommonsFixedIncomeExample {
 					weightConstraintCoefficients[j] = 0.0;
 				}
 			}
-			LinearConstraint contraint = new LinearConstraint(weightConstraintCoefficients, relationship, weight.doubleValue());
-			constraints.add(contraint);
+			LinearConstraint constraint = new LinearConstraint(weightConstraintCoefficients, relationship, weight.doubleValue());
+			constraints.add(constraint);
 		}
 		return constraints;
 	}
@@ -187,6 +286,15 @@ public final class CommonsFixedIncomeExample {
 		instruments.add(new Instrument.Builder("1yBill").withDuration(0.9889).withConvexity(0.7334).withYield(2.25).build());
 		return instruments;
 	}
+	
+	private List<Instrument> getInstruments2() {
+		List<Instrument> instruments = new ArrayList<>();
+		instruments.add(new Instrument.Builder("Bond1").withDuration(1.863930404).withConvexity(4.455761339).withYield(2.947).build());
+		instruments.add(new Instrument.Builder("Bond2").withDuration(4.52407262).withConvexity(23.70475552).withYield(3.565).build());
+		instruments.add(new Instrument.Builder("Bond3").withDuration(8.062189241).withConvexity(77.26053665).withYield(4.180).build());
+		return instruments;
+	}
+	
 	
 	private double[] getInstrumentConvexity(List<Instrument> instruments) {
 		double[] convexitys = new double[instruments.size()];
@@ -222,6 +330,8 @@ public final class CommonsFixedIncomeExample {
 		timer = new Timer();
 		new CommonsFixedIncomeExample(1);
 		new CommonsFixedIncomeExample(2);
+		new CommonsFixedIncomeExample(3);
+		new CommonsFixedIncomeExample(4);
 		timer.print(true);
 	}
 }

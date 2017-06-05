@@ -21,7 +21,7 @@ public class ComparableEqualsBuilder<T> {
 		if (rhs == this) {
 			return true;
 		}
-		if (rhs.getClass() != getClass()) {
+		if (rhs.getClass() != lhs.getClass()) {
 			return false;
 		}
 		return lhs.compareTo((T) rhs) == 0;

@@ -16,6 +16,9 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String formatDate(Date date) {
+		if(date == null) {
+			return null;
+		}
 		DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 		return df.format(date);
 	}
@@ -38,41 +41,54 @@ public class StringUtil {
 	}
 
 	/**
-	 * Formats double as a string with 6 decimal points
+	 * Formats double as a string with {@code precision} decimal places
 	 * 
-	 * @param dbl
+	 * @param d
+	 * @param precision
 	 * @return
 	 */
-	public static String formatDouble(double dbl, int precision) {
-		return String.format("%1$,." + precision + "f", dbl);
+	public static String formatDouble(double d, int precision) {
+		return String.format("%1$,." + precision + "f", d);
 	}
-	
+
 	/**
-	 * Formats double as a string
-	 * @param dbl
+	 * Formats double as a string with {@code precision} decimal points
+	 * 
+	 * @param bd
+	 * @param precision
 	 * @return
 	 */
-	public static String formatDouble(double dbl) {
-		return String.format("%1$,.2f", dbl);
+	public static String formatDouble(BigDecimal bd, int precision) {
+		return formatDouble(bd.doubleValue(), precision);
+	}
+
+	/**
+	 * Formats double as a string with 2 decimal places
+	 * 
+	 * @param d
+	 * @return
+	 */
+	public static String formatDouble(double d) {
+		return formatDouble(d, 2);
 	}
 	
 	
 	public static String formatDouble(BigDecimal bd) {
 		return formatDouble(bd.doubleValue());
 	}
-	
+
 	/**
 	 * Formats double as a string with 8 decimal places
 	 */
-	public static String formatPrice(double dbl) {
-		return String.format("%1$,.8f", dbl);
+	public static String formatPrice(double d) {
+		return formatDouble(d, 8);
 	}
 
 	/**
 	 * Formats BigDecimal as a string with 8 decimal places
 	 */
 	public static String formatPrice(BigDecimal bd) {
-		return String.format("%1$,.8f", bd.doubleValue());
+		return formatDouble(bd, 8);
 	}
 	
 	public static String toTitleCase(String input) {

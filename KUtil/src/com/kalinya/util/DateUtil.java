@@ -4,6 +4,7 @@
  */
 package com.kalinya.util;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,6 +16,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
+import org.joda.time.Years;
 
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
@@ -55,6 +61,22 @@ public class DateUtil {
 	 */
 	public static Date createDate(String s) {
 		return parseDate(s);
+	}
+	
+	/**
+	 * Creates a java.util.Date
+	 * 
+	 * @param year
+	 *            The YEAR value dayOfMonth
+	 * @param month
+	 *            The MONTH value (the month numbering is 1-based)
+	 * @param day
+	 *            The DAY_OF_MONTH value
+	 * @return
+	 */
+	public static Date createDate(int year, int month, int day) {
+		//Note month is 1-based, unlike 0-based java.util.Date 
+		return new Calendar.Builder().setDate(year, month-1,day).build().getTime();
 	}
 	
 	/**
@@ -162,6 +184,14 @@ public class DateUtil {
 		return boundaryDate;
 	}
 	
+	/**
+	 * Creates a Date based on a given string. Uses Apache Commons DateUtils.
+	 * 
+	 * @param s
+	 * @return
+	 * @see org.apache.commons.lang3.time.DateUtils#parseDateStrictly(String, String...)
+	 * @see #createDate(String)
+	 */
 	public static Date parseDate(String s) {
 		Date date = null;
 		try {
@@ -306,5 +336,42 @@ public class DateUtil {
 			currentDate = getNextWeekday(currentDate);
 		}
 		return dates;
+	}
+
+	public static Date parseSymbolicDate(String string) {
+		return parseSymbolicDate(now(), string);
+	}
+	
+	public static Date parseSymbolicDate(Date origin, String string) {
+		String regex = "[^\\d-]";
+		/*
+		 * https://stackoverflow.com/questions/24186801/java-time-expression-evaluation
+		 * input: e.g. P1Y1M1WT2H10M15S
+		 */
+		String[] periodSuffixes = new String[]{"Y","M","W","D"};
+		for(String periodSuffix: periodSuffixes) {
+			int index = string.toUpperCase().indexOf(periodSuffix);
+			if (index >= 0) {
+				String input = "P" + string.substring(0, index).replaceAll(regex , "") + periodSuffix;
+				Period period = new Period(input);
+				DateTime result = new DateTime(origin).plus(period);
+				return createDate(result.getYear(), result.getMonthOfYear(), result.getDayOfMonth());
+			}
+		}
+		throw new IllegalArgumentException(String.format("Unable to parse string [%s]", string));
+	}
+	
+	public static BigDecimal getDateDifferenceInYears(Date d1, Date d2) {
+		Date earlyDate = d1;
+		Date lateDate = d2;
+		if(earlyDate.compareTo(lateDate) > 0) {
+			earlyDate = d2;
+			lateDate = d1;
+		}
+		LocalDate earlyLocalDate = LocalDate.fromDateFields(earlyDate);
+		LocalDate lateLocalDate = LocalDate.fromDateFields(lateDate);
+		int years = Years.yearsBetween(earlyLocalDate, lateLocalDate).getYears();
+		int days = Days.daysBetween(earlyLocalDate.plusYears(years), lateLocalDate).getDays();
+		return NumberUtil.newBigDecimal(years + (days/365.0), 3);
 	}
 }

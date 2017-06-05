@@ -235,4 +235,38 @@ public final class Assertions {
 			Assertions.sumsToOne(parameterName, parameter.get(key));
 		}
 	}
+	
+	/**
+	 * Throws an IllegalArgumentException if the parameters are not equal. E.g.
+	 * use this to check that array lengths are equal.
+	 * 
+	 * @param parameterName
+	 *            The name of the parameter
+	 * @param parameter1
+	 *            The first parameter to test
+	 * @param parameter2
+	 *            The second parameter to test
+	 */
+	public static void isEqual(final String parameterName, final int parameter1, final int parameter2) {
+		isEqual(parameterName, "", parameter1, parameter2);
+	}
+	
+	/**
+	 * Throws an IllegalArgumentException if the parameters are not equal. E.g.
+	 * use this to check that array lengths are equal.
+	 * 
+	 * @param parameterName
+	 *            The name of the parameter
+	 * @param message
+	 *            The message to accompany the IllegalArgumentException
+	 * @param parameter1
+	 *            The first parameter to test
+	 * @param parameter2
+	 *            The second parameter to test
+	 */
+	public static void isEqual(final String parameterName, final String message, final int parameter1, final int parameter2) {
+		if (parameter1 != parameter2) {
+			throw new IllegalArgumentException(String.format("Parameter1 [%s] must equal Parameter2! %s", parameterName, message));
+		}
+	}
 }

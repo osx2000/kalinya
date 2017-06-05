@@ -1,17 +1,20 @@
 package com.kalinya.util;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Collection;
 
+import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import com.kalinya.enums.RoundingType;
 
 public class NumberUtil {
 
-	private static final int SCALE = 12;
-	private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
+	public static final int SCALE = 12;
+	public static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
+	public static final MathContext MATH_CONTEXT = MathContext.DECIMAL64;
 	
 	/**
 	 * Uses the parameter rounding type to return the value rounded or truncated
@@ -106,5 +109,42 @@ public class NumberUtil {
 			stats.addValue(bd.doubleValue());
 		}
 		return stats;
+	}
+
+	/**
+	 * Returns the sum of the values in the input array, or
+	 * <code>Double.NaN</code> if the array is empty. Rounds to
+	 * <code>scale</code> decimal places
+	 * <p>
+	 * Throws <code>IllegalArgumentException</code> if the input array is null.
+	 * </p>
+	 * 
+	 * @param numbers
+	 *            The array of doubles
+	 * @param scale
+	 *            The number of decimal points to round
+	 * @return
+	 * @see org.apache.commons.math3.stat.StatUtils#sum(double[])
+	 */
+	public static BigDecimal sum(double[] numbers, int scale) {
+		return newBigDecimal(StatUtils.sum(numbers), scale);
+	}
+
+	/**
+	 * Returns the sum of the values in the input array, or
+	 * <code>Double.NaN</code> if the array is empty.
+	 * <p>
+	 * Throws <code>IllegalArgumentException</code> if the input array is null.
+	 * </p>
+	 * 
+	 * @param numbers
+	 *            The array of doubles
+	 * @param scale
+	 *            The number of decimal points to round
+	 * @return
+	 * @see org.apache.commons.math3.stat.StatUtils#sum(double[])
+	 */
+	public static BigDecimal sum(double[] numbers) {
+		return new BigDecimal(StatUtils.sum(numbers));
 	}
 }
