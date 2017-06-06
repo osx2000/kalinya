@@ -4,12 +4,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.kalinya.assetallocation.Dimension;
+import com.kalinya.assetallocation.Dimensions;
 import com.kalinya.optimization.Instrument;
 import com.kalinya.optimization.InstrumentStatistic;
 import com.kalinya.optimization.MaturityBucket;
@@ -19,7 +18,7 @@ import com.kalinya.util.NumberUtil;
 import com.kalinya.util.StringUtil;
 
 public class TestHarnessHelper {
-	public static List<Dimension> getAssetAllocationDimensions() {
+	public static Dimensions getAssetAllocationDimensions() {
 		//Level 3
 		Dimension govt = Dimension.create("Govt");
 		Dimension semiGovt = Dimension.create("SemiGovt");
@@ -50,8 +49,11 @@ public class TestHarnessHelper {
 		country.setParentDimension(satellite);
 		duration.setParentDimension(satellite);
 		cash.setParentDimension(cash1);
-
-		return Dimension.getDimensionsAsList(govt, semiGovt, corp, bmkBonds, bmkBills, active, passive, country, duration, cash, core, satellite, cash1);
+		
+		//Add elements to the collection
+		Dimensions dimensions = Dimensions.create();
+		dimensions.add(govt, semiGovt, corp, bmkBonds, bmkBills, active, passive, country, duration, cash, core, satellite, cash1);
+		return dimensions;
 	}
 	
 	public static MaturityBucket[] getMaturityBuckets() {
@@ -189,41 +191,6 @@ public class TestHarnessHelper {
 		return portfolio;
 	}
 	
-	public static BigDecimal getPortfolioSize(Map<Instrument, BigDecimal> portfolio) {
-		BigDecimal portfolioSize = BigDecimal.ZERO;
-		for(BigDecimal instrumentValue: portfolio.values()) {
-			portfolioSize = portfolioSize.add(instrumentValue);
-		}
-		return portfolioSize;
-	}
-	
-	public static Map<Dimension, Set<Instrument>> getInstrumentsByDimension(Map<Instrument, BigDecimal> portfolio) {
-		Map<Dimension, Set<Instrument>> instrumentsByDimension = new LinkedHashMap<Dimension, Set<Instrument>>();
-		for(Instrument instrument: portfolio.keySet()) {
-			Dimension dimension = instrument.getDimension();
-			Set<Instrument> instruments = instrumentsByDimension.get(dimension);
-			if(instruments == null) {
-				instrumentsByDimension.put(dimension, new LinkedHashSet<Instrument>());
-			}
-			instrumentsByDimension.get(dimension).add(instrument);
-		}
-		return instrumentsByDimension;
-	}
-	
-	public static Map<Dimension, BigDecimal> getPortfolioSizeByDimension(Map<Instrument, BigDecimal> portfolio) {
-		Map<Dimension, BigDecimal> portfolioSizeByDimension = new LinkedHashMap<Dimension, BigDecimal>();
-		for(Instrument instrument: portfolio.keySet()) {
-			BigDecimal value = portfolio.get(instrument);
-			Dimension dimension = instrument.getDimension();
-			BigDecimal dimensionSize = portfolioSizeByDimension.get(dimension);
-			if(dimensionSize != null) {
-				value = dimensionSize.add(value);
-			}
-			portfolioSizeByDimension.put(dimension, value);
-		}
-		return portfolioSizeByDimension;
-	}
-
 	public static Instrument getInstrument(Collection<Instrument> instruments, String instrumentId) {
 		for(Instrument instrument: instruments) {
 			if(instrument.getInstrumentId().equalsIgnoreCase(instrumentId)) {

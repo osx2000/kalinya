@@ -54,6 +54,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 	}
 	
 	public String toVerboseString() {
+		//TODO: use ToStringBuilder(this).build();
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("InstrumentId [%s]", getInstrumentId()));
 

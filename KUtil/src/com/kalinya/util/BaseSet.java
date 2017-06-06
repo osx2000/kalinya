@@ -63,6 +63,13 @@ public class BaseSet<E extends Comparable<E>> implements Set<E>, Serializable {
 		return getSet().addAll(arg0);
 	}
 	
+	@SafeVarargs
+	public final void add(E... elements) {
+		for(E element: elements) {
+			add(element);
+		}
+	}
+	
 	@Override
 	public void clear() {
 		getSet().clear();

@@ -1,14 +1,6 @@
 package com.kalinya.assetallocation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -20,11 +12,11 @@ import com.kalinya.util.ToStringBuilder;
 public final class Dimension implements Comparable<Dimension> {
 	public static final Dimension CASH = new Dimension("Cash");
 	private Dimension parentDimension;
-	private List<Dimension> childDimensions;
+	private Dimensions childDimensions;
 	private String name;
 	
 	private Dimension() {
-		childDimensions = new ArrayList<>();
+		childDimensions = Dimensions.create();
 	}
 	
 	private Dimension(String name) {
@@ -43,7 +35,7 @@ public final class Dimension implements Comparable<Dimension> {
 		return new ToStringBuilder(this)
 				.append("Name", name)
 				.append("ParentDimension", parentDimension)
-				.append("ChildDimensions", getDimensionNames(childDimensions))
+				.append("ChildDimensions", childDimensions.toMinimalString())
 				.build();
 	}
 	
@@ -95,41 +87,20 @@ public final class Dimension implements Comparable<Dimension> {
 		}
 	}
 	
-	public List<Dimension> getChildDimensions() {
+	public Dimensions getChildDimensions() {
 		return childDimensions;
 	}
 	
-	public static String getDimensionNames(List<Dimension> dimensions) {
-		StringBuilder sb = new StringBuilder();
-		String concatenator = "";
-		for(Dimension dimension: dimensions) {
-			sb.append(concatenator);
-			sb.append(dimension);
-			concatenator = ", ";
-		}
-		return sb.toString();
+	public Dimensions getRelatedDimensions() {
+		Dimensions dimensions = Dimensions.create();
+		dimensions.add(this);
+		dimensions.addAll(getDescendants());
+		dimensions.addAll(getAntecedents());
+		return dimensions;
 	}
 
-	public static List<Dimension> getDimensionsAsList(Dimension... dimensionsArray) {
-		List<Dimension> dimensionsList = new ArrayList<>();
-		for(Dimension dimension: dimensionsArray) {
-			dimensionsList.add(dimension);
-		}
-		return dimensionsList;
-	}
-	
-	public static List<Dimension> getDimensionsWithInheritanceAsList(Dimension... dimensionsArray) {
-		List<Dimension> dimensionsList = new ArrayList<>();
-		for(Dimension dimension: dimensionsArray) {
-			dimensionsList.add(dimension);
-			dimensionsList.addAll(dimension.getDescendants());
-			dimensionsList.addAll(dimension.getAntecedents());
-		}
-		return dimensionsList;
-	}
-
-	public Set<Dimension> getAntecedents() {
-		Set<Dimension> antecedents = new LinkedHashSet<>();
+	public Dimensions getAntecedents() {
+		Dimensions antecedents = Dimensions.create();
 		Dimension antecedent = getParentDimension();
 		while(antecedent != null) {
 			antecedents.add(antecedent);
@@ -138,8 +109,8 @@ public final class Dimension implements Comparable<Dimension> {
 		return antecedents;
 	}
 
-	public Set<Dimension> getDescendants() {
-		Set<Dimension> descendants = new LinkedHashSet<>();
+	public Dimensions getDescendants() {
+		Dimensions descendants = Dimensions.create();
 		for(Dimension descendant: getChildDimensions()) {
 			descendants.add(descendant);
 			descendants.addAll(descendant.getDescendants());
@@ -162,7 +133,7 @@ public final class Dimension implements Comparable<Dimension> {
 		return maximumChildGenerationCount;
 	}
 	
-	public static Map<Integer, Set<Dimension>> getDimensionsHierarchy(List<Dimension> dimensions) {
+	/*public static Map<Integer, Set<Dimension>> getDimensionsHierarchy(List<Dimension> dimensions) {
 		Map<Integer, Set<Dimension>> dimensionsHierarchy = new TreeMap<Integer, Set<Dimension>>(Collections.reverseOrder());
 		for(Dimension dimension: dimensions) {
 			int childGenerationCount = dimension.getChildGenerationCount();
@@ -173,70 +144,6 @@ public final class Dimension implements Comparable<Dimension> {
 			dimensionsHierarchy.get(childGenerationCount).add(dimension);
 		}
 		return dimensionsHierarchy; 
-	}
+	}*/
 
-	public static String getDimensionFamilyTreeAsString(List<Dimension> dimensions) {
-		/*
-		 * -Core
-		 *  --Active
-		 *  --Cash1
-		 *  --Passive
-		 *  --Satellite
-		 *   ---BmkBills
-		 *   ---BmkBonds
-		 *   ---Cash
-		 *   ---Corp
-		 *   ---Country
-		 *   ---Duration
-		 *   ---Govt
-		 *   ---SemiGovt
-		 *   
-		 *  //TODO: what I'd like to have: 
-		 * -Core
-		 *  --Active
-		 *   ---Govt
-		 *   ---SemiGovt
-		 *   ---Corp
-		 *  --Passive
-		 *   ---BmkBonds
-		 *   ---BmkBills
-		 * -Satellite
-		 *  --Country
-		 *  --Duration
-		 * -Cash1
-		 *  --Cash
-		 */
-		
-		Map<Integer, Set<Dimension>> familyTree = getDimensionsHierarchy(dimensions);
-		Set<Dimension> printed = new HashSet<Dimension>();
-		StringBuilder sb = new StringBuilder();
-		String newLineBreak = "";
-		String tab = "";
-		String bullet = "-";
-		for(int i: familyTree.keySet()) {
-			Set<Dimension> dimensionsInGeneration = familyTree.get(i);
-			for(Dimension dimension: dimensionsInGeneration) {
-				if(printed.contains(dimension)) {
-					continue;
-				}
-				sb.append(newLineBreak + tab + bullet);
-				sb.append(dimension.name);
-				printed.add(dimension);
-				newLineBreak = "\n";
-			}
-			tab += " ";
-			bullet += "-";
-		}
-		return sb.toString();
-	}
-
-	public static Dimension get(List<Dimension> dimensions, String name) {
-		//TODO: move to new Dimensions class
-		for(Dimension dimension: dimensions) {
-			if(dimension.name.equalsIgnoreCase(name)) {
-				return dimension;
-			}
-		}
-		throw new IllegalArgumentException(String.format("Dimension [%s] is not one of the dimension in the collection %s", name, dimensions.toString()));
-	}
 }
