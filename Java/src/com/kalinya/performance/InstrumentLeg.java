@@ -22,6 +22,7 @@ import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.ComparableEqualsBuilder;
 
 public class InstrumentLeg implements Comparable<InstrumentLeg>, SecurityMasterData, Serializable {
+	private static final long serialVersionUID = -6700200847132884132L;
 	private Portfolio portfolio;
 	private Instrument instrument;
 	private Integer legId;
@@ -87,7 +88,7 @@ public class InstrumentLeg implements Comparable<InstrumentLeg>, SecurityMasterD
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<InstrumentLeg>(this, obj)
 				.build();
 	}
 	

@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.assetallocation.Dimension;
 import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
@@ -26,6 +27,7 @@ public class Instrument implements Comparable<Instrument> {
 	private MaturityBucket maturityBucket;
 	private BigDecimal termToMaturityYears;
 	private boolean verboseDescription = false;
+	private Dimension dimension;
 	
 	private Instrument() {
 	}
@@ -39,6 +41,7 @@ public class Instrument implements Comparable<Instrument> {
 		maturityDate = builder.maturityDate;
 		termToMaturityYears = DateUtil.getDateDifferenceInYears(DateUtil.now(), getMaturityDate());
 		maturityBucket = builder.maturityBucket;
+		dimension = builder.dimension;
 	}
 	
 	@Override
@@ -122,13 +125,22 @@ public class Instrument implements Comparable<Instrument> {
 		throw new UnsupportedOperationException(String.format("Unsupported argument Statistic [%s]", statistic));
 	}
 	
+	public void setDimension(Dimension dimension) {
+		this.dimension = dimension;
+	}
+	
+	public Dimension getDimension() {
+		return dimension;
+	}
+	
 	public static class Builder {
 		private String instrumentId;
 		private BigDecimal duration;
 		private BigDecimal convexity;
 		private BigDecimal yield;
 		private Date maturityDate;
-		public MaturityBucket maturityBucket;
+		private MaturityBucket maturityBucket;
+		private Dimension dimension;
 
 		private Builder() {
 		}
@@ -176,6 +188,11 @@ public class Instrument implements Comparable<Instrument> {
 		
 		public Builder assignToMaturityBucket(MaturityBucket[] maturityBuckets) {
 			maturityBucket = MaturityBucket.getMaturityBucket(maturityBuckets, maturityDate);
+			return this;
+		}
+		
+		public Builder withDimension(Dimension dimension) {
+			this.dimension = dimension;
 			return this;
 		}
 	}

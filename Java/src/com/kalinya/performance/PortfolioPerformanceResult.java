@@ -3,6 +3,7 @@ package com.kalinya.performance;
 import com.kalinya.performance.dimensions.PerformanceDimensions;
 
 final public class PortfolioPerformanceResult extends PerformanceResult {
+	private static final long serialVersionUID = 5924391831275313734L;
 
 	public PortfolioPerformanceResult(PerformanceFactory performanceFactory, Portfolios portfolios,
 			BenchmarkAssociations benchmarkAssociations, SecurityMasters securityMasters, Instruments instruments,

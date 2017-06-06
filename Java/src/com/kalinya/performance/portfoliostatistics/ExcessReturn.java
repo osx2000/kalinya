@@ -13,6 +13,7 @@ import com.kalinya.util.Assertions;
 import com.kalinya.util.StringUtil;
 
 public final class ExcessReturn extends PortfolioStatistic {
+	private static final long serialVersionUID = -4639309831686369184L;
 	private static ExcessReturn instance;
 
 	public static ExcessReturn getInstance() {

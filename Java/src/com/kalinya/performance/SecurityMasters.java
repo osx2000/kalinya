@@ -12,6 +12,7 @@ import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.BaseSet;
 
 final public class SecurityMasters extends BaseSet<SecurityMaster> {
+	private static final long serialVersionUID = 7909870254975777703L;
 
 	public SecurityMasters() {
 		super();

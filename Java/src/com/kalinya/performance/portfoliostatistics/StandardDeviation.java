@@ -7,16 +7,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import com.kalinya.performance.PerformanceFactory;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
-import com.kalinya.util.StringUtil;
 
 public final class StandardDeviation extends PortfolioStatistic {
+	private static final long serialVersionUID = -1501869733442255095L;
 	private static StandardDeviation instance;
 
 	public static StandardDeviation getInstance() {

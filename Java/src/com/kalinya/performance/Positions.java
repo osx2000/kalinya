@@ -9,6 +9,7 @@ import com.kalinya.util.DateUtil;
 import com.kalinya.util.StringUtil;
 
 public class Positions extends BaseSet<Position> {
+	private static final long serialVersionUID = 6971662887499508138L;
 	private Set<Position> positionSet;
 	private Portfolios portfolios;
 	private Set<Date> dates;

@@ -135,12 +135,14 @@ public class PerformanceServiceSandbox {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static void deserializePerformanceResults() {
 		FileInputStream fileIn = null;
 		ObjectInputStream in = null;
 		try {
 			fileIn = new FileInputStream(Configurator.SERIALIZED_FILE_PATH);
 			in = new ObjectInputStream(fileIn);
+			@SuppressWarnings("unchecked")
 			Map<PerformanceDimensions, PerformanceValue> performanceValues = (Map<PerformanceDimensions, PerformanceValue>) in.readObject();
 			System.out.println(BaseSet.getCollectionElementsAsString(performanceValues));
 		} catch(Exception e) {

@@ -3,6 +3,7 @@ package com.kalinya.performance.dimensions;
 import java.util.Date;
 
 public class DatePerformanceDimension extends BasePerformanceDimension {
+	private static final long serialVersionUID = 2759545694321940980L;
 	private static BasePerformanceDimension instance;
 	private Date date;
 

@@ -5,7 +5,6 @@ import java.util.Date;
 
 import com.kalinya.inventory.comparators.PriceHifoComparator;
 import com.kalinya.util.NumberUtil;
-import com.kalinya.util.PluginUtil;
 
 public class TransactionStub implements Comparable<TransactionStub>, TranLookup {
 	private String instrumentId;

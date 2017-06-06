@@ -9,6 +9,7 @@ import com.kalinya.enums.CurrencyBasis;
 import com.kalinya.util.BaseSet;
 
 public class Cashflows extends BaseSet<Cashflow> {
+	private static final long serialVersionUID = -1483898703924003303L;
 	public static final Cashflows EMPTY = new Cashflows();
 	private Set<Cashflow> set;
 	private Set<Date> dates;

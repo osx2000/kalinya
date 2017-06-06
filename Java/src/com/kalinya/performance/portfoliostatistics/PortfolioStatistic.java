@@ -6,18 +6,15 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.kalinya.performance.BenchmarkAssociations;
-import com.kalinya.performance.Instrument;
 import com.kalinya.performance.Portfolio;
-import com.kalinya.performance.Portfolios;
 import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.StringUtil;
 import com.kalinya.util.ToStringBuilder;
 
 abstract public class PortfolioStatistic implements Comparable<PortfolioStatistic>, Serializable {
+	private static final long serialVersionUID = -2375541135587032064L;
 	private String name;
 	private Map<Portfolio, Map<Date, BigDecimal>> values;
 
@@ -37,7 +34,7 @@ abstract public class PortfolioStatistic implements Comparable<PortfolioStatisti
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<PortfolioStatistic>(this, obj)
 				.build();
 	}
 	

@@ -1,10 +1,14 @@
 package com.kalinya.harness;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import com.kalinya.assetallocation.Dimension;
 import com.kalinya.assetallocation.Strategy;
+import com.kalinya.optimization.Instrument;
 import com.kalinya.util.NumberUtil;
+import com.kalinya.util.StringUtil;
 
 public final class AssetAllocationSandbox {
 	public static void main(String[] args) {
@@ -16,10 +20,7 @@ public final class AssetAllocationSandbox {
 	}
 	
 	private void createDimensions() {
-		List<Dimension> dimensions = getDimensions();
-		//System.out.println(Dimension.getDimensionFamilyTree(dimensions));
-		//System.out.println(Dimension.getDimensionFamilyTreeAsString(dimensions));
-		
+		List<Dimension> dimensions = TestHarnessHelper.getAssetAllocationDimensions();
 		Strategy strategy = Strategy.create("StrategicAssetAllocation");
 		strategy.setDimensions(dimensions);
 		strategy.setTargetAllocation(Dimension.get(dimensions, "Govt"), NumberUtil.newBigDecimal(0.5));
@@ -30,41 +31,14 @@ public final class AssetAllocationSandbox {
 		strategy.setTargetAllocation(Dimension.get(dimensions, "Country"), NumberUtil.newBigDecimal(0.06));
 		strategy.setTargetAllocation(Dimension.get(dimensions, "Duration"), NumberUtil.newBigDecimal(0.04));
 		strategy.setTargetAllocation(Dimension.get(dimensions, "Cash"), NumberUtil.newBigDecimal(0.05));
-		System.out.println(strategy.getTargetAllocationsAsString());
+		//System.out.println(strategy.getTargetAllocationsAsString());
+		
+		Map<Instrument, BigDecimal> portfolio = TestHarnessHelper.getPortfolio();
+		System.out.println(String.format("PortfolioSize %s", StringUtil.formatDouble(TestHarnessHelper.getPortfolioSize(portfolio))));
+		System.out.println(String.format("InstrumentsByDimension %s", TestHarnessHelper.getInstrumentsByDimension(portfolio)));
+		System.out.println(String.format("PortfolioSizeByDimension %s", TestHarnessHelper.getPortfolioSizeByDimension(portfolio)));
+		strategy.setActualAllocation(portfolio);
+		
 	}
-
-	private List<Dimension> getDimensions() {
-		//Level 3
-		Dimension govt = Dimension.create("Govt");
-		Dimension semiGovt = Dimension.create("SemiGovt");
-		Dimension corp = Dimension.create("Corp");
-		Dimension bmkBonds = Dimension.create("BmkBonds");
-		Dimension bmkBills = Dimension.create("BmkBills");
-
-		//Level 2
-		Dimension active = Dimension.create("Active");
-		Dimension passive = Dimension.create("Passive");
-		Dimension country = Dimension.create("Country");
-		Dimension duration = Dimension.create("Duration");
-		Dimension cash = Dimension.create("Cash");
-
-		//Level 1
-		Dimension core = Dimension.create("Core");
-		Dimension satellite = Dimension.create("Satellite");
-		Dimension cash1 = Dimension.create("Cash1");
-
-		//Add inheritance
-		govt.setParentDimension(active);
-		semiGovt.setParentDimension(active);
-		corp.setParentDimension(active);
-		active.setParentDimension(core);
-		bmkBonds.setParentDimension(passive);
-		bmkBills.setParentDimension(passive);
-		passive.setParentDimension(core);
-		country.setParentDimension(satellite);
-		duration.setParentDimension(satellite);
-		cash.setParentDimension(cash1);
-
-		return Dimension.getDimensionsAsList(govt, semiGovt, corp, bmkBonds, bmkBills, active, passive, country, duration, cash, core, satellite, cash1);
-	}
+	
 }

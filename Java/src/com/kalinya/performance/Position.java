@@ -7,7 +7,6 @@ import java.util.Date;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.kalinya.oc.util.MessageLog;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
@@ -17,6 +16,7 @@ import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.StringUtil;
 
 public final class Position implements Comparable<Position>, SecurityMasterData, Serializable {
+	private static final long serialVersionUID = 7608030994517625249L;
 	private Portfolio portfolio;
 	private Instrument instrument;
 	private InstrumentLeg instrumentLeg;
@@ -156,7 +156,7 @@ public final class Position implements Comparable<Position>, SecurityMasterData,
 
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<Position>(this, obj)
 				.build();
 	}
 	

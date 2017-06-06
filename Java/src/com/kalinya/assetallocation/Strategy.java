@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.kalinya.optimization.Instrument;
 import com.kalinya.util.ToStringBuilder;
 
 public class Strategy {
@@ -16,6 +17,7 @@ public class Strategy {
 	private Map<Integer, Set<Dimension>> allocationHierarchy;
 	private Map<Dimension, BigDecimal> specifiedTargetAllocations;
 	private Map<Dimension, BigDecimal> aggregatedTargetAllocations;
+	private Map<Instrument, BigDecimal> portfolio;
 	
 	private Strategy() {
 	}
@@ -119,6 +121,14 @@ public class Strategy {
 	public String getTargetAllocationsAsString() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
+	}
+
+	public void setActualAllocation(Map<Instrument, BigDecimal> portfolio) {
+		this.portfolio = portfolio;
+	}
+	
+	public Map<Instrument, BigDecimal> getActualAllocation() {
+		return portfolio;
 	}
 	
 	

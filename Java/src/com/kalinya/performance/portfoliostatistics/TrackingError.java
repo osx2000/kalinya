@@ -7,16 +7,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import com.kalinya.performance.PerformanceFactory;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
-import com.kalinya.util.StringUtil;
 
 public final class TrackingError extends PortfolioStatistic {
+	private static final long serialVersionUID = -3566920295262669436L;
 	private static TrackingError instance;
 
 	public static TrackingError getInstance() {

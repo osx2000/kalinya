@@ -6,6 +6,7 @@ import java.util.Set;
 import com.kalinya.util.BaseSet;
 
 public class Instruments extends BaseSet<Instrument> {
+	private static final long serialVersionUID = -1720424418344669033L;
 	private Set<Instrument> instrumentSet;
 	private SecurityMasters securityMasters;
 

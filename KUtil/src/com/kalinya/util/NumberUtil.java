@@ -139,12 +139,24 @@ public class NumberUtil {
 	 * 
 	 * @param numbers
 	 *            The array of doubles
-	 * @param scale
-	 *            The number of decimal points to round
 	 * @return
 	 * @see org.apache.commons.math3.stat.StatUtils#sum(double[])
 	 */
 	public static BigDecimal sum(double[] numbers) {
 		return new BigDecimal(StatUtils.sum(numbers));
+	}
+
+	/**
+	 * Returns the sum of the values in the input collection
+	 * 
+	 * @param values
+	 * @return
+	 */
+	public static BigDecimal sum(Collection<BigDecimal> values) {
+		BigDecimal sum = BigDecimal.ZERO;
+		for(BigDecimal value: values) {
+			sum = sum.add(value);
+		}
+		return sum;
 	}
 }

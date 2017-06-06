@@ -18,6 +18,7 @@ import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.ToStringBuilder;
 
 public final class Dimension implements Comparable<Dimension> {
+	public static final Dimension CASH = new Dimension("Cash");
 	private Dimension parentDimension;
 	private List<Dimension> childDimensions;
 	private String name;
@@ -68,6 +69,10 @@ public final class Dimension implements Comparable<Dimension> {
 	
 	public static Dimension create(String name) {
 		return new Dimension(name);
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public void setParentDimension(Dimension parentDimension) {

@@ -9,7 +9,6 @@ import com.kalinya.inventory.InventoryService;
 import com.kalinya.inventory.RealizedPnl;
 import com.kalinya.stubs.TransactionStub;
 import com.kalinya.stubs.TransactionStubs;
-import com.kalinya.util.PluginUtil;
 import com.kalinya.util.StringUtil;
 
 public class InventoryServiceSandbox {
@@ -64,6 +63,7 @@ public class InventoryServiceSandbox {
 				+ "], RemainingPosition [" + StringUtil.formatDouble(is.getNetPosition(instrumentId, getToday()).doubleValue()) + "]");
 	}
 
+	@SuppressWarnings("unused")
 	private static TransactionStubs getFirstTestSuite(String ticker, int i) {
 		/*
 		 * Identifier [MyTicker], NetPosition [1,400,000.00] on Date [02/14/2016]
@@ -89,6 +89,7 @@ public class InventoryServiceSandbox {
 	 * Sell 1.2mm @ 100.3, Id=777
 	 * Buy 1.4mm @ 100.1, Id=888
 	 */
+	@SuppressWarnings("unused")
 	private static TransactionStubs getFifthTestSuite(String ticker, int i) {
 		///TODO: is this right?  It is using the same high-price comparator
 		

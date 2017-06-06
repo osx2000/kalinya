@@ -16,6 +16,7 @@ import com.kalinya.util.DateUtil;
 import com.kalinya.util.StringUtil;
 
 public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMasterData, Serializable {
+	private static final long serialVersionUID = 1133324168398009965L;
 	private static final Date MAXIMUM_MATURITY_DATE = DateUtil.parseDate("12/31/2099");
 	private String instrumentId;
 	private Date maturityDate;
@@ -67,7 +68,7 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<SecurityMaster>(this, obj)
 				.build();
 	}
 	

@@ -18,9 +18,9 @@ import com.kalinya.util.Assertions;
 import com.kalinya.util.BaseSet;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.Debuggable;
-import com.kalinya.util.StringUtil;
 
 public final class PortfolioStatistics extends BaseSet<PortfolioStatistic> implements Debuggable {
+	private static final long serialVersionUID = -1884667806974979656L;
 	private PerformanceFactory performanceFactory;
 	public static final PortfolioStatistics EMPTY = new PortfolioStatistics();
 	public static final ActiveReturn ACTIVE_RETURN = ActiveReturn.getInstance();

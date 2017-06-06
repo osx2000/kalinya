@@ -11,6 +11,7 @@ import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.StringUtil;
 
 public final class Cashflow implements Comparable<Cashflow>, Serializable {
+	private static final long serialVersionUID = 7605554514632292866L;
 	private Portfolio portfolio;
 	private InstrumentLeg instrumentLeg;
 	private Date date;
@@ -49,7 +50,7 @@ public final class Cashflow implements Comparable<Cashflow>, Serializable {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<Cashflow>(this, obj)
 				.build();
 	}
 	

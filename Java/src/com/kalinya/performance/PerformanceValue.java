@@ -11,6 +11,7 @@ import com.kalinya.enums.CurrencyBasis;
 import com.kalinya.util.StringUtil;
 
 final public class PerformanceValue implements Serializable {
+	private static final long serialVersionUID = 7863804211933490711L;
 	private Positions positions;
 	private Date date;
 	private Date priorDate;

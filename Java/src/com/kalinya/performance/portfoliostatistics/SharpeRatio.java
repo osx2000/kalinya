@@ -1,22 +1,18 @@
 package com.kalinya.performance.portfoliostatistics;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
 import com.kalinya.performance.PerformanceFactory;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.DateUtil;
-import com.kalinya.util.NumberUtil;
-import com.kalinya.util.StringUtil;
 
 public final class SharpeRatio extends PortfolioStatistic {
+	private static final long serialVersionUID = -1241719712280518264L;
 	private static SharpeRatio instance;
 
 	public static SharpeRatio getInstance() {

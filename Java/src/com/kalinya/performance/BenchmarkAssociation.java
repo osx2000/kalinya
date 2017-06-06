@@ -9,9 +9,6 @@ import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.ToStringBuilder;
 
 public class BenchmarkAssociation implements Comparable<BenchmarkAssociation>, Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5790953051999832009L;
 	private Portfolio portfolio;
 	private Portfolio benchmark;

@@ -2,7 +2,6 @@ package com.kalinya.harness;
 
 import java.util.Date;
 
-import com.kalinya.oc.util.MessageLog;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.StringUtil;
 

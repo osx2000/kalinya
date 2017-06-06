@@ -180,20 +180,20 @@ public final class RuntimeArguments {
 	public static Options getCommandLineOptions() {
 		Options commandLineOptions = new Options();
 
-		RuntimeArgumentName argumentName = RuntimeArgumentName.ATTACH_TO_FINDUR;
-		commandLineOptions.addOption(argumentName.ATTACH_TO_FINDUR.getOption());
-		commandLineOptions.addOption(argumentName.START_DATE.getOption());
-		commandLineOptions.addOption(argumentName.END_DATE.getOption());
-		commandLineOptions.addOption(argumentName.PORTFOLIOS.getOption());
-		commandLineOptions.addOption(argumentName.DAY_WEIGHTING.getOption());
-		commandLineOptions.addOption(argumentName.PERFORMANCE_DIMENSIONS.getOption());
+		//RuntimeArgumentName argumentName = RuntimeArgumentName.ATTACH_TO_FINDUR;
+		commandLineOptions.addOption(RuntimeArgumentName.ATTACH_TO_FINDUR.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.START_DATE.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.END_DATE.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.PORTFOLIOS.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.DAY_WEIGHTING.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.PERFORMANCE_DIMENSIONS.getOption());
 		
 		//Import/export CSV file path options
-		commandLineOptions.addOption(argumentName.POSITIONS_FILE_PATH.getOption());
-		commandLineOptions.addOption(argumentName.SECURITY_MASTER_FILE_PATH.getOption());
-		commandLineOptions.addOption(argumentName.PORTFOLIOS_FILE_PATH.getOption());
-		commandLineOptions.addOption(argumentName.BENCHMARK_ASSOCIATIONS_FILE_PATH.getOption());
-		commandLineOptions.addOption(argumentName.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.POSITIONS_FILE_PATH.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.SECURITY_MASTER_FILE_PATH.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.PORTFOLIOS_FILE_PATH.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.BENCHMARK_ASSOCIATIONS_FILE_PATH.getOption());
+		commandLineOptions.addOption(RuntimeArgumentName.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH.getOption());
 		
 		return commandLineOptions;
 	}

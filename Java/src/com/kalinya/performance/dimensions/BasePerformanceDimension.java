@@ -5,10 +5,11 @@ import java.io.Serializable;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.kalinya.performance.Instrument;
 import com.kalinya.util.ComparableEqualsBuilder;
 
 public class BasePerformanceDimension implements Comparable<BasePerformanceDimension>, Serializable {
+	private static final long serialVersionUID = -5575774013450087519L;
+
 	public BasePerformanceDimension() {
 	}
 	
@@ -19,7 +20,7 @@ public class BasePerformanceDimension implements Comparable<BasePerformanceDimen
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<BasePerformanceDimension>(this, obj)
 				.build();
 	}
 	

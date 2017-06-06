@@ -21,6 +21,8 @@ import com.kalinya.util.StringUtil;
 
 public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> implements Comparable<PerformanceDimensions>, SecurityMasterData {
 
+	private static final long serialVersionUID = -2067723302584591824L;
+
 	public enum Predefined {
     	ByDateByLeg(PerformanceDimensions.BY_DATE_BY_LEG),
     	ByDate(PerformanceDimensions.BY_DATE), 

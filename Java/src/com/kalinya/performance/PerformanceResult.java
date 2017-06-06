@@ -24,7 +24,6 @@ import org.joda.time.Days;
 import com.kalinya.enums.CurrencyBasis;
 import com.kalinya.enums.DayWeighting;
 import com.kalinya.enums.DebugLevel;
-import com.kalinya.exception.FileLockedException;
 import com.kalinya.javafx.util.RowData;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.dimensions.CumulativePerformanceDimension;
@@ -211,9 +210,9 @@ public class PerformanceResult implements Serializable {
 			for(PerformanceDimensions keyForCumulativeRatesOfReturn: keysForCumulativeRatesOfReturn) {
 				final Set<PerformanceValue> performanceValuesSubSet = getPerformanceValuesByKey(keyForCumulativeRatesOfReturn);
 				List<BigDecimal> localRatesOfReturn = getRatesOfReturn(performanceValuesSubSet, true);
-				BigDecimal cumulativeLocalRateOfReturn = getPerformanceFactory().getChainLinkedReturn(localRatesOfReturn);
+				BigDecimal cumulativeLocalRateOfReturn = PerformanceFactory.getChainLinkedReturn(localRatesOfReturn);
 				List<BigDecimal> baseRatesOfReturn = getRatesOfReturn(performanceValuesSubSet, false);
-				BigDecimal cumulativeBaseRateOfReturn = getPerformanceFactory().getChainLinkedReturn(baseRatesOfReturn);
+				BigDecimal cumulativeBaseRateOfReturn = PerformanceFactory.getChainLinkedReturn(baseRatesOfReturn);
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
 					System.out.println(String.format("%s CumulativeReturns Local [%s] Base[%s]", 
 							keyForCumulativeRatesOfReturn.toString(), 

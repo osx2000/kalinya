@@ -9,12 +9,14 @@ import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.ToStringBuilder;
 
 public class PortfolioGroup implements Comparable<PortfolioGroup>, Serializable {
+	private static final long serialVersionUID = 1244424305578696957L;
 	private String name;
 	
 	private PortfolioGroup() {
 	}
 	
 	public PortfolioGroup(String name) {
+		this();
 		setName(name);
 	}
 	
@@ -27,7 +29,7 @@ public class PortfolioGroup implements Comparable<PortfolioGroup>, Serializable 
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder(this, obj)
+		return new ComparableEqualsBuilder<PortfolioGroup>(this, obj)
 				.build();
 	}
 	

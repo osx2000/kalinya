@@ -12,6 +12,7 @@ import com.olf.openrisk.utility.Disposable;
 @XmlType(propOrder={"xmlVersion","creditRatingSet"})
 @XmlRootElement
 public class CreditRatings extends BaseSet<CreditRating> implements Disposable {
+	private static final long serialVersionUID = 3875503093150094084L;
 	private Set<CreditRating> creditRatingSet;
 	private String xmlVersion;
 	

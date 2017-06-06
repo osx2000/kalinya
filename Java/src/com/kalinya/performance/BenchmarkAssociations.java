@@ -5,9 +5,9 @@ import java.util.TreeMap;
 
 import com.kalinya.util.Assertions;
 import com.kalinya.util.BaseSet;
-import com.kalinya.util.ToStringBuilder;
 
 public class BenchmarkAssociations extends BaseSet<BenchmarkAssociation>{
+	private static final long serialVersionUID = 8597352530732073478L;
 	private Map<Portfolio, Portfolio> benchmarkAssociationsMap;
 
 	public BenchmarkAssociations() {

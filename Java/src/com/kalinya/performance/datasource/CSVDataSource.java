@@ -22,7 +22,6 @@ import com.kalinya.performance.Cashflows;
 import com.kalinya.performance.Instrument;
 import com.kalinya.performance.InstrumentLeg;
 import com.kalinya.performance.InstrumentLegs;
-import com.kalinya.performance.Instruments;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.Portfolios;
 import com.kalinya.performance.Position;
@@ -44,6 +43,7 @@ import com.kalinya.util.StringUtil;
 import com.kalinya.util.ToStringBuilder;
 
 final public class CSVDataSource extends DataSource {
+	private static final long serialVersionUID = -5237378913019125934L;
 	private final static DataSourceType DATA_SOURCE_TYPE = DataSourceType.CSV;
 	private final String positionsFilePath;
 	private final String securityMasterFilePath;

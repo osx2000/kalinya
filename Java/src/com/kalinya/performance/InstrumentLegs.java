@@ -1,6 +1,5 @@
 package com.kalinya.performance;
 
-import java.util.Date;
 import java.util.Set;
 
 import javax.xml.bind.annotation.XmlAccessOrder;
@@ -13,6 +12,7 @@ import com.kalinya.util.BaseSet;
 @XmlAccessorOrder(XmlAccessOrder.ALPHABETICAL)
 @XmlRootElement
 public class InstrumentLegs extends BaseSet<InstrumentLeg> {
+	private static final long serialVersionUID = 7826136042094105681L;
 	private Set<InstrumentLeg> instrumentLegSet;
 	
 	public InstrumentLegs() {
