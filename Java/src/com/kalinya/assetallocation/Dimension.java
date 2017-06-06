@@ -157,21 +157,52 @@ public final class Dimension implements Comparable<Dimension> {
 		return maximumChildGenerationCount;
 	}
 	
-	public static Map<Integer, Set<Dimension>> getDimensionFamilyTree(List<Dimension> dimensions) {
-		Map<Integer, Set<Dimension>> familyTree = new TreeMap<Integer, Set<Dimension>>(Collections.reverseOrder());
+	public static Map<Integer, Set<Dimension>> getDimensionsHierarchy(List<Dimension> dimensions) {
+		Map<Integer, Set<Dimension>> dimensionsHierarchy = new TreeMap<Integer, Set<Dimension>>(Collections.reverseOrder());
 		for(Dimension dimension: dimensions) {
 			int childGenerationCount = dimension.getChildGenerationCount();
-			Set<Dimension> generation = familyTree.get(childGenerationCount);
+			Set<Dimension> generation = dimensionsHierarchy.get(childGenerationCount);
 			if(generation == null) {
-				familyTree.put(childGenerationCount, new TreeSet<Dimension>());
+				dimensionsHierarchy.put(childGenerationCount, new TreeSet<Dimension>());
 			}
-			familyTree.get(childGenerationCount).add(dimension);
+			dimensionsHierarchy.get(childGenerationCount).add(dimension);
 		}
-		return familyTree; 
+		return dimensionsHierarchy; 
 	}
 
 	public static String getDimensionFamilyTreeAsString(List<Dimension> dimensions) {
-		Map<Integer, Set<Dimension>> familyTree = getDimensionFamilyTree(dimensions);
+		/*
+		 * -Core
+		 *  --Active
+		 *  --Cash1
+		 *  --Passive
+		 *  --Satellite
+		 *   ---BmkBills
+		 *   ---BmkBonds
+		 *   ---Cash
+		 *   ---Corp
+		 *   ---Country
+		 *   ---Duration
+		 *   ---Govt
+		 *   ---SemiGovt
+		 *   
+		 *  //TODO: what I'd like to have: 
+		 * -Core
+		 *  --Active
+		 *   ---Govt
+		 *   ---SemiGovt
+		 *   ---Corp
+		 *  --Passive
+		 *   ---BmkBonds
+		 *   ---BmkBills
+		 * -Satellite
+		 *  --Country
+		 *  --Duration
+		 * -Cash1
+		 *  --Cash
+		 */
+		
+		Map<Integer, Set<Dimension>> familyTree = getDimensionsHierarchy(dimensions);
 		Set<Dimension> printed = new HashSet<Dimension>();
 		StringBuilder sb = new StringBuilder();
 		String newLineBreak = "";
@@ -192,5 +223,15 @@ public final class Dimension implements Comparable<Dimension> {
 			bullet += "-";
 		}
 		return sb.toString();
+	}
+
+	public static Dimension get(List<Dimension> dimensions, String name) {
+		//TODO: move to new Dimensions class
+		for(Dimension dimension: dimensions) {
+			if(dimension.name.equalsIgnoreCase(name)) {
+				return dimension;
+			}
+		}
+		throw new IllegalArgumentException(String.format("Dimension [%s] is not one of the dimension in the collection %s", name, dimensions.toString()));
 	}
 }
