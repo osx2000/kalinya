@@ -197,4 +197,8 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 	private void setAssetClass(AssetClass assetClass) {
 		this.assetClass = assetClass;
 	}
+
+	public static Instrument create(String instrumentId) {
+		return new Instrument(instrumentId);
+	}
 }

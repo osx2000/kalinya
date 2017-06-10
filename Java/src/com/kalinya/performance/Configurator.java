@@ -41,6 +41,9 @@ public class Configurator {
 
 	public static final String SERIALIZED_FILE_PATH = ROOT_FILE_PATH + "PerformanceValues.ser";
 
+	public static final String SCENARIO_RESULTS_FILE_PATH = ROOT_FILE_PATH + "scenario_results.csv";
+	public static final String POSITIONS_FILE_PATH_SCENARIO_RESULTS = ROOT_FILE_PATH + "positions.scenario_results.csv";
+
 
 	public static String getRCode(Class<?> clazz) {
 		if(clazz.equals(EfficientFrontierExample.class)) {

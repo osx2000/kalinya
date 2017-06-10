@@ -29,7 +29,10 @@ public enum CsvHeader implements EnumName {
 	SECTOR("Sector","sector"), 
 	INSTRUMENT_CLASS("Instrument Class","instrument_class"), 
 	PORTFOLIO_GROUP("Portfolio Group", "portfolio_group"),
-	BENCHMARK("Benchmark", "benchmark"),
+	BENCHMARK("Benchmark", "benchmark"), 
+	DURATION("Duration", "duration"),
+	CONVEXITY("Convexity", "convexity"),
+	MARKET_YIELD("Market Yield", "market_yield")
 	;
 
 	private String name;

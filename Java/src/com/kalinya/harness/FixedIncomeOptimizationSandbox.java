@@ -50,8 +50,11 @@ public final class FixedIncomeOptimizationSandbox {
 	 * <h2 style="color:red;">TODO<h5>
 	 * <ul>
 	 * <li>TODO: Currency weight constraints</li>
+	 * <li>TODO: Credit rating constraints</li>
 	 * <li>TODO: Target yield relative to benchmark</li>
 	 * <li>TODO: Minimum issue size</li>
+	 * <li>TODO: Minimum issue size by currency (defined in local currency)</li>
+	 * <li>TODO: Minimum issue size exemption on specified instrument types e.g. commercial paper</li>
 	 * <li>TODO: Minimum issue date</li>
 	 * <li>TODO: Create Optimization object</li>
 	 * <li>TODO: Minimize turnover?</li>
@@ -116,7 +119,7 @@ public final class FixedIncomeOptimizationSandbox {
 			
 			//Yield constraint
 			//Greater than 3 percent
-			double[] yields = TestHarnessHelper.getInstrumentYield(portfolio);
+			double[] yields = TestHarnessHelper.getInstrumentYield(portfolio); 
 			constraints.add(new LinearConstraint(yields, Relationship.GEQ, 2.0));
 			
 			//Concentration limits

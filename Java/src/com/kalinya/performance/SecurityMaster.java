@@ -32,6 +32,7 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 	public SecurityMaster(String instrumentId, Date maturityDate, IndustryGroup industryGroup, Sector sector, RiskGroup riskGroup,
 			InstrumentClass instrumentClass, AssetClass assetClass) {
 		this();
+		//TODO: use Builder pattern
 		setMaturityDate(maturityDate);
 		setInstrumentId(instrumentId);
 		setIndustryGroup(industryGroup);
@@ -43,6 +44,7 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 
 	@Override
 	public String toString() {
+		//TODO: use ToStringBuilder
 		StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
 		sb.append(String.format("InstrumentId [%s]", getInstrumentId()));
 		if(getMaturityDate() != null) {

@@ -88,5 +88,9 @@ public class Instruments extends BaseSet<Instrument> {
 			addAll(instrumentSet);
 		}
 	}
+
+	public static Instruments create() {
+		return new Instruments();
+	}
 }
 

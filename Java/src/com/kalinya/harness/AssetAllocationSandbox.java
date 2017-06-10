@@ -47,8 +47,13 @@ public final class AssetAllocationSandbox {
 	/**
 	 * <h1 style="color:red;">To Do</h1>
 	 * <ul>
+	 * <li>Get post rebalance allocations</li>
+	 * <li>Support strategy definition by CSV</li>
 	 * <li>Use getMinimumOrderSize to ignore small trades</li>
+	 * <li>Support multi-currency portfolios</li>
+	 * <li>Do not target cash; sum proceeds of trades to account for cash rebalancing item</li>
 	 * <li>Check cash allocation when using getMinimumOrderSize to ignore small trades</li>
+	 * <li>Read Lee W. 2000 <i>Theory and Methodology of Tactical Asset Allocation</i> reference from FRAPO (2013) chapter 13, p325</li>
 	 * </ul>
 	 * <h1 style="color:green;">Supported</h1>
 	 * <ul>

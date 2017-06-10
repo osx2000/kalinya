@@ -37,6 +37,19 @@ public class DateUtil {
 		return Calendar.getInstance().getTime();
 	}
 
+	public static Date today() {
+		return getDate(now());
+	}
+	
+	public static Date getDate(Date date) {
+		Calendar instance = Calendar.getInstance();
+		instance.setTime(date);
+		int year = instance.get(Calendar.YEAR);
+		int month = instance.get(Calendar.MONTH);
+		int day = instance.get(Calendar.DAY_OF_MONTH);
+		return new Calendar.Builder().setDate(year, month,day).build().getTime();
+	}
+	
 	/**
 	 * Creates a Date based on a given SimpleDateFormat string
 	 * 

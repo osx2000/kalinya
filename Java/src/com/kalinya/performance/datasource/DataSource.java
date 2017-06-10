@@ -15,6 +15,7 @@ import com.kalinya.performance.Portfolios;
 import com.kalinya.performance.Positions;
 import com.kalinya.performance.SecurityMasters;
 import com.kalinya.performance.enums.DataSourceType;
+import com.kalinya.results.InstrumentResults;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.Debuggable;
 import com.kalinya.util.StringUtil;
@@ -206,6 +207,18 @@ public class DataSource implements Serializable, Debuggable {
 	}
 
 	public void retrieveSecurityMasterData() {
+		throw new NotImplementedException(notImplementedExceptionMessage);
+	}
+	
+	public InstrumentResults getInstrumentResults(Date date) {
+		throw new NotImplementedException(notImplementedExceptionMessage);
+	}
+	
+	public InstrumentResults getResults(Date date, Portfolios portfolios) {
+		throw new NotImplementedException(notImplementedExceptionMessage);
+	}
+	
+	public InstrumentResults getResults(Date date, Portfolios portfolios, String scenarioName) {
 		throw new NotImplementedException(notImplementedExceptionMessage);
 	}
 	

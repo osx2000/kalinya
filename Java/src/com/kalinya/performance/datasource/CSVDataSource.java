@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import com.kalinya.performance.Cashflows;
 import com.kalinya.performance.Instrument;
 import com.kalinya.performance.InstrumentLeg;
 import com.kalinya.performance.InstrumentLegs;
+import com.kalinya.performance.Instruments;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.Portfolios;
 import com.kalinya.performance.Position;
@@ -35,6 +37,8 @@ import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
 import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
+import com.kalinya.results.InstrumentResultEnum;
+import com.kalinya.results.InstrumentResults;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
@@ -49,6 +53,7 @@ final public class CSVDataSource extends DataSource {
 	private final String securityMasterFilePath;
 	private final String portfoliosFilePath;
 	private final String benchmarkAssociationsFilePath;
+	private final String scenarioResultsFilePath;
 
 	public CSVDataSource(Builder builder) {
 		super(builder);
@@ -56,7 +61,8 @@ final public class CSVDataSource extends DataSource {
 		securityMasterFilePath = builder.securityMasterFilePath;
 		portfoliosFilePath = builder.portfoliosFilePath;
 		benchmarkAssociationsFilePath = builder.benchmarkAssociationsFilePath;
-		loadData();
+		scenarioResultsFilePath = builder.scenarioResultsFilePath;
+		//loadData();
 	}
 	
 	@Override
@@ -90,6 +96,7 @@ final public class CSVDataSource extends DataSource {
 		private String securityMasterFilePath;
 		private String portfoliosFilePath;
 		private String benchmarkAssociationsFilePath;
+		public String scenarioResultsFilePath = null;
 
 		@Override
 		public CSVDataSource build() {
@@ -113,6 +120,11 @@ final public class CSVDataSource extends DataSource {
 
 		public Builder withBenchmarkAssociationsFilePath(String benchmarkAssociationsFilePath) {
 			this.benchmarkAssociationsFilePath = benchmarkAssociationsFilePath;
+			return this;
+		}
+		
+		public Builder withScenarioResultsFilePath(String scenarioResultsFilePath) {
+			this.scenarioResultsFilePath = scenarioResultsFilePath;
 			return this;
 		}
 	}
@@ -405,4 +417,87 @@ final public class CSVDataSource extends DataSource {
 	public String getBenchmarkAssociationsFilePath() {
 		return benchmarkAssociationsFilePath;
 	}
+	
+	private String getScenarioResultsFilePath() {
+		return scenarioResultsFilePath;
+	}
+	
+	@Override
+	public InstrumentResults getInstrumentResults(Date dateFilter) {
+		getTimer().start("GetResults");
+		InstrumentResults instrumentResults = null;
+		CSVParser csvParser = null;
+		String filePath = null;
+		try {
+			filePath = getScenarioResultsFilePath();
+			Assertions.notNull(filePath, "ScenarioResultsFilePath");
+			InputStream inputStream = new FileInputStream(filePath);
+			Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
+			csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
+
+			Map<String, Integer> headerMap = csvParser.getHeaderMap();
+			if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
+				System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
+			}
+			Date date = DateUtil.today();
+			Instruments tempInstruments = null;
+			if(instruments == null) {
+				tempInstruments = Instruments.create();
+			}
+			instrumentResults = InstrumentResults.create();
+			List<CSVRecord> csvRecords = csvParser.getRecords();
+			for(CSVRecord csvRecord: csvRecords) {
+				long recordNumber = csvRecord.getRecordNumber();
+				String instrumentId = csvRecord.get(CsvHeader.INSTRUMENT_ID.getName());
+				Instrument instrument = null;
+				if(instruments == null) {
+					instrument = tempInstruments.getInstrument(instrumentId, false);
+				} else {
+					instrument = getInstruments().getInstrument(instrumentId, false);
+				}
+				if(instrument == null) {
+					instrument = new Instrument(instrumentId);
+					if(instruments == null) {
+						tempInstruments.add(instrument);
+					} else {
+						getInstruments().add(instrument);
+					}
+				}
+				
+				if(headerMap.containsKey(CsvHeader.DATE.getName())) {
+					String dateStr = csvRecord.get(CsvHeader.DATE.getName());
+					date = DateUtil.parseDate(dateStr);
+					if(dateFilter.compareTo(date) != 0) {
+						//skip the import because it applies to another date
+						continue;
+					}
+				}
+				//TODO: check header exists
+				String durationStr = csvRecord.get(CsvHeader.DURATION.getName());
+				String convexityStr = csvRecord.get(CsvHeader.CONVEXITY.getName());
+				String marketYieldStr = csvRecord.get(CsvHeader.MARKET_YIELD.getName());
+
+				BigDecimal duration = NumberUtil.newBigDecimal(durationStr);
+				BigDecimal convexity = NumberUtil.newBigDecimal(convexityStr);
+				BigDecimal marketYield = NumberUtil.newBigDecimal(marketYieldStr);
+				
+				instrumentResults.setValue(date, instrument, InstrumentResultEnum.DURATION, duration);
+				instrumentResults.setValue(date, instrument, InstrumentResultEnum.CONVEXITY, convexity);
+				instrumentResults.setValue(date, instrument, InstrumentResultEnum.MARKET_YIELD, marketYield);
+				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
+					System.out.println("Record [" + recordNumber + "] InstrumentId [" + instrumentId.toString() + "]");
+				}
+			}
+			return instrumentResults;
+		} catch (IOException | IllegalArgumentException e) {
+			if(filePath != null) {
+				throw new RuntimeException(String.format("Exception processing file [%s]. %s", filePath, e.getMessage()), e);
+			}
+			throw new RuntimeException(e);
+		} finally {
+			PluginUtil.close(csvParser);
+			getTimer().stop();
+		}
+	}
+
 }

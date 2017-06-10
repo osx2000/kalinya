@@ -47,4 +47,24 @@ public class CreditRatingServiceSandbox {
 		}
 	}
 	
+	/**
+	 * <h2 style="color:red;">TODO<h5>
+	 * <ul>
+	 * <li>TODO: Create Moodys</li>
+	 * <li>TODO: Create Fitch</li>
+	 * <li>TODO: Create S&P</li>
+	 * <li>TODO: Short-term/long-term</li>
+	 * <li>TODO: Support rating aggregation</li>
+	 * <li>TODO: Rating aggregation supports max/min/average</li>
+	 * <li>TODO: Ratings on parties and instruments</li>
+	 * </ul>
+	 * <h2 style="color:green;">SUPPORTED</h3>
+	 * <ul>
+	 * <li></li>
+	 * <li></li>
+	 * <li></li>
+	 * </ul>
+	 */
+	public static void todo() {
+	}
 }
