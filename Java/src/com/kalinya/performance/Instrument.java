@@ -17,6 +17,7 @@ import com.kalinya.util.ComparableEqualsBuilder;
 
 public class Instrument implements Comparable<Instrument>, SecurityMasterData, Serializable {
 	private static final long serialVersionUID = 3743124681155407825L;
+	public static final Instrument CASH = Instrument.create("Cash");
 	private String instrumentId;
 	private String pricingTicker;
 	private Portfolio portfolio;

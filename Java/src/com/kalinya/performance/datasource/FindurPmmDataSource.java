@@ -84,7 +84,7 @@ final public class FindurPmmDataSource extends DataSource {
 	public void retrievePortfolios() {
 		if(portfolios == null) {
 			getTimer().start("GetPortfolios");
-			portfolios = new Portfolios();
+			portfolios = Portfolios.create();
 			Table table = null;
 			try {
 				StringBuilder sql = new StringBuilder();

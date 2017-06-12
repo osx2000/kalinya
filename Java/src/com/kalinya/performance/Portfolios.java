@@ -6,13 +6,12 @@ import com.kalinya.util.BaseSet;
 
 public class Portfolios extends BaseSet<Portfolio>{
 	private static final long serialVersionUID = -5525677261700574992L;
-	public static final Portfolios EMPTY = new Portfolios();
 
-	public Portfolios() {
+	private Portfolios() {
 		super();
 	}
 	
-	public Portfolios(Collection<Portfolio> portfolioSet) {
+	private Portfolios(Collection<Portfolio> portfolioSet) {
 		this();
 		for(Portfolio portfolio: portfolioSet) {
 			add(portfolio);
@@ -46,5 +45,13 @@ public class Portfolios extends BaseSet<Portfolio>{
 			}
 		}
 		throw new IllegalArgumentException("[" + portfolioName + "] is not in the set of loaded portfolios");
+	}
+	
+	public static Portfolios create() {
+		return new Portfolios();
+	}
+	
+	public static Portfolios create(Collection<Portfolio> portfolioSet) {
+		return new Portfolios(portfolioSet);
 	}
 }

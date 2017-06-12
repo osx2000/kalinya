@@ -421,7 +421,7 @@ public class PerformanceResult implements Serializable {
 					String portfolioStr = cashflowTable.getString(CsvHeader.PORTFOLIO.getName(), rowId);
 					String instrumentId = cashflowTable.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);
 					int legId = cashflowTable.getInt(CsvHeader.LEG_ID.getName(), rowId);
-					Portfolio portfolio = new Portfolio(portfolioStr);
+					Portfolio portfolio = Portfolio.create(portfolioStr);
 					Instrument instrument = getInstruments().getInstrument(instrumentId, false);
 					InstrumentLeg instrumentLeg = getInstrumentLegs().getInstrumentLeg(portfolio, instrument, legId);
 					if(instrumentLeg == null) {
@@ -456,7 +456,7 @@ public class PerformanceResult implements Serializable {
 					//TODO: handle cash flows
 					BigDecimal localAmount = NumberUtil.newBigDecimal("0");
 
-					Portfolio portfolio = new Portfolio(portfolioStr);
+					Portfolio portfolio = Portfolio.create(portfolioStr);
 					Instrument instrument = getInstruments().getInstrument(instrumentId, false);
 					InstrumentLeg instrumentLeg = getInstrumentLegs().getInstrumentLeg(portfolio, instrument, legId, false);
 					if(instrumentLeg == null) {
@@ -499,7 +499,7 @@ public class PerformanceResult implements Serializable {
 				}
 				int legId = table.getInt(CsvHeader.LEG_ID.getName(), rowId);
 				String currencyName = table.getString(CsvHeader.CURRENCY.getName(), rowId);
-				Portfolio portfolio = new Portfolio(portfolioStr);
+				Portfolio portfolio = Portfolio.create(portfolioStr);
 				Instrument instrument = getInstruments().getInstrument(instrumentId, false);
 				InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
 				instrumentLegs.add(instrumentLeg);

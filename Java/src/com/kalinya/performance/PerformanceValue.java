@@ -222,6 +222,13 @@ final public class PerformanceValue implements Serializable {
 		this.baseRateOfReturn = baseRateOfReturn;
 	}
 
+	/**
+	 * Adds a PerformanceValue to this PerformanceValue to obtain an aggregated
+	 * PerformanceValue
+	 * 
+	 * @param augend
+	 * @return
+	 */
 	public PerformanceValue add(PerformanceValue augend) {
 		BigDecimal startLocalMarketValue = getStartLocalMarketValue().add(augend.getStartLocalMarketValue());
 		BigDecimal startBaseMarketValue = getStartBaseMarketValue().add(augend.getStartBaseMarketValue());

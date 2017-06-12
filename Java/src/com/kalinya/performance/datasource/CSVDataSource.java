@@ -138,7 +138,7 @@ final public class CSVDataSource extends DataSource {
 	public void retrievePortfolios() {
 		if(portfolios == null) {
 			getTimer().start("GetPortfolios");
-			portfolios = new Portfolios();
+			portfolios = Portfolios.create();
 			CSVParser csvParser = null;
 			try {
 				String filePath = getPortfoliosFilePath();

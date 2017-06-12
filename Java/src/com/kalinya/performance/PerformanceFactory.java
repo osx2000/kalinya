@@ -248,10 +248,10 @@ final public class PerformanceFactory {
 	}
 	
 	public static Portfolios getPortfolios(String[] portfolioNames) {
-		Portfolios portfolios = new Portfolios();
+		Portfolios portfolios = Portfolios.create();
 		if(portfolioNames != null) {
 			for(String portfolioName: portfolioNames) {
-				portfolios.add(new Portfolio(portfolioName));
+				portfolios.add(Portfolio.create(portfolioName));
 			}
 		}
 		return portfolios;

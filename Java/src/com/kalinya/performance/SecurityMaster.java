@@ -14,6 +14,7 @@ import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.StringUtil;
+import com.kalinya.util.ToStringBuilder;
 
 public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMasterData, Serializable {
 	private static final long serialVersionUID = 1133324168398009965L;
@@ -44,43 +45,30 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 
 	@Override
 	public String toString() {
-		//TODO: use ToStringBuilder
-		StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
-		sb.append(String.format("InstrumentId [%s]", getInstrumentId()));
-		if(getMaturityDate() != null) {
-			sb.append(String.format(" MaturityDate [%s]", StringUtil.formatDate(getMaturityDate())));
-		}
-		if(getIndustryGroup() != null) {
-			sb.append(String.format(" IndustryGroup [%s]", getIndustryGroup()));
-		}
-		if(getSector() != null) {
-			sb.append(String.format(" Sector [%s]", getSector()));
-		}
-		if(getRiskGroup() != null) {
-			sb.append(String.format(" RiskGroup [%s]", getRiskGroup()));
-		}
-		if(getInstrumentClass() != null) {
-			sb.append(String.format(" InstrumentClass [%s]", getInstrumentClass()));
-		}
-		if(getAssetClass() != null) {
-			sb.append(String.format(" AssetClass [%s]", getAssetClass()));
-		}
-		return sb.toString();
+		return new ToStringBuilder(this)
+				.append("InstrumentId", getInstrumentId())
+				.append("MaturityDate", StringUtil.formatDate(getMaturityDate()))
+				.append("IndustryGroup", getIndustryGroup())
+				.append("Sector", getSector())
+				.append("RiskGroup", getRiskGroup())
+				.append("InstrumentClass", getInstrumentClass())
+				.append("AssetClass", getAssetClass())
+				.build();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return new ComparableEqualsBuilder<SecurityMaster>(this, obj)
 				.build();
 	}
-	
+
 	@Override
 	public int hashCode(){
 		return new HashCodeBuilder()
 				.append(instrumentId.toUpperCase())
 				.build();
 	}
-	
+
 	@Override
 	public int compareTo(SecurityMaster that) {
 		return new CompareToBuilder()
@@ -92,16 +80,16 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 	public String getInstrumentId() {
 		return instrumentId;
 	}
-	
+
 	private void setInstrumentId(String instrumentId) {
 		this.instrumentId = instrumentId;
 	}
-	
+
 	@Override
 	public Date getMaturityDate() {
 		return maturityDate;
 	}
-	
+
 	private void setMaturityDate(Date maturityDate) {
 		if(maturityDate == null) {
 			this.maturityDate = MAXIMUM_MATURITY_DATE;
@@ -109,12 +97,12 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 			this.maturityDate = maturityDate;
 		}
 	}
-	
+
 	@Override
 	public IndustryGroup getIndustryGroup() {
 		return industryGroup;
 	}
-	
+
 	private void setIndustryGroup(IndustryGroup industryGroup) {
 		this.industryGroup = industryGroup;
 	}
@@ -127,31 +115,31 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 	private void setSector(Sector sector) {
 		this.sector = sector;
 	}
-	
+
 	@Override
 	public RiskGroup getRiskGroup() {
 		return riskGroup;
 	}
-	
+
 	private void setRiskGroup(RiskGroup riskGroup) {
 		this.riskGroup = riskGroup;
 	}
-	
+
 	@Override
 	public InstrumentClass getInstrumentClass() {
 		return instrumentClass;
 	}
-	
+
 	private void setInstrumentClass(InstrumentClass instrumentClass) {
 		this.instrumentClass = instrumentClass;
 	}
-	
+
 	@Override
 	public AssetClass getAssetClass() {
 		return assetClass;
 	}
-	
-	private void setAssetClass(AssetClass assetClass) {
+
+	public void setAssetClass(AssetClass assetClass) {
 		this.assetClass = assetClass;
 	}
 

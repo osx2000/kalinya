@@ -23,7 +23,7 @@ public final class RuntimeArguments {
 	
 	private RuntimeArguments() {
 		attachToFindur = false;
-		portfolios = new Portfolios();
+		portfolios = Portfolios.create();
 	}
 	
 	public RuntimeArguments(Builder builder) {

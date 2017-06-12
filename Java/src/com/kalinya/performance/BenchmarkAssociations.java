@@ -55,11 +55,11 @@ public class BenchmarkAssociations extends BaseSet<BenchmarkAssociation>{
 	}
 
 	public Portfolios getPortfolios() {
-		return new Portfolios(benchmarkAssociationsMap.keySet());
+		return Portfolios.create(benchmarkAssociationsMap.keySet());
 	}
 	
 	public Portfolios getBenchmarks() {
-		return new Portfolios(benchmarkAssociationsMap.values());
+		return Portfolios.create(benchmarkAssociationsMap.values());
 	}
 	
 	private void setBenchmarkAssociationsMap() {

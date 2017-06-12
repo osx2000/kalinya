@@ -8,6 +8,11 @@ import com.kalinya.util.BaseSet;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.StringUtil;
 
+/**
+ * Represents a collection of position exposures used to calculate portfolio performance
+ * 
+ * @see com.kalinya.performance.Position
+ */
 public class Positions extends BaseSet<Position> {
 	private static final long serialVersionUID = 6971662887499508138L;
 	private Set<Position> positionSet;
@@ -86,7 +91,7 @@ public class Positions extends BaseSet<Position> {
 	
 	public Portfolios getPortfolios() {
 		if(portfolios == null) {
-			portfolios = new Portfolios();
+			portfolios = Portfolios.create();
 			for(Position position: getSet()) {
 				portfolios.add(position.getPortfolio());
 			}

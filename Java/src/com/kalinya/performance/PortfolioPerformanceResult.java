@@ -37,7 +37,7 @@ final public class PortfolioPerformanceResult extends PerformanceResult {
 	}
 
 	public Portfolios getPortfoliosWithResults() {
-		Portfolios portfolios = new Portfolios();
+		Portfolios portfolios = Portfolios.create();
 		for(PerformanceDimensions performanceDimensions: getPerformanceValues().keySet()) {
 			portfolios.add(performanceDimensions.getPortfolio());
 		}
