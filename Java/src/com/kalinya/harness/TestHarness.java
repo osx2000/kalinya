@@ -1,34 +1,25 @@
 package com.kalinya.harness;
 
-import java.util.Date;
-
-import com.kalinya.util.DateUtil;
-import com.kalinya.util.StringUtil;
+import com.kalinya.performance.BenchmarkAssociations;
+import com.kalinya.performance.Configurator;
+import com.kalinya.performance.PerformanceResult;
+import com.kalinya.performance.Portfolios;
+import com.kalinya.performance.SecurityMasters;
 
 public class TestHarness {
 
 	public static void main(String[] args) {
-		System.out.println("Tests using 15-Mar");
-		printDate("3/15/2017");
-		printDate("15-Mar-2017");
-		printDate("15-Mar-17");
-		printDate("03/15/17");
-		printDate("15 Mar 2017");
+		SecurityMasters securityMasterData = SecurityMasters.load();
+		System.out.println(String.format("SecurityMaster Data %s", securityMasterData.toVerboseString()));
 		
-		System.out.println("\nTests using 3-Mar");
-		printDate("3 Mar 2017");
-		printDate("3 Mar 17");
-		printDate("03/03/17");
-		printDate("3/3/2017");
-		printDate("3/3/17");
+		Portfolios portfolios = Portfolios.load();
+		System.out.println(String.format("Portfolio Data %s", portfolios.toVerboseString()));
+
+		BenchmarkAssociations benchmarkAssociations = BenchmarkAssociations.load();
+		System.out.println(String.format("BenchmarkAssociations Data %s", benchmarkAssociations.toVerboseString()));
 		
-		System.out.println("\nTests using 13-Dec");
-		printDate("12/13/16");
+		String performanceValuesFilePath = Configurator.PERFORMANCE_RESULTS_EXTRACT_FILE_PATH;
+		PerformanceResult performanceResults = null;
+		
 	}
-
-	private static void printDate(String s) {
-		Date date = DateUtil.parseDate(s);
-		System.out.println("Input [" + s + "] Ouput [" + StringUtil.formatDate(date) + "]");
-	}
-
 }

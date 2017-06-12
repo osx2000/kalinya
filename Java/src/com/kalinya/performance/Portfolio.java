@@ -15,7 +15,7 @@ public class Portfolio implements Comparable<Portfolio>, Serializable {
 	private Portfolio() {
 	}
 
-	public Portfolio(String name) {
+	private Portfolio(String name) {
 		this(name, null);
 	}
 	
@@ -60,5 +60,9 @@ public class Portfolio implements Comparable<Portfolio>, Serializable {
 		return new CompareToBuilder()
 				.append(name.toUpperCase(), that.name.toUpperCase())
 				.build();
+	}
+
+	public static Portfolio create(String portfolioName) {
+		return new Portfolio(portfolioName);
 	}
 }

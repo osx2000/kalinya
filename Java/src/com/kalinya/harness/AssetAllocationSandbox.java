@@ -1,11 +1,10 @@
 package com.kalinya.harness;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 import com.kalinya.assetallocation.Dimensions;
 import com.kalinya.assetallocation.Strategy;
-import com.kalinya.optimization.Instrument;
+import com.kalinya.performance.Positions;
 import com.kalinya.util.NumberUtil;
 import com.kalinya.util.StringUtil;
 
@@ -32,8 +31,8 @@ public final class AssetAllocationSandbox {
 		strategy.setTargetAllocation(dimensions.get("Cash"), NumberUtil.newBigDecimal(0.05));
 		//System.out.println(strategy.getTargetAllocationsAsString());
 		
-		Map<Instrument, BigDecimal> portfolio = TestHarnessHelper.getPortfolio();
-		strategy.setActualAllocation(portfolio);
+		Positions positions = TestHarnessHelper.getPositions();
+		strategy.setActualAllocation(positions);
 		System.out.println(String.format("PortfolioSizeByDimension %s", strategy.getPortfolioSizeByDimension()));
 		System.out.println(String.format("InstrumentsByDimension %s", strategy.getInstrumentsByDimension()));
 		BigDecimal portfolioSize = strategy.getPortfolioSize();

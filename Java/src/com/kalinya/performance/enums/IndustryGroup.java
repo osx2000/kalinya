@@ -23,7 +23,40 @@ public enum IndustryGroup implements EnumIdName {
 	TECHNOLOGY_HARDWARE_AND_EQUIPMENT(4520,"Technology Hardware & Equipment"), 
 	TELECOMMUNICATION_SERVICES(5010,"Telecommunication Services"), 
 	UTILITIES(5510,"Utilities"), 
-	REAL_ESTATE(6010,"Real Estate"), 
+	REAL_ESTATE(6010,"Real Estate"),
+	//TODO: Update list to support sovereign issuers!
+	SOVEREIGN(9999,"Sovereign")
+	
+	/**
+	 * TODO: decide whether to stick with MSCI's GICS or use the NAICS
+	 * + GICS
+	 * 		https://www.msci.com/gics
+	 * + NAICS
+	 * 		https://www.census.gov/cgi-bin/sssd/naics/naicsrch?chart=2017
+	 */
+	
+	/*UNKNOWN(-1, "Unknown"),
+	CASH(1, "Cash"),
+	AGRICULTURE(11, "Agriculture, Forestry, Fishing and Hunting"),
+	MINING(21, "Mining, Quarrying, and Oil and Gas Extraction"),
+	UTILITIES(22, "Utilities"),
+	CONSTRUCTION(23, "Construction"),
+	MANUFACTURING(31-33, "Manufacturing"),
+	WHOLESALE_TRADE(42, "Wholesale Trade"),
+	RETAIL(44-45, "Retail Trade"),
+	TRANSPORTATION(48-49, "Transportation and Warehousing"),
+	INFORMATION(51, "Information"),
+	FINANCE_AND_INSURANCE(52, "Finance and Insurance"),
+	REAL_ESTATE(53, "Real Estate and Rental and Leasing"),
+	PROFESSIONAL_SERVICES(54, "Professional, Scientific, and Technical Services"),
+	MANAGEMENT(55, "Management of Companies and Enterprises"),
+	ADMINISTRATIVE_SERVICES(56, "Administrative and Support and Waste Management and Remediation Services"),
+	EDUCATIONAL(61, "Educational Services"),
+	HEALTHCARE(62, "Health Care and Social Assistance"),
+	ARTS_AND_ENTERTAINMENT(71, "Arts, Entertainment, and Recreation"),
+	ACCOMMODATION_AND_FOOD_SERVICES(72, "Accommodation and Food Services"),
+	OTHER_SERVICES(81, "Other Services (except Public Administration)"),
+	PUBLIC_ADMINISTRATION(92, "Public Administration")*/
 	;
 
 	private int id;

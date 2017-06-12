@@ -6,6 +6,7 @@ import java.util.Date;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.assetallocation.Dimension;
 import com.kalinya.performance.dimensions.AssetClassPerformanceDimension;
 import com.kalinya.performance.dimensions.IndustryGroupPerformanceDimension;
 import com.kalinya.performance.dimensions.InstrumentClassPerformanceDimension;
@@ -151,6 +152,11 @@ public class InstrumentLeg implements Comparable<InstrumentLeg>, SecurityMasterD
 	@Override
 	public AssetClass getAssetClass() {
 		return getInstrument().getAssetClass();
+	}
+	
+	@Override
+	public Dimension getDimension() {
+		return getInstrument().getDimension();
 	}
 
 	public PerformanceDimensions getPerformanceDimensionsKey(

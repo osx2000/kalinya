@@ -118,6 +118,11 @@ public class PerformanceServiceSandbox {
 				performanceResults.extractToUserTable("USER_perf_results_by_leg");
 			}
 		}
+		if(performanceDimensions.equals(PerformanceDimensions.BY_DATE_BY_LEG)) {
+			performanceResults.extractToDatabase();
+			PerformanceResult results = PerformanceResult.load(Configurator.PERFORMANCE_VALUES_DATABASE_FILE_PATH);
+			
+		}
 		performanceResults.extractToCsvFile(dataSource.getResultsExtractFilePath());
 		System.out.println(String.format("Extracted to [%s]", dataSource.getResultsExtractFilePath()));
 		performanceResults.extractToSerializedFile(Configurator.SERIALIZED_FILE_PATH);

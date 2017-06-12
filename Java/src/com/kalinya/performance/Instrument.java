@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlElement;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.assetallocation.Dimension;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
@@ -17,6 +18,7 @@ import com.kalinya.util.ComparableEqualsBuilder;
 
 public class Instrument implements Comparable<Instrument>, SecurityMasterData, Serializable {
 	private static final long serialVersionUID = 3743124681155407825L;
+	public static final Instrument CASH = Instrument.create("Cash");
 	private String instrumentId;
 	private String pricingTicker;
 	private Portfolio portfolio;
@@ -27,6 +29,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 	private InstrumentClass instrumentClass;
 	private AssetClass assetClass;
 	private Date maturityDate;
+	private Dimension dimension;
 
 	private Instrument() {
 		//Disable default ctor
@@ -35,6 +38,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 		setRiskGroup(RiskGroup.UNKNOWN);
 		setInstrumentClass(InstrumentClass.UNKNOWN);
 		setAssetClass(AssetClass.UNKNOWN);
+		setDimension(Dimension.UNKNOWN);
 	}
 	
 	public Instrument(String instrumentId) {
@@ -197,8 +201,19 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 	private void setAssetClass(AssetClass assetClass) {
 		this.assetClass = assetClass;
 	}
+	
+	private void setDimension(Dimension dimension) {
+		this.dimension = dimension;
+	}
+	
+	@Override
+	public Dimension getDimension() {
+		return dimension;
+	}
 
 	public static Instrument create(String instrumentId) {
 		return new Instrument(instrumentId);
 	}
+	
+	
 }

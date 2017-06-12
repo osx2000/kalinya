@@ -2,7 +2,9 @@ package com.kalinya.results;
 
 public enum InstrumentResultEnum {
 
-	DURATION("Duration"), MARKET_YIELD("Market Yield"), CONVEXITY("Convexity");
+	DURATION("Duration"), MARKET_YIELD("Market Yield"), CONVEXITY("Convexity"), 
+	//TODO
+	MATURITY_BUCKET("Maturity Bucket"), TERM_TO_MATURITY_YEARS("Term to Maturity Years");
 
 	private String name;
 

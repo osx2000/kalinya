@@ -1,9 +1,13 @@
 package com.kalinya.performance;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,7 +22,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.input.BOMInputStream;
 import org.joda.time.Days;
 
 import com.kalinya.enums.CurrencyBasis;
@@ -37,6 +45,7 @@ import com.kalinya.performance.enums.SecurityMasterEnum;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.BaseSet;
 import com.kalinya.util.CollectionUtil;
+import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
 import com.kalinya.util.PluginUtil;
 import com.kalinya.util.StringUtil;
@@ -421,7 +430,7 @@ public class PerformanceResult implements Serializable {
 					String portfolioStr = cashflowTable.getString(CsvHeader.PORTFOLIO.getName(), rowId);
 					String instrumentId = cashflowTable.getString(CsvHeader.INSTRUMENT_ID.getName(), rowId);
 					int legId = cashflowTable.getInt(CsvHeader.LEG_ID.getName(), rowId);
-					Portfolio portfolio = new Portfolio(portfolioStr);
+					Portfolio portfolio = Portfolio.create(portfolioStr);
 					Instrument instrument = getInstruments().getInstrument(instrumentId, false);
 					InstrumentLeg instrumentLeg = getInstrumentLegs().getInstrumentLeg(portfolio, instrument, legId);
 					if(instrumentLeg == null) {
@@ -456,7 +465,7 @@ public class PerformanceResult implements Serializable {
 					//TODO: handle cash flows
 					BigDecimal localAmount = NumberUtil.newBigDecimal("0");
 
-					Portfolio portfolio = new Portfolio(portfolioStr);
+					Portfolio portfolio = Portfolio.create(portfolioStr);
 					Instrument instrument = getInstruments().getInstrument(instrumentId, false);
 					InstrumentLeg instrumentLeg = getInstrumentLegs().getInstrumentLeg(portfolio, instrument, legId, false);
 					if(instrumentLeg == null) {
@@ -499,7 +508,7 @@ public class PerformanceResult implements Serializable {
 				}
 				int legId = table.getInt(CsvHeader.LEG_ID.getName(), rowId);
 				String currencyName = table.getString(CsvHeader.CURRENCY.getName(), rowId);
-				Portfolio portfolio = new Portfolio(portfolioStr);
+				Portfolio portfolio = Portfolio.create(portfolioStr);
 				Instrument instrument = getInstruments().getInstrument(instrumentId, false);
 				InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, legId, currencyName);
 				instrumentLegs.add(instrumentLeg);
@@ -720,10 +729,6 @@ public class PerformanceResult implements Serializable {
 
 	public Session getSession() {
 		return getPerformanceFactory().getSession();
-	}
-
-	private DebugLevel getDebugLevel() {
-		return performanceFactory.getDebugLevel();
 	}
 
 	public PerformanceFactory getPerformanceFactory() {
@@ -980,5 +985,92 @@ public class PerformanceResult implements Serializable {
 			PluginUtil.close(out);
 			PluginUtil.close(fileOut);
 		}
+	}
+
+	public void extractToDatabase() {
+		extractToCsvFile(Configurator.PERFORMANCE_VALUES_DATABASE_FILE_PATH);
+	}
+
+	/**
+	 * Loads the collection of Performance records
+	 * 
+	 * @param filePath
+	 *            The path to the CSV file
+	 * @return
+	 */
+	public static PerformanceResult load(String filePath) {
+		Timer timer = new Timer();
+		timer.start("LoadPerformanceValuesData");
+		PerformanceResult performanceResult = PerformanceResult.create();
+		CSVParser csvParser = null;
+		try {
+			Assertions.notNull(filePath, "PerformanceResultFilePath");
+			InputStream inputStream = new FileInputStream(filePath);
+			Reader reader = new InputStreamReader(new BOMInputStream(inputStream));
+			csvParser = new CSVParser(reader, CSVFormat.EXCEL.withHeader().withIgnoreHeaderCase().withIgnoreSurroundingSpaces().withTrim());
+
+			if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
+				Map<String, Integer> headerMap = csvParser.getHeaderMap();
+				System.out.println("Header Map [" + (headerMap != null ? headerMap.toString() : "null") + "]");
+			}
+
+			List<CSVRecord> csvRecords = csvParser.getRecords();
+			for(CSVRecord csvRecord: csvRecords) {
+				long recordNumber = csvRecord.getRecordNumber();
+				
+				String dateStr = csvRecord.get(CsvHeader.DATE.getName());
+				String portfolioName = csvRecord.get(CsvHeader.PORTFOLIO.getName());
+				String instrumentId = csvRecord.get(CsvHeader.INSTRUMENT_ID.getName());
+				String legIdStr = csvRecord.get(CsvHeader.LEG_ID.getName());
+				String currency = csvRecord.get(CsvHeader.CURRENCY.getName());
+				String startMarketValueStr = csvRecord.get(CsvHeader.START_LOCAL_MARKET_VALUE.getName());
+				String baseStartMarketValueStr = csvRecord.get(CsvHeader.START_BASE_MARKET_VALUE.getName());
+				String marketValueStr = csvRecord.get(CsvHeader.END_LOCAL_MARKET_VALUE.getName());
+				String baseMarketValueStr = csvRecord.get(CsvHeader.END_BASE_MARKET_VALUE.getName());
+				String cashFlowStr = csvRecord.get(CsvHeader.LOCAL_CASHFLOWS_AMOUNT.getName());
+				String baseCashFlowStr = csvRecord.get(CsvHeader.BASE_CASHFLOWS_AMOUNT.getName());
+				String localGainLossStr = csvRecord.get(CsvHeader.LOCAL_GAIN_LOSS.getName());
+				String baseGainLossStr = csvRecord.get(CsvHeader.BASE_GAIN_LOSS.getName());
+				String localRateOfReturnStr = csvRecord.get(CsvHeader.LOCAL_RATE_OF_RETURN.getName());
+				String baseRateOfReturnStr = csvRecord.get(CsvHeader.BASE_RATE_OF_RETURN.getName());
+				
+				Date date = DateUtil.parseDate(dateStr);
+				Portfolio portfolio = Portfolio.create(portfolioName);
+				Instrument instrument = Instrument.create(instrumentId);
+				InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument , Integer.valueOf(legIdStr), currency);
+				
+				BigDecimal startMarketValue = NumberUtil.newBigDecimal(startMarketValueStr);
+				BigDecimal baseStartMarketValue = NumberUtil.newBigDecimal(baseStartMarketValueStr);
+				BigDecimal marketValue = NumberUtil.newBigDecimal(marketValueStr);
+				BigDecimal baseMarketValue = NumberUtil.newBigDecimal(baseMarketValueStr);
+				
+				Cashflows localLegCashflows = new Cashflows();
+				Cashflow localCashflow = new Cashflow(instrumentLeg, date, currency, NumberUtil.newBigDecimal(cashFlowStr));
+				localLegCashflows.add(localCashflow);
+				//TODO: change to .create()
+				Cashflows baseCashflows = new Cashflows();
+				Cashflow baseCashflow = new Cashflow(instrumentLeg, date, currency, NumberUtil.newBigDecimal(cashFlowStr));
+				baseCashflows.add(baseCashflow);
+				
+				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
+					System.out.println("Record [" + recordNumber + "] Portfolio [" + portfolio.toString() + "]");
+				}
+				performanceResult.add(portfolio);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			PluginUtil.close(csvParser);
+			timer.stop();
+		}
+		return performanceResult;
+	}
+	
+	private static PerformanceResult create() {
+		return new PerformanceResult();
+	}
+
+	public static DebugLevel getDebugLevel() {
+		return Configurator.debugLevel;
 	}
 }

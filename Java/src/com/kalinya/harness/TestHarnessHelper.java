@@ -9,9 +9,13 @@ import java.util.Map;
 
 import com.kalinya.assetallocation.Dimension;
 import com.kalinya.assetallocation.Dimensions;
-import com.kalinya.optimization.Instrument;
 import com.kalinya.optimization.InstrumentStatistic;
 import com.kalinya.optimization.MaturityBucket;
+import com.kalinya.performance.Configurator;
+import com.kalinya.performance.Instrument;
+import com.kalinya.performance.Instruments;
+import com.kalinya.performance.Positions;
+import com.kalinya.performance.datasource.CSVDataSource;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
@@ -60,7 +64,27 @@ public class TestHarnessHelper {
 		return MaturityBucket.createMaturityBuckets(new String[]{"1y", "2y", "5y", "10y", "30y"});
 	}
 	
-	public static List<Instrument> getInstruments() {
+	/*public static Instruments getInstruments() {
+		MaturityBucket[] maturityBuckets = getMaturityBuckets();
+		CSVDataSource dataSource = new CSVDataSource.Builder()
+				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
+				.build();
+		Instruments instruments = dataSource.getInstruments();
+		
+		portfolio.add(new Instrument.Builder("3yBondDecayed2.5y").withDuration(0.4906).withConvexity(0.2406).withYield(1.70).withMaturityDate(DateUtil.parseSymbolicDate("6m")).build());
+		portfolio.add(new Instrument.Builder("3yBondDecayed2y").withDuration(0.9706).withConvexity(0.7155).withYield(2.19).withMaturityDate(DateUtil.parseSymbolicDate("1y")).build());
+		portfolio.add(new Instrument.Builder("1yBill").withDuration(0.9889).withConvexity(0.7334).withYield(2.25).withMaturityDate(DateUtil.parseSymbolicDate("1y")).build());
+		portfolio.add(new Instrument.Builder("3yBondDecayed1y").withDuration(1.8767).withConvexity(2.2730).withYield(3.00).withMaturityDate(DateUtil.parseSymbolicDate("2y")).build());
+		portfolio.add(new Instrument.Builder("3yBond").withDuration(2.7433).withConvexity(4.5964).withYield(3.90).withMaturityDate(DateUtil.parseSymbolicDate("3y")).build());
+		portfolio.add(new Instrument.Builder("5yBond").withDuration(4.2299).withConvexity(10.7844).withYield(5.00).withMaturityDate(DateUtil.parseSymbolicDate("5y")).build());
+		portfolio.add(new Instrument.Builder("10yBond").withDuration(7.0298).withConvexity(31.6523).withYield(6.30).withMaturityDate(DateUtil.parseSymbolicDate("10y")).build());
+		portfolio.add(new Instrument.Builder("15yBond").withDuration(8.6781).withConvexity(52.6504).withYield(7.20).withMaturityDate(DateUtil.parseSymbolicDate("15y")).build());
+		portfolio.add(new Instrument.Builder("20yBond").withDuration(9.3945).withConvexity(67.5164).withYield(8.20).withMaturityDate(DateUtil.parseSymbolicDate("20y")).assignToMaturityBucket(maturityBuckets).build());
+		Instrument.assignToMaturityBuckets(portfolio, maturityBuckets);
+		return portfolio;
+	}*/
+	
+	/*public static List<Instrument> getInstrumentsAsList() {
 		List<Instrument> portfolio = new ArrayList<>();
 		MaturityBucket[] maturityBuckets = getMaturityBuckets();
 		portfolio.add(Instrument.CASH);
@@ -85,7 +109,7 @@ public class TestHarnessHelper {
 		portfolio.add(new Instrument.Builder("Bond3").withDuration(8.062189241).withConvexity(77.26053665).withYield(4.180).withMaturityDate(DateUtil.parseSymbolicDate("10y")).build());
 		Instrument.assignToMaturityBuckets(portfolio, maturityBuckets);
 		return portfolio;
-	}
+	}*/
 	
 	public static BigDecimal getYield(Instrument[] portfolio, double[] instrumentWeights) {
 		return getStatistic(portfolio, instrumentWeights, InstrumentStatistic.YIELD);
@@ -116,6 +140,7 @@ public class TestHarnessHelper {
 				instrument = portfolio[i];
 				BigDecimal instrumentWeight = NumberUtil.newBigDecimal(instrumentWeights[i]);
 				BigDecimal instrumentProRataWeight = instrumentWeight.divide(sumOfWeights, NumberUtil.MATH_CONTEXT);
+				//TODO: getResults
 				statisticValue = statisticValue.add(instrument.getStatistic(instrumentStatistic).multiply(instrumentProRataWeight));
 			};
 			return statisticValue;
@@ -156,39 +181,9 @@ public class TestHarnessHelper {
 
 	public static Map<Instrument, BigDecimal> getPortfolio() {
 		Map<Instrument, BigDecimal> portfolio = new LinkedHashMap<Instrument, BigDecimal>();
-		List<Instrument> instruments = getInstruments();
-		
-		getInstrument(instruments, "Cash").setDimension(Dimension.CASH);
-		portfolio.put(getInstrument(instruments, "Cash"), NumberUtil.newBigDecimal(600e3, 2));
-		
-		getInstrument(instruments, "3yBondDecayed2.5y").setDimension(Dimension.create("Govt"));
-		portfolio.put(getInstrument(instruments, "3yBondDecayed2.5y"), NumberUtil.newBigDecimal(4.2e6, 2));
-		
-		getInstrument(instruments, "3yBondDecayed2y").setDimension(Dimension.create("Govt"));
-		portfolio.put(getInstrument(instruments, "3yBondDecayed2y"), NumberUtil.newBigDecimal(4.6e6, 2));
-		
-		getInstrument(instruments, "1yBill").setDimension(Dimension.create("BmkBills"));
-		portfolio.put(getInstrument(instruments, "1yBill"), NumberUtil.newBigDecimal(1.5e6, 2));
-		
-		getInstrument(instruments, "3yBondDecayed1y").setDimension(Dimension.create("SemiGovt"));
-		portfolio.put(getInstrument(instruments, "3yBondDecayed1y"), NumberUtil.newBigDecimal(1.6e6, 2));
-		
-		getInstrument(instruments, "3yBond").setDimension(Dimension.create("Corp"));
-		portfolio.put(getInstrument(instruments, "3yBond"), NumberUtil.newBigDecimal(790e3, 2));
-		
-		getInstrument(instruments, "5yBond").setDimension(Dimension.create("BmkBonds"));
-		portfolio.put(getInstrument(instruments, "5yBond"), NumberUtil.newBigDecimal(575e3, 2));
-		
-		getInstrument(instruments, "10yBond").setDimension(Dimension.create("BmkBonds"));
-		portfolio.put(getInstrument(instruments, "10yBond"), NumberUtil.newBigDecimal(725e3, 2));
-		
-		getInstrument(instruments, "15yBond").setDimension(Dimension.create("Duration"));
-		portfolio.put(getInstrument(instruments, "15yBond"), NumberUtil.newBigDecimal(600e3, 2));
-		
-		getInstrument(instruments, "20yBond").setDimension(Dimension.create("Country"));
-		portfolio.put(getInstrument(instruments, "20yBond"), NumberUtil.newBigDecimal(810e3, 2));
+		Instruments instruments = getInstruments();
 
-		return portfolio;
+		return null;
 	}
 	
 	public static Instrument getInstrument(Collection<Instrument> instruments, String instrumentId) {
@@ -198,5 +193,11 @@ public class TestHarnessHelper {
 			}
 		}
 		throw new IllegalArgumentException(String.format("InstrumentId [%s] is not one of the instruments in the collection %s", instrumentId, instruments.toString()));
+	}
+
+	public static Positions getPositions() {
+		// TODO Auto-generated method stub
+		//TODO: use database to retrieve Positions collection
+		return null;
 	}
 }

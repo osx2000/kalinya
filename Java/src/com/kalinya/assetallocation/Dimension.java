@@ -5,12 +5,16 @@ import java.util.Set;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.performance.dimensions.BasePerformanceDimension;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.ToStringBuilder;
 
-public final class Dimension implements Comparable<Dimension> {
+public final class Dimension extends BasePerformanceDimension implements Comparable<BasePerformanceDimension> {
+	private static final long serialVersionUID = 7692384436512440722L;
 	public static final Dimension CASH = new Dimension("Cash");
+	public static final Dimension UNKNOWN = Dimension.create("Unknown");
+	private static Dimension instance;
 	private Dimension parentDimension;
 	private Dimensions childDimensions;
 	private String name;
@@ -41,7 +45,7 @@ public final class Dimension implements Comparable<Dimension> {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder<Dimension>(this, obj)
+		return new ComparableEqualsBuilder<BasePerformanceDimension>(this, obj)
 				.build();
 	}
 	
@@ -53,9 +57,9 @@ public final class Dimension implements Comparable<Dimension> {
 	}
 	
 	@Override
-	public int compareTo(Dimension that) {
+	public int compareTo(BasePerformanceDimension that) {
 		return new CompareToBuilder()
-				.append(name.toUpperCase(), that.name.toUpperCase())
+				.append(getName().toUpperCase(), that.getName().toUpperCase())
 				.build();
 	}
 	
@@ -131,6 +135,13 @@ public final class Dimension implements Comparable<Dimension> {
 			maximumChildGenerationCount = Math.max(maximumChildGenerationCount, descendant.getChildGenerationCount()+1);
 		}
 		return maximumChildGenerationCount;
+	}
+
+	public static Dimension getInstance() {
+		if(instance == null) {
+			instance = new Dimension();
+		}
+		return instance;
 	}
 	
 	/*public static Map<Integer, Set<Dimension>> getDimensionsHierarchy(List<Dimension> dimensions) {

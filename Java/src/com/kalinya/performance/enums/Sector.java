@@ -19,7 +19,9 @@ public enum Sector implements EnumIdName {
 	INFORMATION_TECHNOLOGY(45,"Information Technology"), 
 	TELECOMMUNICATION_SERVICES(50,"Telecommunication Services"), 
 	UTILITIES(55,"Utilities"), 
-	REAL_ESTATE(60,"Real Estate"), 
+	REAL_ESTATE(60,"Real Estate"),
+	//TODO: find classifications that include sovereign
+	SOVEREIGN(999,"Sovereign")
 	;
 	
 	private int id;

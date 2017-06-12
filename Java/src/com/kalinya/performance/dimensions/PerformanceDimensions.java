@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 
+import com.kalinya.assetallocation.Dimension;
 import com.kalinya.performance.InstrumentLeg;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.SecurityMasterData;
@@ -72,6 +73,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	private RiskGroup riskGroup;
 	private InstrumentClass instrumentClass;
 	private AssetClass assetClass;
+	private Dimension dimension;
 	
 	public PerformanceDimensions() {
 		super();
@@ -79,7 +81,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 
 	public PerformanceDimensions(Date date, Portfolio portfolio, InstrumentLeg instrumentLeg,
 			IndustryGroup industryGroup, Sector sector, RiskGroup riskGroup, InstrumentClass instrumentClass,
-			AssetClass assetClass) {
+			AssetClass assetClass, Dimension dimension) {
 		this();
 		setDate(date);
 		setInstrumentLeg(instrumentLeg);
@@ -329,6 +331,11 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	public void setAssetClass(AssetClass assetClass) {
 		this.assetClass = assetClass;
 	}
+	
+	@Override
+	public Dimension getDimension() {
+		return dimension;
+	}
 
 	public PerformanceDimensions withDateDimension() {
 		return withDateDimension(true);
@@ -346,7 +353,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	
 	public PerformanceDimensions withDateDimension(Date date) {
 		return new PerformanceDimensions(date, getPortfolio(), getInstrumentLeg(), getIndustryGroup(), getSector(),
-				getRiskGroup(), getInstrumentClass(), getAssetClass());
+				getRiskGroup(), getInstrumentClass(), getAssetClass(), getDimension());
 	}
 	
 	public PerformanceDimensions withCumulativeDimension() {
@@ -379,7 +386,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	
 	public PerformanceDimensions withPortfolioDimension(Portfolio portfolio) {
 		return new PerformanceDimensions(getDate(), portfolio, getInstrumentLeg(), getIndustryGroup(), getSector(),
-				getRiskGroup(), getInstrumentClass(), getAssetClass());
+				getRiskGroup(), getInstrumentClass(), getAssetClass(), getDimension());
 	}
 	
 	public PerformanceDimensions withInstrumentLegDimension() {
@@ -398,7 +405,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 
 	public PerformanceDimensions withInstrumentLegDimension(InstrumentLeg instrumentLeg) {
 		return new PerformanceDimensions(getDate(), getPortfolio(), instrumentLeg, getIndustryGroup(), getSector(),
-				getRiskGroup(), getInstrumentClass(), getAssetClass());
+				getRiskGroup(), getInstrumentClass(), getAssetClass(), getDimension());
 	}
 	
 	public PerformanceDimensions withIndustryGroupDimension() {
@@ -417,7 +424,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 
 	public PerformanceDimensions withIndustryGroupDimension(IndustryGroup industryGroup) {
 		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), industryGroup, getSector(),
-				getRiskGroup(), getInstrumentClass(), getAssetClass());
+				getRiskGroup(), getInstrumentClass(), getAssetClass(), getDimension());
 	}
 	
 	public PerformanceDimensions withSectorDimension() {
@@ -436,7 +443,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	
 	public PerformanceDimensions withSectorDimension(Sector sector) {
 		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), sector,
-				getRiskGroup(), getInstrumentClass(), getAssetClass());
+				getRiskGroup(), getInstrumentClass(), getAssetClass(), getDimension());
 	}
 	
 	public PerformanceDimensions withRiskGroupDimension() {
@@ -455,7 +462,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	
 	public PerformanceDimensions withRiskGroupDimension(RiskGroup riskGroup) {
 		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), getSector(),
-				riskGroup, getInstrumentClass(), getAssetClass());
+				riskGroup, getInstrumentClass(), getAssetClass(), getDimension());
 	}
 	
 	public PerformanceDimensions withInstrumentClassDimension() {
@@ -474,7 +481,7 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	
 	public PerformanceDimensions withInstrumentClassDimension(InstrumentClass instrumentClass) {
 		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), getSector(),
-				getRiskGroup(), instrumentClass, getAssetClass());
+				getRiskGroup(), instrumentClass, getAssetClass(), getDimension());
 	}
 	
 	public PerformanceDimensions withAssetClassDimension() {
@@ -493,8 +500,28 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	
 	public PerformanceDimensions withAssetClassDimension(AssetClass assetClass) {
 		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), getSector(),
-				getRiskGroup(), getInstrumentClass(), assetClass);
+				getRiskGroup(), getInstrumentClass(), assetClass, getDimension());
 	}
+	
+	public PerformanceDimensions withDimension() {
+		return withDimension(true);
+	}
+	
+	public PerformanceDimensions withDimension(boolean b) {
+		Dimension instance = Dimension.getInstance();
+		if(b) {
+			add(instance);
+		} else {
+			remove(instance);
+		}
+		return this;
+	}
+	
+	public PerformanceDimensions withDimension(Dimension dimension) {
+		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), getSector(),
+				riskGroup, getInstrumentClass(), getAssetClass(), dimension);
+	}
+	
 
 	public void validate() {
 		if(contains(CumulativePerformanceDimension.getInstance()) && contains(DatePerformanceDimension.getInstance())) {
@@ -521,6 +548,6 @@ public class PerformanceDimensions extends BaseSet<BasePerformanceDimension> imp
 	
 	@Override
 	protected PerformanceDimensions clone() {
-		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), getSector(), getRiskGroup(), getInstrumentClass(), getAssetClass());
+		return new PerformanceDimensions(getDate(), getPortfolio(), getInstrumentLeg(), getIndustryGroup(), getSector(), getRiskGroup(), getInstrumentClass(), getAssetClass(), getDimension());
 	}
 }

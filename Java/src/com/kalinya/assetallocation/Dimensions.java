@@ -1,23 +1,24 @@
 package com.kalinya.assetallocation;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.kalinya.util.BaseSet;
-
-public final class Dimensions extends BaseSet<Dimension> {
+public final class Dimensions implements Set<Dimension>, Serializable {
 	private static final long serialVersionUID = -1720424418344669033L;
 	public static final Dimensions EMPTY = new Dimensions();
+	private Set<Dimension> set;
 
 	public Dimensions() {
 		super();
 	}
 	
-	@Override
 	protected Set<Dimension> createSet() {
 		return new LinkedHashSet<Dimension>();
 	}
@@ -26,7 +27,6 @@ public final class Dimensions extends BaseSet<Dimension> {
 		return new Dimensions();
 	}
 	
-	@Override
 	public String toMinimalString() {
 		StringBuilder sb = new StringBuilder();
 		String concatenator = "";
@@ -113,6 +113,87 @@ public final class Dimensions extends BaseSet<Dimension> {
 			bullet += "-";
 		}
 		return sb.toString();
+	}
+	
+	public final Set<Dimension> getSet() {
+		return set;
+	}
+
+	@Override
+	public boolean add(Dimension arg0) {
+		return getSet().add(arg0);
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends Dimension> arg0) {
+		return getSet().addAll(arg0);
+	}
+	
+	@SafeVarargs
+	public final void add(Dimension... elements) {
+		for(Dimension element: elements) {
+			add(element);
+		}
+	}
+	
+	@Override
+	public void clear() {
+		getSet().clear();
+	}
+
+	@Override
+	public boolean contains(Object arg0) {
+		return getSet().contains(arg0);
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> arg0) {
+		return getSet().containsAll(arg0);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return getSet().isEmpty();
+	}
+
+	@Override
+	public Iterator<Dimension> iterator() {
+		return getSet().iterator();
+	}
+
+	@Override
+	public boolean remove(Object arg0) {
+		return getSet().remove(arg0);
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> arg0) {
+		return getSet().removeAll(arg0);
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> arg0) {
+		return getSet().retainAll(arg0);
+	}
+
+	@Override
+	public int size() {
+		return getSet().size();
+	}
+
+	@Override
+	public Object[] toArray() {
+		return getSet().toArray();
+	}
+
+	@Override
+	public <T> T[] toArray(T[] arg0) {
+		//TODO: test this
+		return getSet().toArray(arg0);
+	}
+
+	public int getCount() {
+		return getSet().size();
 	}
 }
 

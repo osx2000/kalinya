@@ -7,6 +7,7 @@ import java.util.Date;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.assetallocation.Dimension;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
@@ -15,6 +16,11 @@ import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.StringUtil;
 
+/**
+ * Represents a position exposure in a portfolio to an instrument leg as of
+ * date, used to calculate portfolio performance
+ *
+ */
 public final class Position implements Comparable<Position>, SecurityMasterData, Serializable {
 	private static final long serialVersionUID = 7608030994517625249L;
 	private Portfolio portfolio;
@@ -250,5 +256,10 @@ public final class Position implements Comparable<Position>, SecurityMasterData,
 	@Override
 	public AssetClass getAssetClass() {
 		return getInstrument().getAssetClass();
+	}
+
+	@Override
+	public Dimension getDimension() {
+		return getInstrument().getDimension();
 	}
 }
