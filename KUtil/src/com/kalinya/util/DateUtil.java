@@ -42,6 +42,9 @@ public class DateUtil {
 	}
 	
 	public static Date getDate(Date date) {
+		if(date == null) {
+			return null;
+		}
 		Calendar instance = Calendar.getInstance();
 		instance.setTime(date);
 		int year = instance.get(Calendar.YEAR);

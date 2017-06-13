@@ -3,7 +3,9 @@ package com.kalinya.util;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -158,5 +160,19 @@ public class NumberUtil {
 			sum = sum.add(value);
 		}
 		return sum;
+	}
+
+	/**
+	 * Returns the array of Doubles as a List
+	 * 
+	 * @param dbls
+	 * @return
+	 */
+	public static List<BigDecimal> getDoubleArrayAsListBigDecimal(double[] dbls) {
+		List<BigDecimal> list = new ArrayList<>();
+		for(double dbl: dbls) {
+			list.add(newBigDecimal(dbl));
+		}
+		return list;
 	}
 }

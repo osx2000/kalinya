@@ -1,6 +1,7 @@
 package com.kalinya.results;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.kalinya.performance.Instrument;
+import com.kalinya.performance.Instruments;
 import com.kalinya.performance.Portfolio;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.util.BaseSet;
@@ -18,12 +20,22 @@ public class InstrumentResults extends BaseSet<InstrumentResult> implements Resu
 	private static final long serialVersionUID = 18379221951726194L;
 	private Date date;
 	private Portfolio portfolio;
-	private Map<Date, Set<InstrumentResults>> resultsByDate;
+	private Set<InstrumentResultEnum> instrumentResults;
+	private Map<Date, Set<InstrumentResult>> resultsByDate;
 	private Map<Instrument, Set<InstrumentResult>> resultsByInstrument;
+	
+	public InstrumentResults() {
+		super();
+		instrumentResults = new HashSet<>();
+	}
 	
 	@Override
 	public String toString() {
 		return toMinimalString();
+	}
+	
+	public void setDate(Date date) {
+		this.date = date;
 	}
 	
 	@Override
@@ -36,13 +48,38 @@ public class InstrumentResults extends BaseSet<InstrumentResult> implements Resu
 		return portfolio;
 	}
 
-	public void setValue(Date date, Instrument instrument, InstrumentResultEnum resultEnum, BigDecimal value) {
+	public boolean setValue(Date date, Instrument instrument, InstrumentResultEnum resultEnum, BigDecimal value) {
 		InstrumentResult resultValue = InstrumentResult.create(date, instrument, resultEnum, value);
-		getSet().add(resultValue);
+		return add(resultValue);
 	}
 
 	public static InstrumentResults create() {
 		return new InstrumentResults();
+	}
+	
+	@Override
+	public boolean add(InstrumentResult instrumentResult) {
+		instrumentResults.add(instrumentResult.getInstrumentResultEnum());
+		return super.add(instrumentResult);
+	}
+	
+	@Override
+	public boolean addAll(Collection<? extends InstrumentResult> arg0) {
+		for(InstrumentResult instrumentResult: arg0) {
+			instrumentResults.add(instrumentResult.getInstrumentResultEnum());
+		}
+		return super.addAll(arg0);
+	}
+	
+	public BigDecimal getValue(Instrument instrument, InstrumentResultEnum instrumentResultEnum, boolean throwException) {
+		setAndGetResultsByDate();
+		if(resultsByDate.size() > 1) {
+			if(throwException) {
+				throw new IllegalArgumentException("There are results for more than one date. A date must be specified in order to retrieve the correct results");
+			}
+			return null;
+		}
+		return getValue(null, instrument, instrumentResultEnum, throwException);
 	}
 	
 	public BigDecimal getValue(Date date, Instrument instrument, InstrumentResultEnum instrumentResultEnum, boolean throwException) {
@@ -54,10 +91,41 @@ public class InstrumentResults extends BaseSet<InstrumentResult> implements Resu
 	}
 	
 	public InstrumentResult getResult(Date date, Instrument instrument, InstrumentResultEnum instrumentResultEnum, boolean throwException) {
+		setAndGetResultsByInstrument();
+		
+		//Verify there are results for this instrument
+		if(!resultsByInstrument.containsKey(instrument)) {
+			if(throwException) {
+				throw new IllegalArgumentException(String.format("Failed to retrieve results for Instrument [%s]", 
+						instrument.getInstrumentId()));
+			}
+			return null;
+		}
+		
+		//Verify there are results for this date
+		setAndGetResultsByDate();
+		if(date != null && !resultsByDate.containsKey(date)) {
+			if(throwException) {
+				throw new IllegalArgumentException(String.format("Failed to retrieve results for Date [%s]", 
+						StringUtil.formatDate(date)));
+			}
+			return null;
+		}
+		
 		for(InstrumentResult result: getSet()) {
-			if(result.getDate().compareTo(date) == 0) {
-				if(result.getInstrument().compareTo(instrument) == 0) {
-					if(result.getInstrumentResultEnum().equals(instrumentResultEnum)) {
+			if(result.getInstrument().equals(instrument)) {
+				if(result.getInstrumentResultEnum().equals(instrumentResultEnum)) {
+					if(date == null) {
+						if(resultsByDate.size() == 1) {
+							return result;
+						} else {
+							if(throwException) {
+								throw new IllegalArgumentException("There are results for more than one date. A date must be specified in order to retrieve the correct results");
+							}
+							return null;
+						}
+					}
+					if(result.getDate().compareTo(date) == 0) {
 						return result;
 					}
 				}
@@ -77,7 +145,7 @@ public class InstrumentResults extends BaseSet<InstrumentResult> implements Resu
 	public static InstrumentResults retrieve(DataSource dataSource, Date dateFilter) {
 		return dataSource.getInstrumentResults(dateFilter);
 	}
-
+	
 	public InstrumentResults getResults(Date date, String instrumentId, boolean throwException) {
 		Map<Instrument, Set<InstrumentResult>> resultsByInstrument = setAndGetResultsByInstrument();
 		InstrumentResults instrumentResults = create();
@@ -109,5 +177,76 @@ public class InstrumentResults extends BaseSet<InstrumentResult> implements Resu
 			resultsByInstrument.get(instrument).add(result);
 		}
 		return resultsByInstrument;
+	}
+	
+	public Map<Date, Set<InstrumentResult>> setAndGetResultsByDate() {
+		if(resultsByDate != null) {
+			return resultsByDate;
+		}
+		resultsByDate = new TreeMap<Date, Set<InstrumentResult>>();
+		for(InstrumentResult result: getSet()) {
+			Date date = result.getDate();
+			Set<InstrumentResult> instrumentResults = resultsByDate.get(date);
+			if(instrumentResults == null) {
+				resultsByDate.put(date, new HashSet<>());
+			}
+			resultsByDate.get(date).add(result);
+		}
+		return resultsByDate;
+	}
+
+
+	/**
+	 * Retrieves InstrumentResults for the parameter date, instruments and result enumeration
+	 * 
+	 * @param today
+	 * @param instruments
+	 * @param instrumentResultEnum
+	 * @param throwException
+	 * @return
+	 */
+	public InstrumentResults getResults(Date date, Instruments instruments, InstrumentResultEnum instrumentResultEnum,
+			boolean addDefaultCashResults, boolean throwException) {
+		InstrumentResults instrumentResults = InstrumentResults.create();
+		if(addDefaultCashResults) {
+			//Add the default cash value
+			instrumentResults.add(InstrumentResult.create(date, Instrument.CASH, instrumentResultEnum, instrumentResultEnum.getDefaultCashValue()));
+		}
+		for(InstrumentResult result: getSet()) {
+			if(result.getDate().compareTo(date) == 0) {
+				if(result.getInstrumentResultEnum().equals(instrumentResultEnum)) {
+					if(instruments.contains(result.getInstrument())) {
+						instrumentResults.add(result);
+					}
+				}
+			}
+		}
+		if(instrumentResults.size() != instruments.size()
+				&& throwException) {
+			throw new IllegalArgumentException(String.format("Failed to retrieve all results for Result [%s] for Date [%s]: [%s] instruments and [%s] results", 
+					StringUtil.formatDate(date), instrumentResultEnum, instruments.size(), instrumentResults.size()));
+		}
+		return instrumentResults;
+	}
+
+	/**
+	 * Returns the results as an array
+	 * 
+	 * @return
+	 */
+	public double[] asArray() {
+		double[] array = new double[size()];
+		int i = 0;
+		for(InstrumentResult instrumentResult: getSet()) {
+			array[i] = instrumentResult.getValue().doubleValue();
+			i++;
+		}
+		return array;
+	}
+
+	public void addDefaultCashResults() {
+		for(InstrumentResultEnum instrumentResultEnum: instrumentResults) {
+			add(InstrumentResult.create(date, Instrument.CASH, instrumentResultEnum, instrumentResultEnum.getDefaultCashValue()));
+		}
 	}
 }

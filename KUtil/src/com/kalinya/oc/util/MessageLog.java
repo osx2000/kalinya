@@ -34,18 +34,19 @@ public class MessageLog implements Disposable {
 	private String errorLogFile;
 	private Class<?> caller;
 
-	@Deprecated
-	public MessageLog(Session session, String errorLogFile) {
-		this.session = session;
-		this.debug = session.getDebug();
-		this.errorLogFile = errorLogFile;
+	public MessageLog(Class<?> caller) {
+		this(null, caller);
 	}
 	
 	public MessageLog(Session session, Class<?> caller) {
-		this(session, caller.getSimpleName() + ".log");
+		this.session = session;
+		if(session != null) {
+			this.debug = session.getDebug();
+		}
+		this.errorLogFile = caller.getSimpleName() + ".log";
 		this.caller = caller;
 	}
-
+	
 	public Class<?> getCaller() {
 		return caller;
 	}
@@ -58,7 +59,14 @@ public class MessageLog implements Disposable {
 	
 	@SuppressWarnings("static-method")
 	public void info(String message) {
-		System.out.println("INFO: " + message);
+		String extendedMessage = String.format("INFO: %s", message);
+		if(session == null) {
+			System.out.println(extendedMessage);
+		} else {
+			debug.printLine(extendedMessage);
+			debug.logError(message, EnumMessageSeverity.Error);
+			printToFile("ERROR", message);
+		}
 	}
 	
 	/**
@@ -98,10 +106,14 @@ public class MessageLog implements Disposable {
 	 * @param message
 	 */
 	public void error(String message) {
-		debug.printLine("ERROR: " + message);
-		debug.logError(message, EnumMessageSeverity.Error);
-		session.logStatus(message);
-		printToFile("ERROR", message);
+		String extendedMessage = String.format("ERROR: %s", message);
+		if(session == null) {
+			System.err.println(extendedMessage);
+		} else {
+			debug.printLine(extendedMessage);
+			debug.logError(message, EnumMessageSeverity.Error);
+			printToFile("ERROR", message);
+		}
 	}
 	
 	/**
@@ -111,19 +123,24 @@ public class MessageLog implements Disposable {
 	 */
 	public <E> void error(Collection<E> collection) {
 		for(E e: collection) {
-			info(e.toString());
+			error(e.toString());
 		}
 	}
 	
 	/**
 	 * Logs an error message to the error log console and a log file and posts
 	 * the status to the System Monitor
+	 * 
 	 * @param message
 	 */
 	public void warning(String message) {
-		debug.printLine("WARNING: " + message);
-		debug.logError(message, EnumMessageSeverity.Warning);
-		session.logStatus(message);
+		String extendedMessage = String.format("WARN: ",  message);
+		if(session == null) {
+			System.out.println(extendedMessage);
+		} else {
+			debug.printLine(extendedMessage);
+			debug.logError(message, EnumMessageSeverity.Warning);
+		}
 	}
 	
 	/**
@@ -133,7 +150,7 @@ public class MessageLog implements Disposable {
 	 */
 	public <E> void warning(Collection<E> collection) {
 		for(E e: collection) {
-			info(e.toString());
+			warning(e.toString());
 		}
 	}
 

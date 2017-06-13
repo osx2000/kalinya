@@ -2,12 +2,11 @@ package com.kalinya.optimization;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.kalinya.assetallocation.Dimension;
+import com.kalinya.assetallocation.AllocationDimension;
 import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.NumberUtil;
@@ -27,7 +26,7 @@ public class Instrument implements Comparable<Instrument> {
 	private MaturityBucket maturityBucket;
 	private BigDecimal termToMaturityYears;
 	private boolean verboseDescription = false;
-	private Dimension dimension;
+	private AllocationDimension allocationDimension;
 	
 	private Instrument() {
 	}
@@ -41,7 +40,7 @@ public class Instrument implements Comparable<Instrument> {
 		maturityDate = builder.maturityDate;
 		termToMaturityYears = DateUtil.getDateDifferenceInYears(DateUtil.now(), getMaturityDate());
 		maturityBucket = builder.maturityBucket;
-		dimension = builder.dimension;
+		allocationDimension = builder.dimension;
 	}
 	
 	@Override
@@ -113,24 +112,12 @@ public class Instrument implements Comparable<Instrument> {
 		return maturityBucket;
 	}
 	
-	public BigDecimal getStatistic(InstrumentStatistic statistic) {
-		switch(statistic) {
-		case DURATION:
-			return getDuration();
-		case YIELD:
-			return getYield();
-		case CONVEXITY:
-			return getConvexity();
-		}
-		throw new UnsupportedOperationException(String.format("Unsupported argument Statistic [%s]", statistic));
+	public void setAllocationDimension(AllocationDimension allocationDimension) {
+		this.allocationDimension = allocationDimension;
 	}
 	
-	public void setDimension(Dimension dimension) {
-		this.dimension = dimension;
-	}
-	
-	public Dimension getDimension() {
-		return dimension;
+	public AllocationDimension getAllocationDimension() {
+		return allocationDimension;
 	}
 	
 	public static class Builder {
@@ -140,7 +127,7 @@ public class Instrument implements Comparable<Instrument> {
 		private BigDecimal yield;
 		private Date maturityDate;
 		private MaturityBucket maturityBucket;
-		private Dimension dimension;
+		private AllocationDimension dimension;
 
 		private Builder() {
 		}
@@ -186,43 +173,10 @@ public class Instrument implements Comparable<Instrument> {
 			return this;
 		}
 		
-		public Builder assignToMaturityBucket(MaturityBucket[] maturityBuckets) {
-			maturityBucket = MaturityBucket.getMaturityBucket(maturityBuckets, maturityDate);
-			return this;
-		}
-		
-		public Builder withDimension(Dimension dimension) {
+		public Builder withDimension(AllocationDimension dimension) {
 			this.dimension = dimension;
 			return this;
 		}
-	}
-	
-	public static void assignToMaturityBuckets(List<Instrument> portfolio, MaturityBucket[] maturityBuckets) {
-		for(Instrument instrument: portfolio) {
-			instrument.maturityBucket = MaturityBucket.getMaturityBucket(maturityBuckets, instrument.getMaturityDate());
-		}
-	}
-	
-	public static double[][] getInstrumentBucketMatrix(Instrument[] portfolio, MaturityBucket[] maturityBuckets) {
-		double[][] matrix = new double[maturityBuckets.length][portfolio.length];
-		for(int i = 0; i < maturityBuckets.length; i++) {
-			MaturityBucket maturityBucket = maturityBuckets[i];
-			//TODO: compress next two lines into one
-			double[] bucketMembership = getInstrumentBucketVector(portfolio, maturityBucket);
-			matrix[i] = bucketMembership;
-		}
-		return matrix;
-	}
-	
-	public static double[] getInstrumentBucketVector(Instrument[] portfolio, MaturityBucket maturityBucket) {
-		double[] vector = new double[portfolio.length];
-		for(int i = 0; i < portfolio.length; i++) {
-			Instrument instrument = portfolio[i];
-			if(instrument.getMaturityBucket().equals(maturityBucket)) {
-				vector[i] = 1.0;
-			}
-		}
-		return vector;
 	}
 	
 	public static double[] getInstrumentWeightVectorForBucket(Instrument[] portfolio, double[] instrumentWeights, MaturityBucket maturityBucket) {

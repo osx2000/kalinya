@@ -3,9 +3,9 @@ package com.kalinya.harness;
 import java.math.BigDecimal;
 import java.util.Map;
 
-import com.kalinya.assetallocation.Dimensions;
+import com.kalinya.assetallocation.AllocationDimensions;
 import com.kalinya.assetallocation.Strategy;
-import com.kalinya.optimization.Instrument;
+import com.kalinya.performance.Instrument;
 import com.kalinya.util.NumberUtil;
 import com.kalinya.util.StringUtil;
 
@@ -19,7 +19,7 @@ public final class AssetAllocationSandbox {
 	}
 	
 	private void createDimensions() {
-		Dimensions dimensions = TestHarnessHelper.getAssetAllocationDimensions();
+		AllocationDimensions dimensions = TestHarnessHelper.getAssetAllocationDimensions();
 		Strategy strategy = Strategy.create("StrategicAssetAllocation");
 		strategy.setDimensions(dimensions);
 		strategy.setTargetAllocation(dimensions.get("Govt"), NumberUtil.newBigDecimal(0.5));

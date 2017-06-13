@@ -1,6 +1,7 @@
 package com.kalinya.performance;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -8,12 +9,14 @@ import javax.xml.bind.annotation.XmlElement;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.assetallocation.AllocationDimension;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
 import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.ComparableEqualsBuilder;
+import com.kalinya.util.DateUtil;
 
 public class Instrument implements Comparable<Instrument>, SecurityMasterData, Serializable {
 	private static final long serialVersionUID = 3743124681155407825L;
@@ -28,6 +31,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 	private InstrumentClass instrumentClass;
 	private AssetClass assetClass;
 	private Date maturityDate;
+	private AllocationDimension allocationDimension;
 
 	private Instrument() {
 		//Disable default ctor
@@ -36,6 +40,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 		setRiskGroup(RiskGroup.UNKNOWN);
 		setInstrumentClass(InstrumentClass.UNKNOWN);
 		setAssetClass(AssetClass.UNKNOWN);
+		setAllocationDimension(AllocationDimension.UNKNOWN);
 	}
 	
 	public Instrument(String instrumentId) {
@@ -152,6 +157,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 		setRiskGroup(securityMasters.getRiskGroup(getInstrumentId()));
 		setInstrumentClass(securityMasters.getInstrumentClass(getInstrumentId()));
 		setAssetClass(securityMasters.getAssetClass(getInstrumentId()));
+		setAllocationDimension(securityMasters.getAllocationDimension(getInstrumentId()));
 	}
 
 	@Override
@@ -201,5 +207,17 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 
 	public static Instrument create(String instrumentId) {
 		return new Instrument(instrumentId);
+	}
+
+	public BigDecimal getTermToMaturityYears(Date date) {
+		return DateUtil.getDateDifferenceInYears(date, getMaturityDate());
+	}
+
+	public void setAllocationDimension(AllocationDimension allocationDimension) {
+		this.allocationDimension = allocationDimension;
+	}
+	
+	public AllocationDimension getAllocationDimension() {
+		return allocationDimension;
 	}
 }

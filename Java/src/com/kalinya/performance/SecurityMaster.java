@@ -6,6 +6,7 @@ import java.util.Date;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.kalinya.assetallocation.AllocationDimension;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
@@ -26,12 +27,13 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 	private RiskGroup riskGroup;
 	private InstrumentClass instrumentClass;
 	private AssetClass assetClass;
+	private AllocationDimension allocationDimension;
 	
 	private SecurityMaster() {
 	}
 
 	public SecurityMaster(String instrumentId, Date maturityDate, IndustryGroup industryGroup, Sector sector, RiskGroup riskGroup,
-			InstrumentClass instrumentClass, AssetClass assetClass) {
+			InstrumentClass instrumentClass, AssetClass assetClass, AllocationDimension allocationDimension) {
 		this();
 		//TODO: use Builder pattern
 		setMaturityDate(maturityDate);
@@ -41,6 +43,7 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 		setRiskGroup(riskGroup);
 		setInstrumentClass(instrumentClass);
 		setAssetClass(assetClass);
+		setAllocationDimension(allocationDimension);
 	}
 
 	@Override
@@ -141,6 +144,14 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 
 	public void setAssetClass(AssetClass assetClass) {
 		this.assetClass = assetClass;
+	}
+	
+	public void setAllocationDimension(AllocationDimension allocationDimension) {
+		this.allocationDimension = allocationDimension;
+	}
+
+	public AllocationDimension getAllocationDimension() {
+		return allocationDimension;
 	}
 
 }

@@ -32,7 +32,8 @@ public enum CsvHeader implements EnumName {
 	BENCHMARK("Benchmark", "benchmark"), 
 	DURATION("Duration", "duration"),
 	CONVEXITY("Convexity", "convexity"),
-	MARKET_YIELD("Market Yield", "market_yield")
+	MARKET_YIELD("Market Yield", "market_yield"), 
+	ALLOCATION_DIMENSION("Allocation Dimension", "allocation_dimension")
 	;
 
 	private String name;

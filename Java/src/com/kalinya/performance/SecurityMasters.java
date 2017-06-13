@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.kalinya.assetallocation.AllocationDimension;
+import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
@@ -50,6 +52,10 @@ final public class SecurityMasters extends BaseSet<SecurityMaster> {
 	public Date getMaturityDate(String instrumentId) {
 		return getSecurityMaster(instrumentId).getMaturityDate();
 	}
+	
+	public AllocationDimension getAllocationDimension(String instrumentId) {
+		return getSecurityMaster(instrumentId).getAllocationDimension();
+	}
 
 	public Set<String> getInstrumentIds() {
 		Set<String> instrumentIds = new HashSet<>();
@@ -57,5 +63,9 @@ final public class SecurityMasters extends BaseSet<SecurityMaster> {
 			instrumentIds.add(securityMaster.getInstrumentId());
 		}
 		return instrumentIds;
+	}
+
+	public static SecurityMasters retrieve(DataSource dataSource) {
+		return dataSource.getSecurityMasterData();
 	}
 }

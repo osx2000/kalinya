@@ -31,7 +31,7 @@ public class InstrumentResult implements Comparable<InstrumentResult> {
 				.append("Date", StringUtil.formatDate(date))
 				.append("Instrument", (instrument != null ? instrument.getInstrumentId() : null))
 				.append("ResultEnum", instrumentResultEnum)
-				.append("Value", StringUtil.formatDouble(value))
+				.append("Value", StringUtil.formatPrice(value))
 				.build();
 	}
 	

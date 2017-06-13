@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.kalinya.optimization.Instrument;
+import com.kalinya.performance.Instrument;
 import com.kalinya.util.Assertions;
 import com.kalinya.util.NumberUtil;
 import com.kalinya.util.StringUtil;
@@ -20,9 +20,9 @@ import com.kalinya.util.ToStringBuilder;
 public class Strategy {
 	
 	private String name;
-	private Map<Integer, Dimensions> allocationHierarchy;
-	private Map<Dimension, BigDecimal> specifiedTargetAllocationsByDimension;
-	private Map<Dimension, BigDecimal> aggregatedTargetAllocationsByDimension;
+	private Map<Integer, AllocationDimensions> allocationHierarchy;
+	private Map<AllocationDimension, BigDecimal> specifiedTargetAllocationsByDimension;
+	private Map<AllocationDimension, BigDecimal> aggregatedTargetAllocationsByDimension;
 	private Map<Instrument, BigDecimal> portfolio;
 	private BigDecimal portfolioSize;
 	private BigDecimal minimumOrderSize;
@@ -49,18 +49,18 @@ public class Strategy {
 		return new Strategy(name);
 	}
 	
-	public void setDimensions(Dimensions dimensions) {
+	public void setDimensions(AllocationDimensions dimensions) {
 		allocationHierarchy = dimensions.getHierarchy();
-		aggregatedTargetAllocationsByDimension = new HashMap<Dimension, BigDecimal>();
-		for(Dimension dimension: dimensions) {
+		aggregatedTargetAllocationsByDimension = new HashMap<AllocationDimension, BigDecimal>();
+		for(AllocationDimension dimension: dimensions) {
 			aggregatedTargetAllocationsByDimension.put(dimension, BigDecimal.ZERO);
 		}
 	}
 	
-	public List<Dimension> getDimensions() {
-		Collection<Dimensions> dimensions = allocationHierarchy.values();
-		List<Dimension> distinctDimensions = new LinkedList<>();
-		for(Set<Dimension> set: dimensions) {
+	public List<AllocationDimension> getDimensions() {
+		Collection<AllocationDimensions> dimensions = allocationHierarchy.values();
+		List<AllocationDimension> distinctDimensions = new LinkedList<>();
+		for(Set<AllocationDimension> set: dimensions) {
 			distinctDimensions.addAll(set);
 		}
 		return distinctDimensions;
@@ -71,8 +71,8 @@ public class Strategy {
 		int firstGenerationId = allocationHierarchy.keySet().iterator().next();
 		int generationId = 0;
 		while(generationId <= firstGenerationId) {
-			Set<Dimension> generationDimensions = allocationHierarchy.get(generationId);
-			for(Dimension dimension: generationDimensions) {
+			Set<AllocationDimension> generationDimensions = allocationHierarchy.get(generationId);
+			for(AllocationDimension dimension: generationDimensions) {
 				BigDecimal target = BigDecimal.ZERO;
 				if(generationId == 0) {
 					target = specifiedTargetAllocationsByDimension.get(dimension);
@@ -80,7 +80,7 @@ public class Strategy {
 						target = BigDecimal.ZERO;
 					}
 				} else {
-					for(Dimension childDimension: dimension.getDescendants()) {
+					for(AllocationDimension childDimension: dimension.getDescendants()) {
 						if(specifiedTargetAllocationsByDimension.keySet().contains(childDimension)) {
 							target = target.add(aggregatedTargetAllocationsByDimension.get(childDimension));
 						}
@@ -103,28 +103,28 @@ public class Strategy {
 		
 	}
 
-	public void setTargetAllocation(Dimension dimension, BigDecimal target) {
+	public void setTargetAllocation(AllocationDimension dimension, BigDecimal target) {
 		if(specifiedTargetAllocationsByDimension == null) {
-			specifiedTargetAllocationsByDimension = new HashMap<Dimension, BigDecimal>();
+			specifiedTargetAllocationsByDimension = new HashMap<AllocationDimension, BigDecimal>();
 		}
 		if(aggregatedTargetAllocationsByDimension == null) {
-			aggregatedTargetAllocationsByDimension = new HashMap<Dimension, BigDecimal>();
+			aggregatedTargetAllocationsByDimension = new HashMap<AllocationDimension, BigDecimal>();
 		}
 		specifiedTargetAllocationsByDimension.put(dimension, target);
 		aggregateTargetAllocations();
 	}
 	
-	public Map<Dimension, BigDecimal> getSpecifiedTargetAllocations() {
-		Set<Dimension> specifiedDimensions = allocationHierarchy.get(0);
-		Map<Dimension, BigDecimal> specifiedTargetAllocations = new HashMap<Dimension, BigDecimal>();
-		for(Dimension dimension: specifiedDimensions) {
+	public Map<AllocationDimension, BigDecimal> getSpecifiedTargetAllocations() {
+		Set<AllocationDimension> specifiedDimensions = allocationHierarchy.get(0);
+		Map<AllocationDimension, BigDecimal> specifiedTargetAllocations = new HashMap<AllocationDimension, BigDecimal>();
+		for(AllocationDimension dimension: specifiedDimensions) {
 			BigDecimal target = this.aggregatedTargetAllocationsByDimension.get(dimension);
 			specifiedTargetAllocations.put(dimension, target);
 		}
 		return specifiedTargetAllocations;
 	}
 	
-	public Map<Dimension, BigDecimal> getAggregatedTargetAllocations() {
+	public Map<AllocationDimension, BigDecimal> getAggregatedTargetAllocations() {
 		return aggregatedTargetAllocationsByDimension;
 	}
 	
@@ -133,7 +133,7 @@ public class Strategy {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setActualAllocation(Map<Instrument, BigDecimal> portfolio) {
+	public void setActualAllocation(Map<com.kalinya.performance.Instrument, BigDecimal> portfolio) {
 		this.portfolio = portfolio;
 	}
 	
@@ -164,11 +164,11 @@ public class Strategy {
 		return minimumOrderSize;
 	}
 	
-	public Map<Dimension, Set<Instrument>> getInstrumentsByDimension() {
+	public Map<AllocationDimension, Set<Instrument>> getInstrumentsByDimension() {
 		Assertions.notNullOrEmpty("Portfolio", portfolio);
-		Map<Dimension, Set<Instrument>> instrumentsByDimension = new LinkedHashMap<Dimension, Set<Instrument>>();
+		Map<AllocationDimension, Set<Instrument>> instrumentsByDimension = new LinkedHashMap<AllocationDimension, Set<Instrument>>();
 		for(Instrument instrument: portfolio.keySet()) {
-			Dimension dimension = instrument.getDimension();
+			AllocationDimension dimension = instrument.getAllocationDimension();
 			Set<Instrument> instruments = instrumentsByDimension.get(dimension);
 			if(instruments == null) {
 				instrumentsByDimension.put(dimension, new LinkedHashSet<Instrument>());
@@ -178,12 +178,12 @@ public class Strategy {
 		return instrumentsByDimension;
 	}
 	
-	public Map<Dimension, BigDecimal> getPortfolioSizeByDimension() {
+	public Map<AllocationDimension, BigDecimal> getPortfolioSizeByDimension() {
 		Assertions.notNullOrEmpty("Portfolio", portfolio);
-		Map<Dimension, BigDecimal> portfolioSizeByDimension = new LinkedHashMap<Dimension, BigDecimal>();
+		Map<AllocationDimension, BigDecimal> portfolioSizeByDimension = new LinkedHashMap<AllocationDimension, BigDecimal>();
 		for(Instrument instrument: portfolio.keySet()) {
 			BigDecimal value = portfolio.get(instrument);
-			Dimension dimension = instrument.getDimension();
+			AllocationDimension dimension = instrument.getAllocationDimension();
 			BigDecimal dimensionSize = portfolioSizeByDimension.get(dimension);
 			if(dimensionSize != null) {
 				value = dimensionSize.add(value);
@@ -203,7 +203,7 @@ public class Strategy {
 		orderDetails = new ArrayList<>();
 		for(Instrument instrument: portfolio.keySet()) {
 			BigDecimal weightInDimension = weightsInDimension.get(instrument);
-			Dimension dimension = instrument.getDimension();
+			AllocationDimension dimension = instrument.getAllocationDimension();
 			BigDecimal dimensionTargetAllocation = specifiedTargetAllocationsByDimension.get(dimension);
 			BigDecimal instrumentTargetAllocation = weightInDimension.multiply(dimensionTargetAllocation);
 			targetAllocationsByInstrument.put(instrument, instrumentTargetAllocation);
@@ -233,10 +233,10 @@ public class Strategy {
 	private Map<Instrument, BigDecimal> getWeightsInDimension() {
 		Assertions.notNullOrEmpty("Portfolio", portfolio);
 		Map<Instrument, BigDecimal> weightsInDimension = new LinkedHashMap<Instrument, BigDecimal>();
-		Map<Dimension, Set<Instrument>> instrumentsByDimension = getInstrumentsByDimension();
-		Map<Dimension, BigDecimal> portfolioSizeByDimension = getPortfolioSizeByDimension();
+		Map<AllocationDimension, Set<Instrument>> instrumentsByDimension = getInstrumentsByDimension();
+		Map<AllocationDimension, BigDecimal> portfolioSizeByDimension = getPortfolioSizeByDimension();
 		
-		for(Dimension dimension: instrumentsByDimension.keySet()) {
+		for(AllocationDimension dimension: instrumentsByDimension.keySet()) {
 			Set<Instrument> instrumentsInDimension = instrumentsByDimension.get(dimension);
 			for(Instrument instrument: instrumentsInDimension) {
 				BigDecimal instrumentValue = portfolio.get(instrument);

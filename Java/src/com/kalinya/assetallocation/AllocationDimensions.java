@@ -9,28 +9,28 @@ import java.util.TreeMap;
 
 import com.kalinya.util.BaseSet;
 
-public final class Dimensions extends BaseSet<Dimension> {
+public final class AllocationDimensions extends BaseSet<AllocationDimension> {
 	private static final long serialVersionUID = -1720424418344669033L;
-	public static final Dimensions EMPTY = new Dimensions();
+	public static final AllocationDimensions EMPTY = new AllocationDimensions();
 
-	public Dimensions() {
+	public AllocationDimensions() {
 		super();
 	}
 	
 	@Override
-	protected Set<Dimension> createSet() {
-		return new LinkedHashSet<Dimension>();
+	protected Set<AllocationDimension> createSet() {
+		return new LinkedHashSet<AllocationDimension>();
 	}
 
-	public static Dimensions create() {
-		return new Dimensions();
+	public static AllocationDimensions create() {
+		return new AllocationDimensions();
 	}
 	
 	@Override
 	public String toMinimalString() {
 		StringBuilder sb = new StringBuilder();
 		String concatenator = "";
-		for(Dimension dimension: getSet()) {
+		for(AllocationDimension dimension: getSet()) {
 			sb.append(concatenator);
 			sb.append(dimension);
 			concatenator = ", ";
@@ -38,21 +38,21 @@ public final class Dimensions extends BaseSet<Dimension> {
 		return sb.toString();
 	}
 
-	public Map<Integer, Dimensions> getHierarchy() {
-		Map<Integer, Dimensions> dimensionsHierarchy = new TreeMap<Integer, Dimensions>(Collections.reverseOrder());
-		for(Dimension dimension: getSet()) {
+	public Map<Integer, AllocationDimensions> getHierarchy() {
+		Map<Integer, AllocationDimensions> dimensionsHierarchy = new TreeMap<Integer, AllocationDimensions>(Collections.reverseOrder());
+		for(AllocationDimension dimension: getSet()) {
 			int childGenerationCount = dimension.getChildGenerationCount();
-			Set<Dimension> generation = dimensionsHierarchy.get(childGenerationCount);
+			Set<AllocationDimension> generation = dimensionsHierarchy.get(childGenerationCount);
 			if(generation == null) {
-				dimensionsHierarchy.put(childGenerationCount, Dimensions.create());
+				dimensionsHierarchy.put(childGenerationCount, AllocationDimensions.create());
 			}
 			dimensionsHierarchy.get(childGenerationCount).add(dimension);
 		}
 		return dimensionsHierarchy; 
 	}
 
-	public Dimension get(String name) {
-		for(Dimension dimension: getSet()) {
+	public AllocationDimension get(String name) {
+		for(AllocationDimension dimension: getSet()) {
 			if(dimension.getName().equalsIgnoreCase(name)) {
 				return dimension;
 			}
@@ -92,15 +92,15 @@ public final class Dimensions extends BaseSet<Dimension> {
 		 *  --Cash
 		 */
 		
-		Map<Integer, Dimensions> familyTree = getHierarchy();
-		Set<Dimension> printed = new HashSet<Dimension>();
+		Map<Integer, AllocationDimensions> familyTree = getHierarchy();
+		Set<AllocationDimension> printed = new HashSet<AllocationDimension>();
 		StringBuilder sb = new StringBuilder();
 		String newLineBreak = "";
 		String tab = "";
 		String bullet = "-";
 		for(int i: familyTree.keySet()) {
-			Set<Dimension> dimensionsInGeneration = familyTree.get(i);
-			for(Dimension dimension: dimensionsInGeneration) {
+			Set<AllocationDimension> dimensionsInGeneration = familyTree.get(i);
+			for(AllocationDimension dimension: dimensionsInGeneration) {
 				if(printed.contains(dimension)) {
 					continue;
 				}

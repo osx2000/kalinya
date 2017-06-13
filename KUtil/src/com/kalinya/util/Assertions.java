@@ -167,6 +167,37 @@ public final class Assertions {
         }
 	}
 	
+	 /**
+		 * Throws an IllegalArgumentException if the parameter is null or the array is
+		 * empty
+		 * 
+		 * @param parameterName
+		 *            The name of the parameter
+		 * @param parameter
+		 *            The parameter to test
+		 */
+		public static void notNullOrEmpty(final String parameterName, final double[] parameter) {
+			notNullOrEmpty(parameterName, "", parameter);
+		}
+		
+		/**
+		 * Throws an IllegalArgumentException if the parameter is null or the array
+		 * is empty
+		 * 
+		 * @param parameterName
+		 *            The name of the parameter
+		 * @param message
+		 *            The message to accompany the IllegalArgumentException
+		 * @param parameter
+		 *            The parameter to test
+		 */
+		public static void notNullOrEmpty(String parameterName, final String message, double[] parameter) {
+			notNull(parameterName, parameter);
+	    	if (parameter.length == 0) {
+	            throw new IllegalArgumentException(String.format("Parameter [%s] must not be empty! %s", parameterName, message));
+	        }
+		}
+	
 	/**
 	 * Throws an IllegalArgumentException if the parameter is zero. Use this
 	 * prior to dividing by zero.

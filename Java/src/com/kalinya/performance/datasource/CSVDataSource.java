@@ -15,6 +15,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 
+import com.kalinya.assetallocation.AllocationDimension;
 import com.kalinya.enums.DebugLevel;
 import com.kalinya.performance.BenchmarkAssociation;
 import com.kalinya.performance.BenchmarkAssociations;
@@ -241,16 +242,32 @@ final public class CSVDataSource extends DataSource {
 					String industryGroupStr = csvRecord.get(CsvHeader.INDUSTRY_GROUP.getName());
 					String sectorStr = csvRecord.get(CsvHeader.SECTOR.getName());
 					String instrumentClassStr = csvRecord.get(CsvHeader.INSTRUMENT_CLASS.getName());
+					String allocationDimensionStr = csvRecord.get(CsvHeader.ALLOCATION_DIMENSION.getName());
 
-					Date maturityDate = DateUtil.parseDate(maturityDateStr);
 					AssetClass assetClass = AssetClass.fromName(assetClassStr);
 					RiskGroup riskGroup = RiskGroup.fromName(riskGroupStr);
 					IndustryGroup industryGroup = IndustryGroup.fromName(industryGroupStr);
 					Sector sector = Sector.fromName(sectorStr);
 					InstrumentClass instrumentClass = InstrumentClass.fromName(instrumentClassStr);
+					AllocationDimension allocationDimension = AllocationDimension.create(allocationDimensionStr);
+					Date maturityDate = null;
+					if(maturityDateStr.trim().length() == 0) {
+						switch (assetClass) {
+						case EQUITY:
+							maturityDate = DateUtil.MAXIMUM_DATE;
+							break;
+						case CASH:
+							maturityDate = DateUtil.today();
+							break;
+						default:
+							throw new UnsupportedOperationException(String.format("Missing MaturityDate for InstrumentId [%s]", instrumentId));
+						}
+					} else { 
+						maturityDate = DateUtil.parseDate(maturityDateStr);
+					}
 
 					SecurityMaster securityMaster = new SecurityMaster(instrumentId, maturityDate, industryGroup, sector,
-							riskGroup, instrumentClass, assetClass);
+							riskGroup, instrumentClass, assetClass, allocationDimension);
 
 					if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
 						System.out.println("Record [" + recordNumber + "] SecurityMaster [" + securityMaster.toString() + "]");
@@ -484,6 +501,7 @@ final public class CSVDataSource extends DataSource {
 				instrumentResults.setValue(date, instrument, InstrumentResultEnum.DURATION, duration);
 				instrumentResults.setValue(date, instrument, InstrumentResultEnum.CONVEXITY, convexity);
 				instrumentResults.setValue(date, instrument, InstrumentResultEnum.MARKET_YIELD, marketYield);
+				instrumentResults.setDate(date);
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
 					System.out.println("Record [" + recordNumber + "] InstrumentId [" + instrumentId.toString() + "]");
 				}
