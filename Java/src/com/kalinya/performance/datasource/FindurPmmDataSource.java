@@ -240,7 +240,7 @@ final public class FindurPmmDataSource extends DataSource {
 				String instrumentId = instrumentIds.get(insNum);
 				InstrumentClass instrumentClass = (InstrumentClass) instrumentClasses.get(insNum);
 				SecurityMaster securityMaster = new SecurityMaster(instrumentId, null, null, null,
-						null, instrumentClass, null, null);
+						null, instrumentClass, null, null, null);
 				if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
 					System.out.println(String.format("InsNum [%s] InstrumentId [%s] SecurityMaster [%s]", 
 							insNum, instrumentId, securityMaster.toString()));

@@ -91,23 +91,17 @@ public class StringUtil {
 		return formatDouble(bd, 8);
 	}
 	
+	/**
+	 * Converts all the words in the parameter String into capitalized words.
+	 * Each word is made up of an upper-case character and then a series of
+	 * lower-case characters.
+	 * 
+	 * @param input
+	 * @return
+	 * @see org.apache.commons.lang3.text.WordUtils#capitalizeFully(String)
+	 */
 	public static String toTitleCase(String input) {
 		return WordUtils.capitalizeFully(input);
-	    /*StringBuilder titleCase = new StringBuilder();
-	    boolean nextTitleCase = true;
-	    for (char c : input.toCharArray()) {
-	        if (Character.isSpaceChar(c)) {
-	            nextTitleCase = true;
-	        } else if (nextTitleCase) {
-	            c = Character.toTitleCase(c);
-	            nextTitleCase = false;
-	        } else {
-	        	c = Character.toLowerCase(c);
-	        }
-
-	        titleCase.append(c);
-	    }
-	    return titleCase.toString();*/
 	}
 	
 	public static <K,V> String getMapAsStringWithLineBreaks(Map<K, V> map) {

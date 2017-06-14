@@ -2,34 +2,20 @@ package com.kalinya.assetallocation;
 
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
+import com.kalinya.instrument.InstrumentData;
 import com.kalinya.util.Assertions;
-import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.ToStringBuilder;
 
-public final class AllocationDimension implements Comparable<AllocationDimension> {
-	public static final AllocationDimension CASH = new AllocationDimension("Cash");
-	public static final AllocationDimension UNKNOWN = new AllocationDimension("Unknown");
+public final class AllocationDimension extends InstrumentData<AllocationDimension> {
+	private static final long serialVersionUID = -1561648899512026567L;
+	public static final AllocationDimension CASH = AllocationDimension.create("Cash");
+	public static final AllocationDimension UNKNOWN = AllocationDimension.create("Unknown");
 	private AllocationDimension parentDimension;
-	private AllocationDimensions childDimensions;
-	private String name;
-	
-	private AllocationDimension() {
-		childDimensions = AllocationDimensions.create();
-	}
+	private AllocationDimensions<AllocationDimension> childDimensions;
 	
 	private AllocationDimension(String name) {
-		this();
-		this.name = name;
-	}
-	
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-				.append("Name", name)
-				.build();
+		super(name);
+		childDimensions = AllocationDimensions.create();
 	}
 	
 	public String toVerboseString() {
@@ -40,37 +26,10 @@ public final class AllocationDimension implements Comparable<AllocationDimension
 				.build();
 	}
 	
-	@Override
-	public boolean equals(Object obj) {
-		return new ComparableEqualsBuilder<AllocationDimension>(this, obj)
-				.build();
-	}
-	
-	@Override
-	public int hashCode(){
-		return new HashCodeBuilder()
-				.append(name.toUpperCase())
-				.build();
-	}
-	
-	@Override
-	public int compareTo(AllocationDimension that) {
-		return new CompareToBuilder()
-				.append(name.toUpperCase(), that.name.toUpperCase())
-				.build();
-	}
-	
-	public static AllocationDimension create(String name) {
-		return new AllocationDimension(name);
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
 	public void setParentDimension(AllocationDimension parentDimension) {
 		Assertions.isNotEqual("AssetAllocationDimension", this, parentDimension);
 		this.parentDimension = parentDimension;
+		
 		if(!parentDimension.getChildDimensions().contains(this)) {
 			parentDimension.addChildDimension(this);
 		}
@@ -88,20 +47,20 @@ public final class AllocationDimension implements Comparable<AllocationDimension
 		}
 	}
 	
-	public AllocationDimensions getChildDimensions() {
+	public AllocationDimensions<? extends AllocationDimension> getChildDimensions() {
 		return childDimensions;
 	}
 	
-	public AllocationDimensions getRelatedDimensions() {
-		AllocationDimensions dimensions = AllocationDimensions.create();
+	public AllocationDimensions<AllocationDimension> getRelatedDimensions() {
+		AllocationDimensions<AllocationDimension> dimensions = new AllocationDimensions<AllocationDimension>();
 		dimensions.add(this);
 		dimensions.addAll(getDescendants());
 		dimensions.addAll(getAntecedents());
 		return dimensions;
 	}
 
-	public AllocationDimensions getAntecedents() {
-		AllocationDimensions antecedents = AllocationDimensions.create();
+	public AllocationDimensions<AllocationDimension> getAntecedents() {
+		AllocationDimensions<AllocationDimension> antecedents = new AllocationDimensions<>();
 		AllocationDimension antecedent = getParentDimension();
 		while(antecedent != null) {
 			antecedents.add(antecedent);
@@ -110,8 +69,8 @@ public final class AllocationDimension implements Comparable<AllocationDimension
 		return antecedents;
 	}
 
-	public AllocationDimensions getDescendants() {
-		AllocationDimensions descendants = AllocationDimensions.create();
+	public AllocationDimensions<AllocationDimension> getDescendants() {
+		AllocationDimensions<AllocationDimension> descendants = new AllocationDimensions<>();
 		for(AllocationDimension descendant: getChildDimensions()) {
 			descendants.add(descendant);
 			descendants.addAll(descendant.getDescendants());
@@ -132,6 +91,10 @@ public final class AllocationDimension implements Comparable<AllocationDimension
 			maximumChildGenerationCount = Math.max(maximumChildGenerationCount, descendant.getChildGenerationCount()+1);
 		}
 		return maximumChildGenerationCount;
+	}
+
+	public static AllocationDimension create(String name) {
+		return new AllocationDimension(name);
 	}
 
 	/*public static Map<Integer, Set<Dimension>> getDimensionsHierarchy(List<Dimension> dimensions) {

@@ -1,29 +1,59 @@
 package com.kalinya.harness;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
+import com.kalinya.assetallocation.AllocationDimension;
+import com.kalinya.assetallocation.AllocationDimensions;
+import com.kalinya.instrument.InstrumentType;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.StringUtil;
 
 public class TestHarness {
 
 	public static void main(String[] args) {
-		System.out.println("Tests using 15-Mar");
-		printDate("3/15/2017");
-		printDate("15-Mar-2017");
-		printDate("15-Mar-17");
-		printDate("03/15/17");
-		printDate("15 Mar 2017");
+		/*InstrumentType cash = new InstrumentType("cAsh");
+		InstrumentType swap = new InstrumentType("SWAP");
+		InstrumentType swap2 = new InstrumentType("SWAp");
+		InstrumentType bond = new InstrumentType("generic option");
+		Set<InstrumentType> instrumentTypesAsTreeSet = new TreeSet<>();
+		instrumentTypesAsTreeSet.add(cash);
+		instrumentTypesAsTreeSet.add(swap);
+		instrumentTypesAsTreeSet.add(swap2);
+		instrumentTypesAsTreeSet.add(bond);
+		Set<InstrumentType> instrumentTypesAsHashSet = new HashSet<>();
+		instrumentTypesAsHashSet.add(cash);
+		instrumentTypesAsHashSet.add(swap2);
+		instrumentTypesAsHashSet.add(swap);
+		instrumentTypesAsHashSet.add(bond);
+		System.out.println(String.format("InstrumentTypesAsHashSet: %s", instrumentTypesAsHashSet.toString()));
+		System.out.println(String.format("InstrumentTypesAsTreeSet: %s", instrumentTypesAsTreeSet.toString()));
+		System.out.println(String.format("Swap v Swap2 CompareTo: %s", swap.compareTo(swap2)));
+		System.out.println(String.format("Swap2 v Swap CompareTo: %s", swap2.compareTo(swap)));
+		System.out.println(String.format("Swap v Swap2 Equals: %s", swap.equals(swap2)));
+		System.out.println(String.format("Bond v Swap CompareTo: %s", bond.compareTo(swap)));
+		System.out.println(String.format("Swap v Bond CompareTo: %s", swap.compareTo(bond)));
+		System.out.println(String.format("Bond v Swap Equals: %s", swap.equals(bond)));*/
 		
-		System.out.println("\nTests using 3-Mar");
-		printDate("3 Mar 2017");
-		printDate("3 Mar 17");
-		printDate("03/03/17");
-		printDate("3/3/2017");
-		printDate("3/3/17");
+		AllocationDimensions<AllocationDimension> dims = AllocationDimensions.create();
+		AllocationDimension cashAllocation = AllocationDimension.create("cAsh");
+		AllocationDimension cashAllocation2 = AllocationDimension.create("CASH");
+		AllocationDimension govtBondAllocation = AllocationDimension.create("GovT BOND");
+		AllocationDimension corpBondAllocation = AllocationDimension.create("CoRP BoNd");
+		dims.add(cashAllocation);
+		dims.add(cashAllocation2);
+		dims.add(govtBondAllocation);
+		dims.add(corpBondAllocation);
+		System.out.println(String.format("AllocationDimensions: %s", dims.toVerboseString()));
+		System.out.println(String.format("Contains(cashAllocation): %s", dims.contains(cashAllocation)));
+		System.out.println(String.format("Contains(cashAllocation2): %s", dims.contains(cashAllocation2)));
+		dims.remove(cashAllocation2);
+		System.out.println(String.format("Contains(cashAllocation): %s", dims.contains(cashAllocation)));
+		System.out.println(String.format("Contains(cashAllocation2): %s", dims.contains(cashAllocation2)));
 		
-		System.out.println("\nTests using 13-Dec");
-		printDate("12/13/16");
+		
 	}
 
 	private static void printDate(String s) {

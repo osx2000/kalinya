@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.kalinya.assetallocation.AllocationDimension;
+import com.kalinya.instrument.InstrumentType;
 import com.kalinya.performance.datasource.DataSource;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
@@ -55,6 +56,10 @@ final public class SecurityMasters extends BaseSet<SecurityMaster> {
 	
 	public AllocationDimension getAllocationDimension(String instrumentId) {
 		return getSecurityMaster(instrumentId).getAllocationDimension();
+	}
+	
+	public InstrumentType getInstrumentType(String instrumentId) {
+		return getSecurityMaster(instrumentId).getInstrumentType();
 	}
 
 	public Set<String> getInstrumentIds() {

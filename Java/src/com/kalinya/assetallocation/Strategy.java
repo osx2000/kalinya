@@ -20,7 +20,7 @@ import com.kalinya.util.ToStringBuilder;
 public class Strategy {
 	
 	private String name;
-	private Map<Integer, AllocationDimensions> allocationHierarchy;
+	private Map<Integer, AllocationDimensions<AllocationDimension>> allocationHierarchy;
 	private Map<AllocationDimension, BigDecimal> specifiedTargetAllocationsByDimension;
 	private Map<AllocationDimension, BigDecimal> aggregatedTargetAllocationsByDimension;
 	private Map<Instrument, BigDecimal> portfolio;
@@ -49,7 +49,7 @@ public class Strategy {
 		return new Strategy(name);
 	}
 	
-	public void setDimensions(AllocationDimensions dimensions) {
+	public void setDimensions(AllocationDimensions<AllocationDimension> dimensions) {
 		allocationHierarchy = dimensions.getHierarchy();
 		aggregatedTargetAllocationsByDimension = new HashMap<AllocationDimension, BigDecimal>();
 		for(AllocationDimension dimension: dimensions) {
@@ -58,7 +58,7 @@ public class Strategy {
 	}
 	
 	public List<AllocationDimension> getDimensions() {
-		Collection<AllocationDimensions> dimensions = allocationHierarchy.values();
+		Collection<AllocationDimensions<AllocationDimension>> dimensions = allocationHierarchy.values();
 		List<AllocationDimension> distinctDimensions = new LinkedList<>();
 		for(Set<AllocationDimension> set: dimensions) {
 			distinctDimensions.addAll(set);
@@ -212,11 +212,11 @@ public class Strategy {
 			allocationDifferenceByInstrument.put(instrument, allocationDifference);
 			BigDecimal orderValue = allocationDifference.multiply(getPortfolioSize());
 			orders.put(instrument, orderValue.setScale(2, NumberUtil.ROUNDING_MODE));
-			String orderDetail = String.format("Instrument [%s] Dimension [%s] ActualAllocation [%s] InstrumentTargetAllocation [%s] Difference [%s] Order [%s]",
+			String orderDetail = String.format("Instrument [%s] Dimension [%s] ActualAllocation [%s%%] InstrumentTargetAllocation [%s%%] Difference [%s%%] Order [%s]",
 					instrument.getInstrumentId(), dimension.getName(), 
-					StringUtil.formatDouble(actualAllocation),
-					StringUtil.formatDouble(instrumentTargetAllocation),
-					StringUtil.formatDouble(allocationDifference),
+					StringUtil.formatDouble(actualAllocation.multiply(NumberUtil.ONE_HUNDRED)),
+					StringUtil.formatDouble(instrumentTargetAllocation.multiply(NumberUtil.ONE_HUNDRED)),
+					StringUtil.formatDouble(allocationDifference.multiply(NumberUtil.ONE_HUNDRED)),
 					StringUtil.formatDouble(orderValue));
 			orderDetails.add((orderDetails.size() > 0 ? "\n" : "") + orderDetail);
 		}

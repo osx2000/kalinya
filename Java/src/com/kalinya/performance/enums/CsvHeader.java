@@ -33,7 +33,8 @@ public enum CsvHeader implements EnumName {
 	DURATION("Duration", "duration"),
 	CONVEXITY("Convexity", "convexity"),
 	MARKET_YIELD("Market Yield", "market_yield"), 
-	ALLOCATION_DIMENSION("Allocation Dimension", "allocation_dimension")
+	ALLOCATION_DIMENSION("Allocation Dimension", "allocation_dimension"), 
+	INSTRUMENT_TYPE("Instrument Type", "instrument_type")
 	;
 
 	private String name;

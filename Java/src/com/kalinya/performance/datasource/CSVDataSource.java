@@ -17,6 +17,7 @@ import org.apache.commons.io.input.BOMInputStream;
 
 import com.kalinya.assetallocation.AllocationDimension;
 import com.kalinya.enums.DebugLevel;
+import com.kalinya.instrument.InstrumentType;
 import com.kalinya.performance.BenchmarkAssociation;
 import com.kalinya.performance.BenchmarkAssociations;
 import com.kalinya.performance.Cashflow;
@@ -243,6 +244,7 @@ final public class CSVDataSource extends DataSource {
 					String sectorStr = csvRecord.get(CsvHeader.SECTOR.getName());
 					String instrumentClassStr = csvRecord.get(CsvHeader.INSTRUMENT_CLASS.getName());
 					String allocationDimensionStr = csvRecord.get(CsvHeader.ALLOCATION_DIMENSION.getName());
+					String instrumentTypeStr = csvRecord.get(CsvHeader.INSTRUMENT_TYPE.getName());;
 
 					AssetClass assetClass = AssetClass.fromName(assetClassStr);
 					RiskGroup riskGroup = RiskGroup.fromName(riskGroupStr);
@@ -250,6 +252,7 @@ final public class CSVDataSource extends DataSource {
 					Sector sector = Sector.fromName(sectorStr);
 					InstrumentClass instrumentClass = InstrumentClass.fromName(instrumentClassStr);
 					AllocationDimension allocationDimension = AllocationDimension.create(allocationDimensionStr);
+					InstrumentType instrumentType = InstrumentType.create(instrumentTypeStr);
 					Date maturityDate = null;
 					if(maturityDateStr.trim().length() == 0) {
 						switch (assetClass) {
@@ -267,7 +270,7 @@ final public class CSVDataSource extends DataSource {
 					}
 
 					SecurityMaster securityMaster = new SecurityMaster(instrumentId, maturityDate, industryGroup, sector,
-							riskGroup, instrumentClass, assetClass, allocationDimension);
+							riskGroup, instrumentClass, assetClass, allocationDimension, instrumentType);
 
 					if(getDebugLevel().atLeast(DebugLevel.HIGH)) {
 						System.out.println("Record [" + recordNumber + "] SecurityMaster [" + securityMaster.toString() + "]");

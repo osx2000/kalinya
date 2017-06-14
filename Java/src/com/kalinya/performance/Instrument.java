@@ -10,6 +10,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.kalinya.assetallocation.AllocationDimension;
+import com.kalinya.instrument.InstrumentType;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
@@ -17,6 +18,7 @@ import com.kalinya.performance.enums.RiskGroup;
 import com.kalinya.performance.enums.Sector;
 import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.DateUtil;
+import com.kalinya.util.ToStringBuilder;
 
 public class Instrument implements Comparable<Instrument>, SecurityMasterData, Serializable {
 	private static final long serialVersionUID = 3743124681155407825L;
@@ -32,6 +34,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 	private AssetClass assetClass;
 	private Date maturityDate;
 	private AllocationDimension allocationDimension;
+	private InstrumentType instrumentType;
 
 	private Instrument() {
 		//Disable default ctor
@@ -41,6 +44,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 		setInstrumentClass(InstrumentClass.UNKNOWN);
 		setAssetClass(AssetClass.UNKNOWN);
 		setAllocationDimension(AllocationDimension.UNKNOWN);
+		setInstrumentType(InstrumentType.UNKNOWN);
 	}
 	
 	public Instrument(String instrumentId) {
@@ -56,36 +60,26 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 
 	@Override
 	public String toString() {
-		return toVerboseString();
+		return toMinimalString();
 	}
 	
-	public String toVerboseString() {
-		//TODO: use ToStringBuilder(this).build();
-		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("InstrumentId [%s]", getInstrumentId()));
+	public String toMinimalString() {
+		return new ToStringBuilder(this).append("InstrumentId", instrumentId).build();
+	}
 
-		if(getPortfolio() != null) {
-			sb.append(String.format(" Portfolio [%s]", getPortfolio()));
-		}
-		if(getIndustryGroup() != null) {
-			sb.append(String.format(" IndustryGroup [%s]", getIndustryGroup()));
-		}
-		if(getSector() != null) {
-			sb.append(String.format(" Sector [%s]", getSector()));
-		}
-		if(getRiskGroup() != null) {
-			sb.append(String.format(" RiskGroup [%s]", getRiskGroup()));
-		}
-		if(getInstrumentClass() != null) {
-			sb.append(String.format(" InstrumentClass [%s]", getInstrumentClass()));
-		}
-		if(getAssetClass() != null) {
-			sb.append(String.format(" AssetClass [%s]", getAssetClass()));
-		}
-		if(getMaturityDate() != null) {
-			sb.append(String.format(" MaturityDate [%s]", getMaturityDate()));
-		}
-		return sb.toString();
+	public String toVerboseString() {
+		return new ToStringBuilder(this)
+				.append("InstrumentId", getInstrumentId())
+				.append("Portfolio", getPortfolio())
+				.append("InstrumentType", getInstrumentType())
+				.append("IndustryGroup", getIndustryGroup())
+				.append("Sector", getSector())
+				.append("RiskGroup", getRiskGroup())
+				.append("InstrumentClass", getInstrumentClass())
+				.append("AssetClass", getAssetClass())
+				.append("MaturityDate", getMaturityDate())
+				.append("AllocationDimension", getAllocationDimension())
+				.build();
 	}
 	
 	@Override
@@ -158,6 +152,7 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 		setInstrumentClass(securityMasters.getInstrumentClass(getInstrumentId()));
 		setAssetClass(securityMasters.getAssetClass(getInstrumentId()));
 		setAllocationDimension(securityMasters.getAllocationDimension(getInstrumentId()));
+		setInstrumentType(securityMasters.getInstrumentType(getInstrumentId()));
 	}
 
 	@Override
@@ -219,5 +214,13 @@ public class Instrument implements Comparable<Instrument>, SecurityMasterData, S
 	
 	public AllocationDimension getAllocationDimension() {
 		return allocationDimension;
+	}
+	
+	public void setInstrumentType(InstrumentType instrumentType) {
+		this.instrumentType = instrumentType;
+	}
+	
+	public InstrumentType getInstrumentType() {
+		return instrumentType;
 	}
 }

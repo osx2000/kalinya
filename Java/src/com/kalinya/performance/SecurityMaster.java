@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.kalinya.assetallocation.AllocationDimension;
+import com.kalinya.instrument.InstrumentType;
 import com.kalinya.performance.enums.AssetClass;
 import com.kalinya.performance.enums.IndustryGroup;
 import com.kalinya.performance.enums.InstrumentClass;
@@ -28,12 +29,13 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 	private InstrumentClass instrumentClass;
 	private AssetClass assetClass;
 	private AllocationDimension allocationDimension;
+	private InstrumentType instrumentType;
 	
 	private SecurityMaster() {
 	}
 
 	public SecurityMaster(String instrumentId, Date maturityDate, IndustryGroup industryGroup, Sector sector, RiskGroup riskGroup,
-			InstrumentClass instrumentClass, AssetClass assetClass, AllocationDimension allocationDimension) {
+			InstrumentClass instrumentClass, AssetClass assetClass, AllocationDimension allocationDimension, InstrumentType instrumentType) {
 		this();
 		//TODO: use Builder pattern
 		setMaturityDate(maturityDate);
@@ -44,6 +46,7 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 		setInstrumentClass(instrumentClass);
 		setAssetClass(assetClass);
 		setAllocationDimension(allocationDimension);
+		setInstrumentType(instrumentType);
 	}
 
 	@Override
@@ -56,6 +59,8 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 				.append("RiskGroup", getRiskGroup())
 				.append("InstrumentClass", getInstrumentClass())
 				.append("AssetClass", getAssetClass())
+				.append("AllocationDimension", getAllocationDimension())
+				.append("InstrumentType", getInstrumentType())
 				.build();
 	}
 
@@ -152,6 +157,14 @@ public class SecurityMaster implements Comparable<SecurityMaster>, SecurityMaste
 
 	public AllocationDimension getAllocationDimension() {
 		return allocationDimension;
+	}
+	
+	public void setInstrumentType(InstrumentType instrumentType) {
+		this.instrumentType = instrumentType;
+	}
+
+	public InstrumentType getInstrumentType() {
+		return instrumentType;
 	}
 
 }

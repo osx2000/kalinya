@@ -5,15 +5,18 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.kalinya.assetallocation.AllocationDimensions;
 import com.kalinya.assetallocation.AllocationDimension;
+import com.kalinya.assetallocation.AllocationDimensions;
 import com.kalinya.optimization.Instrument;
 import com.kalinya.optimization.MaturityBuckets;
+import com.kalinya.performance.Configurator;
 import com.kalinya.performance.Instruments;
+import com.kalinya.performance.SecurityMasters;
+import com.kalinya.performance.datasource.CSVDataSource;
 import com.kalinya.util.NumberUtil;
 
 public class TestHarnessHelper {
-	public static AllocationDimensions getAssetAllocationDimensions() {
+	public static AllocationDimensions<AllocationDimension> getAssetAllocationDimensions() {
 		//Level 3
 		AllocationDimension govt = AllocationDimension.create("Govt");
 		AllocationDimension semiGovt = AllocationDimension.create("SemiGovt");
@@ -46,7 +49,7 @@ public class TestHarnessHelper {
 		cash.setParentDimension(cash1);
 		
 		//Add elements to the collection
-		AllocationDimensions dimensions = AllocationDimensions.create();
+		AllocationDimensions<AllocationDimension> dimensions = AllocationDimensions.create();
 		dimensions.add(govt, semiGovt, corp, bmkBonds, bmkBills, active, passive, country, duration, cash, core, satellite, cash1);
 		return dimensions;
 	}
@@ -98,6 +101,12 @@ public class TestHarnessHelper {
 		portfolio.put(instruments.getInstrument("10yBond"), NumberUtil.newBigDecimal(725e3, 2));
 		portfolio.put(instruments.getInstrument("15yBond"), NumberUtil.newBigDecimal(600e3, 2));
 		portfolio.put(instruments.getInstrument("20yBond"), NumberUtil.newBigDecimal(810e3, 2));
+		CSVDataSource csvDataSource = new CSVDataSource.Builder()
+				.withScenarioResultsFilePath(Configurator.SCENARIO_RESULTS_FILE_PATH)
+				.withSecurityMasterFilePath(Configurator.SECURITY_MASTER_FILE_PATH)
+				.build();
+		SecurityMasters securityMasters = SecurityMasters.retrieve(csvDataSource);
+		instruments.addSecurityMasterData(securityMasters);
 		return portfolio;
 	}
 	

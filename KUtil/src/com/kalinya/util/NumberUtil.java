@@ -17,6 +17,7 @@ public class NumberUtil {
 	public static final int SCALE = 12;
 	public static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
 	public static final MathContext MATH_CONTEXT = MathContext.DECIMAL64;
+	public static final BigDecimal ONE_HUNDRED = new BigDecimal(100);
 	
 	/**
 	 * Uses the parameter rounding type to return the value rounded or truncated
