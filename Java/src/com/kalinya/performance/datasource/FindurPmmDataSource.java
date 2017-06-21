@@ -335,7 +335,7 @@ final public class FindurPmmDataSource extends DataSource {
 						BigDecimal baseMarketValue = NumberUtil.newBigDecimal(positionsTable.getDouble(CsvHeader.END_BASE_MARKET_VALUE.getName(), rowId));
 
 						//TODO: handle cash flows
-						BigDecimal localAmount = NumberUtil.newBigDecimal("0");
+						//BigDecimal localAmount = NumberUtil.newBigDecimal("0");
 
 						Portfolio portfolio = portfolios.get(portfolioName);
 						Instrument instrument = instruments.getInstrument(instrumentId, false);

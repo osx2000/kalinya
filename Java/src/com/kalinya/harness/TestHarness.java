@@ -1,13 +1,9 @@
 package com.kalinya.harness;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
 
 import com.kalinya.assetallocation.AllocationDimension;
 import com.kalinya.assetallocation.AllocationDimensions;
-import com.kalinya.instrument.InstrumentType;
 import com.kalinya.util.DateUtil;
 import com.kalinya.util.StringUtil;
 
@@ -56,6 +52,7 @@ public class TestHarness {
 		
 	}
 
+	@SuppressWarnings("unused")
 	private static void printDate(String s) {
 		Date date = DateUtil.parseDate(s);
 		System.out.println("Input [" + s + "] Ouput [" + StringUtil.formatDate(date) + "]");

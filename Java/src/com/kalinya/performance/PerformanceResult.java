@@ -234,21 +234,8 @@ public class PerformanceResult implements Serializable {
 		return getPerformanceFactory().getDayWeighting();
 	}
 
-	private BigDecimal calculateRateOfReturn(PerformanceValue performanceValue, CurrencyBasis currencyBasis) {
-		//Place holder calculates RoR using the start market value as the divisor
-		BigDecimal divisor = performanceValue.getStartMarketValue(currencyBasis);
-		if(divisor.compareTo(BigDecimal.ZERO) == 0) {
-			divisor = performanceValue.getEndMarketValue(currencyBasis);
-		}
-		BigDecimal rateOfReturn = BigDecimal.ZERO;
-		if(divisor.compareTo(BigDecimal.ZERO) != 0) {
-			rateOfReturn = performanceValue.getGainLoss(currencyBasis).divide(divisor , getScale(), getRoundingMode());
-		}
-		return rateOfReturn;
-	}
-
 	protected static BigDecimal calculateModifiedDietzRateOfReturn(PerformanceValue performanceValue, DayWeighting dayWeighting, CurrencyBasis currencyBasis) {
-		BigDecimal numerator = performanceValue.getGainLoss(currencyBasis);
+		//BigDecimal numerator = performanceValue.getGainLoss(currencyBasis);
 		BigDecimal weightedCashflows = BigDecimal.ZERO;
 		if(performanceValue.getPriorDate() != null) {
 			Days days = Days.daysBetween(performanceValue.getPriorDateInstant(), performanceValue.getDateInstant());
@@ -328,11 +315,6 @@ public class PerformanceResult implements Serializable {
 
 	private void setInstruments(Instruments instruments) {
 		this.instruments = instruments;
-	}
-
-	private void setInstruments(SecurityMasters securityMasterData) {
-		getTimer().start("GetInstruments");
-		instruments = new Instruments(securityMasterData);
 	}
 
 	public InstrumentLegs getInstrumentLegs() {
@@ -454,7 +436,7 @@ public class PerformanceResult implements Serializable {
 					BigDecimal baseMarketValue = NumberUtil.newBigDecimal(positionsTable.getDouble(CsvHeader.END_BASE_MARKET_VALUE.getName(), rowId));
 
 					//TODO: handle cash flows
-					BigDecimal localAmount = NumberUtil.newBigDecimal("0");
+					//BigDecimal localAmount = NumberUtil.newBigDecimal("0");
 
 					Portfolio portfolio = Portfolio.create(portfolioStr);
 					Instrument instrument = getInstruments().getInstrument(instrumentId, false);
@@ -615,7 +597,7 @@ public class PerformanceResult implements Serializable {
 	}
 
 	public void setScale(int scale) {
-		this.scale = scale;
+		PerformanceResult.scale = scale;
 	}
 
 	public static RoundingMode getRoundingMode() {
@@ -623,7 +605,7 @@ public class PerformanceResult implements Serializable {
 	}
 
 	public void setRoundingMode(RoundingMode roundingMode) {
-		this.roundingMode = roundingMode;
+		PerformanceResult.roundingMode = roundingMode;
 	}
 
 	public Timer getTimer() {

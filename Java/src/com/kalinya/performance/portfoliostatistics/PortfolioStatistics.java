@@ -37,8 +37,8 @@ public final class PortfolioStatistics extends BaseSet<PortfolioStatistic> imple
 	
 	//Cached PortfolioStatistic results
 	private Map<Portfolio, Map<Date, BigDecimal>> returnsByPortfolioByDate;
-	private Map<Portfolio, Map<Date, BigDecimal>> activeReturnsByPortfolioByDate;
-	private Map<Portfolio, Map<Date, BigDecimal>> excessReturnsByPortfolioByDate;
+	//private Map<Portfolio, Map<Date, BigDecimal>> activeReturnsByPortfolioByDate;
+	//private Map<Portfolio, Map<Date, BigDecimal>> excessReturnsByPortfolioByDate;
 	private Map<Portfolio, Map<Date, BigDecimal>> cumulativeExcessReturnsByPortfolio;
 	private Map<PortfolioStatistic, Map<Portfolio, Map<Date, BigDecimal>>> results;
 	

@@ -67,7 +67,6 @@ public class PGMVExample {
 			 */
 			double[][] data = getRandomData();
 			data = getReturnsDataFromCsvFile();
-			int instrumentCount = data.length;
 			
 			/**
 			 * We are transferring the double array to R

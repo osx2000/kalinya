@@ -1,8 +1,11 @@
 package com.kalinya.oc.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import com.kalinya.util.PluginUtil;
+import com.kalinya.util.StringUtil;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Debug;
@@ -11,8 +14,8 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.market.Market;
 import com.olf.openrisk.table.Table;
-import com.olf.openrisk.utility.Collection;
 import com.olf.openrisk.utility.Disposable;
+import com.sun.xml.internal.bind.v2.runtime.IllegalAnnotationsException;
 
 public class MessageLog implements Disposable {
 
@@ -33,6 +36,7 @@ public class MessageLog implements Disposable {
 	private Debug debug;
 	private String errorLogFile;
 	private Class<?> caller;
+	private Collection<Exception> exceptions;
 
 	public MessageLog(Class<?> caller) {
 		this(null, caller);
@@ -45,6 +49,15 @@ public class MessageLog implements Disposable {
 		}
 		this.errorLogFile = caller.getSimpleName() + ".log";
 		this.caller = caller;
+		exceptions = new ArrayList<>();
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Caller [" + getCaller().getSimpleName() + "] ");
+		sb.append("HasExceptions [" + String.valueOf(hasExceptions()) + "]");
+		return sb.toString();
 	}
 	
 	public Class<?> getCaller() {
@@ -74,9 +87,21 @@ public class MessageLog implements Disposable {
 	 * 
 	 * @param collection
 	 */
-	public <E> void info(Collection<E> collection) {
+	public <E> void info(java.util.Collection<E> collection) {
 		for(E e: collection) {
 			info(e.toString());
+		}
+	}
+	
+	/**
+	 * Prints each element of the array
+	 * 
+	 * @param dbls
+	 * @param precision
+	 */
+	public void info(double[] dbls, int precision) {
+		for(double d: dbls) {
+			info(StringUtil.formatDouble(d, precision));
 		}
 	}
 
@@ -293,7 +318,16 @@ public class MessageLog implements Disposable {
 	 * @param e
 	 */
 	public void logException(Exception e) {
-		error(e.getClass() + ": " + e.getMessage());
+		getExceptions().add(e);
+		if(e instanceof IllegalAnnotationsException) {
+			error(((IllegalAnnotationsException) e).getErrors());
+		}
+		if(e.getMessage() == null && e.getCause() != null) {
+			//Instances of MarshalException have the message on the cause
+			error(e.getClass() + ": " + e.getCause().getMessage());
+		} else {
+			error(e.getClass() + ": " + e.getMessage());
+		}
 		for(StackTraceElement ste: e.getStackTrace()) {
 			error(ste.toString());
 		}
@@ -353,5 +387,38 @@ public class MessageLog implements Disposable {
 		} catch (OException e) {
 			throw new OpenRiskException(e);
 		}
+	}
+	
+
+	public Collection<Exception> getExceptions() {
+		return exceptions;
+	}
+	
+	public boolean hasExceptions() {
+		return getExceptions().size() > 0;
+	}
+
+	public void printExceptions() {
+		info("[" + getExceptions().size() + "] exception" + MessageLog.pluralize(getExceptions().size()) + " reported");
+		for(Exception e: getExceptions()) {
+			error(e.getClass() + ": " + e.getMessage());
+			for(StackTraceElement ste: e.getStackTrace()) {
+				error(ste.toString());
+			}
+		}
+	}
+	
+	/**
+	 * Logs an info message that a process is starting
+	 */
+	public void start() {
+		info("START [" + getCaller().getSimpleName() + "]");
+	}
+	
+	/**
+	 * Logs an info message that a process is ending
+	 */
+	public void end() {
+		info("END [" + getCaller().getSimpleName() + "]");
 	}
 }

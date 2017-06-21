@@ -50,7 +50,7 @@ import com.kalinya.util.ToStringBuilder;
 
 final public class CSVDataSource extends DataSource {
 	private static final long serialVersionUID = -5237378913019125934L;
-	private final static DataSourceType DATA_SOURCE_TYPE = DataSourceType.CSV;
+	//private final static DataSourceType DATA_SOURCE_TYPE = DataSourceType.CSV;
 	private final String positionsFilePath;
 	private final String securityMasterFilePath;
 	private final String portfoliosFilePath;
@@ -366,6 +366,7 @@ final public class CSVDataSource extends DataSource {
 					}
 					InstrumentLeg instrumentLeg = new InstrumentLeg(portfolio, instrument, Integer.valueOf(legIdStr), currency);
 					Cashflows instrumentLegCashflows = new Cashflows();
+					@SuppressWarnings("deprecation")
 					Cashflow instrumentLegCashflow = new Cashflow(instrumentLeg, date, currency, NumberUtil.newBigDecimal(cashFlowStr));
 					instrumentLegCashflows.add(instrumentLegCashflow );
 					if(getCashflows) {

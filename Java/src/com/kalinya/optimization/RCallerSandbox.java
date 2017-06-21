@@ -2,6 +2,7 @@ package com.kalinya.optimization;
 
 import com.github.rcaller.rstuff.RCaller;
 import com.github.rcaller.rstuff.RCode;
+import com.kalinya.oc.util.MessageLog;
 
 public class RCallerSandbox {
 
@@ -24,6 +25,8 @@ public class RCallerSandbox {
 		double[] residuals = 
 				caller.getParser(). 
 				getAsDoubleArray("residuals");  
+		MessageLog messageLog = new MessageLog(RCallerSandbox.class);
+		messageLog.info(residuals, 4);
 	}
 
 }

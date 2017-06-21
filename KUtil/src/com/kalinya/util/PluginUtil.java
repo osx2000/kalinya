@@ -56,6 +56,7 @@ import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
 import com.olf.openrisk.utility.Disposable;
+import com.olf.openrisk.utility.EnumRefBase;
 
 public class PluginUtil {
 
@@ -639,4 +640,22 @@ public class PluginUtil {
 					colType.toString()));
 		}
 	}
+
+	/**
+	 * Returns a string of the enum ID values separated by the delimiter
+	 * 
+	 * @param enums
+	 * @param delimiter
+	 * @return
+	 */
+	public static String joinEnumIds(EnumRefBase[] enums, String delimiter) {
+		int[] ints = new int[enums.length];
+		int i = 0;
+		for(EnumRefBase e: enums) {
+			ints[i] = e.getValue();
+			i++;
+		}
+		return StringUtil.join(ints, delimiter);
+	}
+
 }

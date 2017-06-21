@@ -40,7 +40,7 @@ public class DataSource implements Serializable, Debuggable {
 	private DebugLevel debugLevel;
 	private String resultsExtractFilePath;
 
-	public DataSource(Builder builder) {
+	public DataSource(@SuppressWarnings("rawtypes") Builder builder) {
 		timer = new Timer();
 		this.portfoliosFilter = builder.portfoliosFilter;
 		this.startDate = builder.startDate;
@@ -62,6 +62,7 @@ public class DataSource implements Serializable, Debuggable {
 				.build();
 	}
 
+	@SuppressWarnings("unchecked")
 	public static class Builder<T extends Builder<T>> {
 		private Portfolios portfoliosFilter;
 		private Date startDate;

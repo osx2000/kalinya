@@ -13,12 +13,18 @@ public class RDetails {
 	public RDetails(ROutputParser parser) {
 		version = parser.getAsStringArray("rVersion")[0];
 		nickname = parser.getAsStringArray("rNickname")[0];
+		platform = parser.getAsStringArray("rPlatform")[0];
+		os = parser.getAsStringArray("rOS")[0];
+		system = parser.getAsStringArray("rSystem")[0];
 	}
 
 	public String toString() {
 		return new ToStringBuilder(this)
 				.append("Version", version)
 				.append("Nickname", nickname)
+				.append("Platform", platform)
+				.append("OS", os)
+				.append("System", system)
 				.build();
 	}
 }

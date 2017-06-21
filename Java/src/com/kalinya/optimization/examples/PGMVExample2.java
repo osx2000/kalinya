@@ -13,8 +13,6 @@ import com.kalinya.util.NumberUtil;
 import com.kalinya.util.StringUtil;
 import com.kalinya.util.Timer;
 
-import sun.swing.StringUIClientPropertyKey;
-
 /**
  *
  * @author Mehmet Hakan Satman
@@ -102,13 +100,6 @@ public class PGMVExample2 {
 			for (int j = 0; j < matrix.length; j++) {
 				System.out.println(String.format("Record [%s,%s] Value [%s]", i+1, j+1, matrix[i][j]));
 			}
-		}
-	}
-
-	private void print(double[] vector) {
-		System.out.println("vector");
-		for (int i = 0; i < vector.length; i++) {
-			System.out.println(String.format("Record [%s] Value [%s]", i+1, vector[i]));
 		}
 	}
 

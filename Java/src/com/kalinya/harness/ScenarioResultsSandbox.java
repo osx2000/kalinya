@@ -17,6 +17,7 @@ public class ScenarioResultsSandbox {
 	public static void main(String[] args) {
 
 		FindurSession findurSession = new FindurSession();
+		@SuppressWarnings("unused")
 		PerformanceFactory pf = findurSession.getPerformanceFactory();
 
 		DataSource dataSource = null;

@@ -3,6 +3,7 @@ package com.kalinya.performance;
 import org.apache.commons.csv.CSVFormat;
 
 import com.kalinya.enums.DebugLevel;
+import com.kalinya.enums.InstrumentReferenceType;
 import com.kalinya.optimization.examples.EfficientFrontierExample;
 import com.kalinya.optimization.examples.EfficientFrontierExampleNoShorts;
 import com.kalinya.optimization.examples.RomlExample;
@@ -67,6 +68,27 @@ public class Configurator {
 		throw new IllegalArgumentException(String.format("Unknown caller [%s]", clazz.getSimpleName()));
 	}
 
+	/**
+	 * Instrument exporter/importer
+	 */
+	public final static String INSTRUMENT_IMPORT_ROOT = "C:\\Users\\sdube\\workspaces\\dat\\";
+	public final static String INSTRUMENT_IMPORT_FILE_PATH = INSTRUMENT_IMPORT_ROOT + "instruments.xml";
+	public final static String INSTRUMENT_IMPORT_FILE_PATH_USD = INSTRUMENT_IMPORT_ROOT
+			+ "USDGovernmentBillsAndBonds.xml";
+	public final static String INSTRUMENT_IMPORT_FILE_PATH_NON_USD = INSTRUMENT_IMPORT_ROOT
+			+ "NonUSDGovernmentBillsAndBonds.xml";
+	public final static String PRICE_IMPORT_ROOT = "C:\\Users\\sdube\\workspaces\\dat\\";
+	public final static String PRICE_IMPORT_FILE_PATH = PRICE_IMPORT_ROOT + "prices.xml";
+	/**
+	 * <ul>
+	 * <li><b>USD</b>: InstrumentReferenceType.CUSIP</li>
+	 * <li><b>Non-USD</b>: InstrumentReferenceType.ISIN</li>
+	 * </ul>
+	 */
+	public final static InstrumentReferenceType INSTRUMENT_REFERENCE_TYPE = InstrumentReferenceType.CUSIP;
+	// public final static InstrumentReferenceType INSTRUMENT_REFERENCE_TYPE = InstrumentReferenceType.ISIN;
 
-
+	public final static boolean CREATE_MISSING_ISSUERS = true;
+	public static final int PRICE_SCALE = 10;
+	public static final InstrumentReferenceType GRID_POINT_LOOKUP_TYPE = InstrumentReferenceType.GRID_POINT_NAME;
 }
