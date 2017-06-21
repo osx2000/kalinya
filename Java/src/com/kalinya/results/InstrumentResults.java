@@ -172,7 +172,7 @@ public class InstrumentResults extends BaseSet<InstrumentResult> implements Resu
 			Instrument instrument = result.getInstrument();
 			Set<InstrumentResult> instrumentResults = resultsByInstrument.get(instrument);
 			if(instrumentResults == null) {
-				resultsByInstrument.put(instrument, new HashSet<>());
+				resultsByInstrument.put(instrument, new HashSet<InstrumentResult>());
 			}
 			resultsByInstrument.get(instrument).add(result);
 		}
@@ -188,7 +188,7 @@ public class InstrumentResults extends BaseSet<InstrumentResult> implements Resu
 			Date date = result.getDate();
 			Set<InstrumentResult> instrumentResults = resultsByDate.get(date);
 			if(instrumentResults == null) {
-				resultsByDate.put(date, new HashSet<>());
+				resultsByDate.put(date, new HashSet<InstrumentResult>());
 			}
 			resultsByDate.get(date).add(result);
 		}

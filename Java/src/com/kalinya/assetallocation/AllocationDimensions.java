@@ -60,7 +60,7 @@ public final class AllocationDimensions<E extends Comparable<AllocationDimension
 			int childGenerationCount = ((AllocationDimension) dimension).getChildGenerationCount();
 			Set<AllocationDimension> generation = dimensionsHierarchy.get(childGenerationCount);
 			if(generation == null) {
-				dimensionsHierarchy.put(childGenerationCount, new AllocationDimensions<>());
+				dimensionsHierarchy.put(childGenerationCount, new AllocationDimensions<AllocationDimension>());
 			}
 			dimensionsHierarchy.get(childGenerationCount).add((AllocationDimension) dimension);
 		}
