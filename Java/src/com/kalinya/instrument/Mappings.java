@@ -9,7 +9,8 @@ import com.olf.openrisk.trading.EnumPricingModel;
 
 public class Mappings {
 	
-	private final static boolean ADD_RBA_MAPPINGS = true;
+	private final static boolean ADD_RBA_MAPPINGS = false;
+	private final static boolean ADD_BNM_MAPPINGS = true;
 
 	public static Map<String, String> getInstrumentTypeMap() {
 		Map<String, String> map = new HashMap<String, String>();
@@ -50,6 +51,12 @@ public class Mappings {
 			map.put("short_name party_id 21301", "NIB");
 			map.put("short_name party_id 21844", "EFSF");
 			map.put("short_name party_id 21845", "EU");
+		}
+		if(ADD_BNM_MAPPINGS) {
+			map.put("20208sname", "GOVT CH"); //China
+			map.put("20429sname", "GOVT CH"); //China
+			map.put("China Exim Bank", "EXIM BANK CH"); //Export-Import Bank of China
+			
 		}
 		return map;
 	}

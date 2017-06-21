@@ -12,9 +12,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.kalinya.enums.InstrumentReferenceType;
 import com.kalinya.oc.util.InstrumentUtil;
 import com.kalinya.oc.util.MessageLog;
+import com.kalinya.util.ComparableEqualsBuilder;
 import com.kalinya.util.PluginUtil;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.EnumInstrumentFieldId;
@@ -31,6 +35,7 @@ import com.olf.openrisk.trading.InstrumentType;
 @XmlRootElement(name = "bond")
 public class Bond implements Comparable<Bond> {
 	private MessageLog messageLog;
+	
 	private Session session;
 	private Mapper mapper;
 	private List<String> updates;
@@ -53,25 +58,31 @@ public class Bond implements Comparable<Bond> {
 	private String portfolioGroup;
 	private InstrumentReferenceType instrumentReferenceType;
 
+	/**
+	 * Affects the Comparator so that a collection of Bonds will be sorted by issuer
+	 */
+	private boolean orderByIssuer = true;
+
 	public Bond() {
 		updates = new ArrayList<String>();
 	}
 
 	//TODO: support ins info fields
-	public Bond(MessageLog messageLog, Mapper mapper, String instrumentReference) {
-		this(messageLog, mapper, instrumentReference, null);
+	public Bond(MessageLog messageLog, Mapper mapper, String instrumentReference, InstrumentReferenceType instrumentReferenceType) {
+		this(messageLog, mapper, instrumentReference, instrumentReferenceType, null);
 	}
 	
 	public Bond(MessageLog messageLog, Mapper mapper, Instrument instrument) {
-		this(messageLog, mapper, null, instrument);
+		this(messageLog, mapper, null, null, instrument);
 	}
 	
-	private Bond(MessageLog messageLog, Mapper mapper, String instrumentReference, Instrument instrument) {
+	private Bond(MessageLog messageLog, Mapper mapper, String instrumentReference, InstrumentReferenceType instrumentReferenceType, Instrument instrument) {
 		this();
 		this.messageLog = messageLog;
 		this.session = messageLog.getSession();
 		setMapper(mapper);
 		try {
+			setInstrumentReferenceType(instrumentReferenceType);
 			if(instrument == null) {
 				setInstrument(instrumentReference);
 			}
@@ -120,37 +131,32 @@ public class Bond implements Comparable<Bond> {
 	}
 
 	@Override
-	public int hashCode() {
-		return (reference == null ? 0 : reference.hashCode());
-	}
-
-	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof Bond)) {
-			return false;
-		}
-		return this.compareTo((Bond) obj) == 0;
+		return new ComparableEqualsBuilder<Bond>(this, obj)
+				.build();
+	}
+	
+	@Override
+	public int hashCode(){
+		return new HashCodeBuilder()
+				.append(reference)
+				.append(isin)
+				.append(ticker)
+				.append(cusip)
+				.build();
 	}
 
 	@Override
 	public int compareTo(Bond that) {
-		if (this == that) {
-			return 0;
+		CompareToBuilder compareToBuilder = new CompareToBuilder();
+		if (orderByIssuer) {
+			compareToBuilder.append(issuerBusinessUnit, that.issuerBusinessUnit);
 		}
-
-		int i = getReference().compareTo(that.getReference());
-		if(i != 0) return i;
-		
-		i = getIsin().compareTo(that.getIsin());
-		if(i != 0) return i;
-		
-		i = getTicker().compareTo(that.getTicker());
-		if(i != 0) return i;
-		
-		i = getCusip().compareTo(that.getCusip());
-		if(i != 0) return i;
-
-		return 0;
+		compareToBuilder.append(reference, that.reference)
+						.append(isin, that.isin)
+						.append(ticker, that.reference)
+						.append(cusip, that.cusip);
+		return compareToBuilder.build();
 	}
 	
 	public BondLeg getFirstLeg() {

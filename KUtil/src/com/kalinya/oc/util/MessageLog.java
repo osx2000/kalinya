@@ -36,7 +36,7 @@ public class MessageLog implements Disposable {
 	private Debug debug;
 	private String errorLogFile;
 	private Class<?> caller;
-	private Collection<Exception> exceptions;
+	private Collection<Throwable> exceptions;
 
 	public MessageLog(Class<?> caller) {
 		this(null, caller);
@@ -317,7 +317,7 @@ public class MessageLog implements Disposable {
 	 * Logs the exception.getMessage() and the stack 
 	 * @param e
 	 */
-	public void logException(Exception e) {
+	public void logException(Throwable e) {
 		getExceptions().add(e);
 		if(e instanceof IllegalAnnotationsException) {
 			error(((IllegalAnnotationsException) e).getErrors());
@@ -390,7 +390,7 @@ public class MessageLog implements Disposable {
 	}
 	
 
-	public Collection<Exception> getExceptions() {
+	public Collection<Throwable> getExceptions() {
 		return exceptions;
 	}
 	
@@ -400,7 +400,7 @@ public class MessageLog implements Disposable {
 
 	public void printExceptions() {
 		info("[" + getExceptions().size() + "] exception" + MessageLog.pluralize(getExceptions().size()) + " reported");
-		for(Exception e: getExceptions()) {
+		for(Throwable e: getExceptions()) {
 			error(e.getClass() + ": " + e.getMessage());
 			for(StackTraceElement ste: e.getStackTrace()) {
 				error(ste.toString());

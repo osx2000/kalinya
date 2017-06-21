@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -24,7 +25,8 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.utility.Disposable;
 
-@XmlType(propOrder={"xmlVersion", "description", "sourceDbVersion", "sourceDbServer", "sourceDbName", "extractDateTime", "size", "instrumentReferenceName", "bondSet", "mapper"})
+@XmlType(propOrder = { "xmlVersion", "description", "sourceDbVersion", "sourceDbServer", "sourceDbName",
+		"extractDateTime", "size", "instrumentReferenceName", "bondSet", "mapper" })
 @XmlRootElement
 public class Bonds extends BaseSet<Bond> implements Disposable {
 	private static final long serialVersionUID = -1765336618519582141L;
@@ -42,6 +44,16 @@ public class Bonds extends BaseSet<Bond> implements Disposable {
 	private String instrumentReferenceName;
 	private InstrumentReferenceType instrumentReferenceType;
 	private String description;
+	@SuppressWarnings("unused")
+	private Set<String> distinctBusinessUnits;
+	@SuppressWarnings("unused")
+	private Set<String> distinctLegalEntities;
+	@SuppressWarnings("unused")
+	private Set<String> distinctPortfolioGroups;
+	@SuppressWarnings("unused")
+	private Set<String> distinctPricingModels;
+	@SuppressWarnings("unused")
+	private Set<String> distinctInstrumentGroups;
 
 	public Bonds() {
 		super();
@@ -72,7 +84,7 @@ public class Bonds extends BaseSet<Bond> implements Disposable {
 				i++;
 				reference = it.next();
 				messageLog.info("Retrieving [" + i + "] of [" + size + "] Ref [" + reference + "]");
-				Bond bond = new Bond(messageLog, mapper, reference);
+				Bond bond = new Bond(getMessageLog(), getMapper(), reference, getInstrumentReferenceType());
 				add(bond);
 			}
 			setBondSet(getSet());
@@ -356,6 +368,14 @@ public class Bonds extends BaseSet<Bond> implements Disposable {
 		return set;
 	}
 	
+	public Set<String> getDistinctInstrumentTypes() {
+		Set<String> set = new TreeSet<String>();
+		for(Bond bond: getSet()) {
+			set.add(bond.getInstrumentTypeName());
+		}
+		return set;
+	}
+	
 	public Set<String> getDistinctHolidaySchedules() {
 		Set<String> set = new HashSet<String>();
 		for(Bond bond: getBondSet()) {
@@ -403,6 +423,46 @@ public class Bonds extends BaseSet<Bond> implements Disposable {
 			if(value != null) {
 				set.add(value);
 			}
+		}
+		return set;
+	}
+	
+	public Set<String> getDistinctBusinessUnits() {
+		Set<String> set = new TreeSet<String>();
+		for(Bond bond: getSet()) {
+			set.add(bond.getIssuerBusinessUnit());
+		}
+		return set;
+	}
+	
+	public Set<String> getDistinctLegalEntities() {
+		Set<String> set = new TreeSet<String>();
+		for(Bond bond: getSet()) {
+			set.add(bond.getIssuerLegalEntity());
+		}
+		return set;
+	}
+
+	public Set<String> getDistinctPortfolioGroups() {
+		Set<String> set = new TreeSet<String>();
+		for(Bond bond: getSet()) {
+			set.add(bond.getPortfolioGroup());
+		}
+		return set;
+	}
+
+	public Set<String> getDistinctPricingModels() {
+		Set<String> set = new TreeSet<String>();
+		for(Bond bond: getSet()) {
+			set.add(bond.getPricingModel());
+		}
+		return set;
+	}
+	
+	public Set<String> getDistinctInstrumentGroups() {
+		Set<String> set = new TreeSet<String>();
+		for(Bond bond: getSet()) {
+			set.add(bond.getInstrumentGroup());
 		}
 		return set;
 	}
