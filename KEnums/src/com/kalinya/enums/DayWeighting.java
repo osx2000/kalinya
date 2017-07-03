@@ -17,12 +17,10 @@ public enum DayWeighting implements EnumIdName {
 		this.weight = weight;
 	}
 	
-	@Override
 	public int getId() {
 		return id;
 	}
 	
-	@Override
 	public String getName() {
 		return name;
 	}
